@@ -10,7 +10,7 @@ var buildings = []
 @onready var buildings_container = $BuildingsContainer
 
 var building_scene = preload("res://BuildingItem.tscn")
-
+var floating_text_scene = preload("res://FloatingText.tscn")
 
 func _ready():
 	buildings.append(BuildingData.new("Ферма", 10, 1))
@@ -44,7 +44,11 @@ func get_total_income():
 	return total
 
 func _on_gold_button_pressed():
-	gold += 1
+	var click_value = 1
+	
+	gold += click_value
+	
+	spawn_floating_text(click_value)
 	update_ui()
 
 func update_ui():
@@ -68,3 +72,15 @@ func buy_building(index):
 		gold -= b.cost
 		b.buy()
 		update_ui()
+
+func spawn_floating_text(amount: int):
+	var text = floating_text_scene.instantiate()
+	
+	text.text = "+" + str(amount)
+	
+	# позиция мыши
+	var mouse_pos = get_viewport().get_mouse_position()
+	text.position = mouse_pos
+	text.position += Vector2(randf_range(-20, 20), randf_range(-10, 10))
+	
+	add_child(text)
