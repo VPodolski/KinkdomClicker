@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://hbt2mawi1kq5"]
+
+[ext_resource type="Script" uid="uid://b44bst04tcwbo" path="res://main.gd" id="1_ig7tw"]
+
+[node name="Main" type="Control" unique_id=243547217]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ig7tw")
+
+[node name="GoldButton" type="Button" parent="." unique_id=1397629066]
+custom_minimum_size = Vector2(300, 100)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -67.5
+offset_top = -15.5
+offset_right = 67.5
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Собрать золото"
+
+[node name="GoldLabel" type="Label" parent="." unique_id=605480262]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "Золото: 0"
+
+[node name="AutoGoldTimer" type="Timer" parent="." unique_id=154780128]
+autostart = true
+
+[node name="BuildingsContainer" type="VBoxContainer" parent="." unique_id=1449457944]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+grow_horizontal = 0
+
+[connection signal="timeout" from="AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
