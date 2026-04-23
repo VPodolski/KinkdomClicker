@@ -78,7 +78,6 @@ func spawn_floating_text(amount: int):
 	
 	text.text = "+" + str(amount)
 	
-	# позиция мыши
 	var mouse_pos = get_viewport().get_mouse_position()
 	text.position = mouse_pos
 	text.position += Vector2(randf_range(-20, 20), randf_range(-10, 10))

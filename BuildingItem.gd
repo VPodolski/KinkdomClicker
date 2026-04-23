@@ -17,10 +17,8 @@ func setup(_building, _index):
 	building = _building
 	index = _index
 
-
 func _on_buy_pressed():
 	emit_signal("buy_pressed", index)
-
 
 func update_ui(current_gold: int):
 	name_label.text = building.name
@@ -29,5 +27,4 @@ func update_ui(current_gold: int):
 	" | Цена: " + str(building.cost) + \
 	" | +" + str(building.income) + "/сек"
 	
-	# 💥 ВАЖНО
 	buy_button.disabled = current_gold < building.cost
