@@ -1,0 +1,25 @@
+# Godot cache
+.godot/
+.import/
+
+# Export
+export/
+export_presets.cfg
+
+# Mono 
+.mono/
+data_*/
+*.csproj
+*.sln
+
+# Logs & temp
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
