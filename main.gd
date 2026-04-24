@@ -13,13 +13,21 @@ var building_scene = preload("res://BuildingItem.tscn")
 var floating_text_scene = preload("res://FloatingText.tscn")
 
 func _ready():
+	await ready
+	
+	gold_button.pivot_offset = gold_button.size / 2
+	
 	buildings.append(BuildingData.new("Ферма", 10, 1))
 	buildings.append(BuildingData.new("Шахта", 50, 5))
 	buildings.append(BuildingData.new("Лесопилка", 30, 3))
 
 	create_building_ui()
-
+	start_button_pulse()
+	
 	gold_button.pressed.connect(_on_gold_button_pressed)
+	gold_button.mouse_entered.connect(_on_button_hover)
+	gold_button.mouse_exited.connect(_on_button_exit)
+	
 	update_ui()
 	
 func create_building_ui():
@@ -44,10 +52,12 @@ func get_total_income():
 	return total
 
 func _on_gold_button_pressed():
+	gold_button.scale = Vector2(1, 1)
 	var click_value = 1
 	
 	gold += click_value
 	
+	animate_button_press(gold_button) 
 	spawn_floating_text(click_value)
 	update_ui()
 
@@ -83,3 +93,30 @@ func spawn_floating_text(amount: int):
 	text.position += Vector2(randf_range(-20, 20), randf_range(-10, 10))
 	
 	add_child(text)
+	
+func animate_button_press(button: Control):
+	var tween = create_tween()
+	
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+	
+	tween.tween_property(button, "scale", Vector2(0.9, 0.9), 0.05)
+	tween.tween_property(button, "scale", Vector2(1, 1), 0.1)
+
+func _on_button_hover():
+	var tween = create_tween()
+	tween.tween_property(gold_button, "scale", Vector2(1.1, 1.1), 0.1)
+
+
+func _on_button_exit():
+	var tween = create_tween()
+	tween.tween_property(gold_button, "scale", Vector2(1, 1), 0.1)
+
+func start_button_pulse():
+	while true:
+		var tween = create_tween()
+		
+		tween.tween_property(gold_button, "scale", Vector2(1.05, 1.05), 0.6)
+		tween.tween_property(gold_button, "scale", Vector2(1, 1), 0.6)
+		
+		await tween.finished
