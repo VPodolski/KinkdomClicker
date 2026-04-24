@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://e45egfnu0t8v"]
+
+[node name="UpgradeItem" type="VBoxContainer" unique_id=27434265]
+
+[node name="NameLabel" type="Label" parent="." unique_id=81604852]
+layout_mode = 2
+
+[node name="InfoLabel" type="Label" parent="." unique_id=844861484]
+layout_mode = 2
+
+[node name="CraftButton" type="Button" parent="." unique_id=1858319139]
+layout_mode = 2

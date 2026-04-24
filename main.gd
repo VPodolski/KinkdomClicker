@@ -1,13 +1,17 @@
 extends Control
 
 var gold: float = 0.0
+var gold_per_click = 1
 var gold_boost_cost: int = 10
 var ui_update_timer := 0.0
 var buildings = []
+var upgrades = []
 
-@onready var gold_label = $GoldLabel
-@onready var gold_button = $GoldButton
-@onready var buildings_container = $BuildingsContainer
+@onready var gold_button = $TabContainer/MainTab/GoldButton
+@onready var gold_label = $TabContainer/MainTab/GoldLabel
+@onready var buildings_container = $TabContainer/MainTab/BuildingsContainer
+@onready var tab_container = $TabContainer
+@onready var forge_tab = $TabContainer/ForgeTab
 
 var building_scene = preload("res://BuildingItem.tscn")
 var floating_text_scene = preload("res://FloatingText.tscn")
@@ -18,8 +22,17 @@ func _ready():
 	gold_button.pivot_offset = gold_button.size / 2
 	
 	buildings.append(BuildingData.new("Ферма", 10, 1))
-	buildings.append(BuildingData.new("Шахта", 50, 5))
-	buildings.append(BuildingData.new("Лесопилка", 30, 3))
+	buildings.append(BuildingData.new("Лесопилка", 50, 5))
+	buildings.append(BuildingData.new("Каменоломня", 150, 15))
+	buildings.append(BuildingData.new("Кузница", 500, 50))
+	buildings.append(BuildingData.new("Рынок", 1500, 150))
+	buildings.append(BuildingData.new("Гильдия", 5000, 500))
+	buildings.append(BuildingData.new("Банк", 20000, 2000))
+	buildings.append(BuildingData.new("Замок", 100000, 10000))
+	
+	upgrades.append(UpgradeData.new("Улучшенные инструменты", 100, 5))
+	upgrades.append(UpgradeData.new("Закалённая сталь", 500, 10))
+	upgrades.append(UpgradeData.new("Мастерская ковка", 1500, 20))
 
 	create_building_ui()
 	start_button_pulse()
@@ -27,6 +40,9 @@ func _ready():
 	gold_button.pressed.connect(_on_gold_button_pressed)
 	gold_button.mouse_entered.connect(_on_button_hover)
 	gold_button.mouse_exited.connect(_on_button_exit)
+	
+	var index = tab_container.get_tab_idx_from_control(forge_tab)
+	tab_container.set_tab_hidden(index, true)
 	
 	update_ui()
 	
@@ -53,12 +69,11 @@ func get_total_income():
 
 func _on_gold_button_pressed():
 	gold_button.scale = Vector2(1, 1)
-	var click_value = 1
 	
-	gold += click_value
+	gold += gold_per_click
 	
 	animate_button_press(gold_button) 
-	spawn_floating_text(click_value)
+	spawn_floating_text(gold_per_click)
 	update_ui()
 
 func update_ui():
@@ -74,6 +89,8 @@ func _process(delta):
 	if ui_update_timer >= 0.05: # 20 раз в секунду
 		update_ui()
 		ui_update_timer = 0.0
+		
+	update_crafting(delta)
 
 func buy_building(index):
 	var b = buildings[index]
@@ -82,6 +99,13 @@ func buy_building(index):
 		gold -= b.cost
 		b.buy()
 		update_ui()
+		
+	if buildings[index].name == "Кузница" and buildings[index].count == 1:
+		unlock_forge()
+
+func unlock_forge():
+	var index = tab_container.get_tab_idx_from_control(forge_tab)
+	tab_container.set_tab_hidden(index, false)
 
 func spawn_floating_text(amount: int):
 	var text = floating_text_scene.instantiate()
@@ -120,3 +144,41 @@ func start_button_pulse():
 		tween.tween_property(gold_button, "scale", Vector2(1, 1), 0.6)
 		
 		await tween.finished
+
+
+func get_forge_speed_multiplier():
+	var forge = get_building_by_name("Кузница")
+	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
+
+func update_crafting(delta):
+	for upgrade in upgrades:
+		if upgrade.is_crafting:
+			var speed = get_forge_speed_multiplier()
+			upgrade.progress += delta * speed
+			
+			if upgrade.progress >= upgrade.base_time:
+				complete_upgrade(upgrade)
+
+func start_upgrade(index):
+	var u = upgrades[index]
+	
+	if gold >= u.cost and not u.is_crafting:
+		gold -= u.cost
+		u.is_crafting = true
+
+func complete_upgrade(upgrade):
+	upgrade.is_crafting = false
+	upgrade.progress = 0
+	
+	# пример эффекта
+	gold_per_click += 1
+
+func get_building_by_name(name):
+	var count = 0
+	
+	for upgrade in upgrades:
+		if (upgrade.name == name):
+			count += 1
+		
+	return count
+	

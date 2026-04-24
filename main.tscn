@@ -11,39 +11,48 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
 
-[node name="GoldButton" type="Button" parent="." unique_id=1397629066]
-custom_minimum_size = Vector2(300, 100)
+[node name="TabContainer" type="TabContainer" parent="." unique_id=565127916]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -67.5
-offset_top = -15.5
-offset_right = 67.5
-offset_bottom = 15.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+current_tab = 1
+
+[node name="MainTab" type="VBoxContainer" parent="TabContainer" unique_id=1750776209]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="GoldButton" type="Button" parent="TabContainer/MainTab" unique_id=1397629066]
+custom_minimum_size = Vector2(300, 100)
+layout_mode = 2
 text = "Собрать золото"
 
-[node name="GoldLabel" type="Label" parent="." unique_id=605480262]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 23.0
-grow_horizontal = 2
+[node name="GoldLabel" type="Label" parent="TabContainer/MainTab" unique_id=605480262]
+layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Золото: 0"
 
-[node name="AutoGoldTimer" type="Timer" parent="." unique_id=154780128]
+[node name="AutoGoldTimer" type="Timer" parent="TabContainer/MainTab" unique_id=154780128]
 autostart = true
 
-[node name="BuildingsContainer" type="VBoxContainer" parent="." unique_id=1449457944]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-grow_horizontal = 0
+[node name="BuildingsContainer" type="VBoxContainer" parent="TabContainer/MainTab" unique_id=1449457944]
+layout_mode = 2
 
-[connection signal="timeout" from="AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
+[node name="ForgeTab" type="VBoxContainer" parent="TabContainer" unique_id=199863777]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="ForgeTitle" type="Label" parent="TabContainer/ForgeTab" unique_id=580593036]
+layout_mode = 2
+
+[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/ForgeTab" unique_id=1631420813]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Queue" type="Label" parent="TabContainer/ForgeTab" unique_id=1944781138]
+layout_mode = 2
+
+[connection signal="timeout" from="TabContainer/MainTab/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
