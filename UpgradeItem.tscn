@@ -1,12 +1,23 @@
 [gd_scene format=3 uid="uid://e45egfnu0t8v"]
 
+[ext_resource type="Script" uid="uid://4w1t8t2nlulq" path="res://UpgradeItem.gd" id="1_o32h2"]
+
 [node name="UpgradeItem" type="VBoxContainer" unique_id=27434265]
+script = ExtResource("1_o32h2")
 
-[node name="NameLabel" type="Label" parent="." unique_id=81604852]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1146131859]
 layout_mode = 2
 
-[node name="InfoLabel" type="Label" parent="." unique_id=844861484]
+[node name="NameLabel" type="Label" parent="VBoxContainer" unique_id=81604852]
 layout_mode = 2
+
+[node name="InfoLabel" type="Label" parent="VBoxContainer" unique_id=844861484]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="VBoxContainer" unique_id=103895422]
+layout_mode = 2
+max_value = 1.0
 
 [node name="CraftButton" type="Button" parent="." unique_id=1858319139]
 layout_mode = 2
+text = "Создать"

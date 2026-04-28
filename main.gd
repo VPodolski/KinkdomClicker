@@ -10,10 +10,12 @@ var upgrades = []
 @onready var gold_button = $TabContainer/MainTab/GoldButton
 @onready var gold_label = $TabContainer/MainTab/GoldLabel
 @onready var buildings_container = $TabContainer/MainTab/BuildingsContainer
+@onready var upgrades_container = $TabContainer/ForgeTab/UpgradesContainer
 @onready var tab_container = $TabContainer
 @onready var forge_tab = $TabContainer/ForgeTab
 
 var building_scene = preload("res://BuildingItem.tscn")
+var upgrade_item_scene = preload("res://UpgradeItem.tscn")
 var floating_text_scene = preload("res://FloatingText.tscn")
 
 func _ready():
@@ -35,6 +37,7 @@ func _ready():
 	upgrades.append(UpgradeData.new("Мастерская ковка", 1500, 20))
 
 	create_building_ui()
+	create_upgrades_ui()
 	start_button_pulse()
 	
 	gold_button.pressed.connect(_on_gold_button_pressed)
@@ -45,6 +48,7 @@ func _ready():
 	tab_container.set_tab_hidden(index, true)
 	
 	update_ui()
+	print("upgrades count: ", upgrades.size())
 	
 func create_building_ui():
 	for i in range(buildings.size()):
@@ -52,6 +56,27 @@ func create_building_ui():
 		item.setup(buildings[i], i)	
 		item.buy_pressed.connect(_on_building_buy)
 		buildings_container.add_child(item)
+
+func create_upgrades_ui():
+	# 🧹 очищаем старые элементы (если перезапуск)
+	for child in upgrades_container.get_children():
+		child.queue_free()
+	
+	# 🏗️ создаём новые
+	for i in range(upgrades.size()):
+		var upgrade = upgrades[i]
+		
+		var item = upgrade_item_scene.instantiate()
+		
+		upgrades_container.add_child(item)
+		
+		item.setup(upgrade, i)
+		
+		item.craft_pressed.connect(_on_upgrade_pressed)
+		
+func _on_upgrade_pressed(index):
+	start_upgrade(index)
+	update_upgrades_ui()
 
 func _on_building_buy(index):
 	buy_building(index)
@@ -106,6 +131,7 @@ func buy_building(index):
 func unlock_forge():
 	var index = tab_container.get_tab_idx_from_control(forge_tab)
 	tab_container.set_tab_hidden(index, false)
+	create_upgrades_ui()
 
 func spawn_floating_text(amount: int):
 	var text = floating_text_scene.instantiate()
@@ -158,6 +184,11 @@ func update_crafting(delta):
 			
 			if upgrade.progress >= upgrade.base_time:
 				complete_upgrade(upgrade)
+	update_upgrades_ui() 
+
+func update_upgrades_ui():
+	for child in upgrades_container.get_children():
+		child.update_ui()
 
 func start_upgrade(index):
 	var u = upgrades[index]
@@ -174,11 +205,8 @@ func complete_upgrade(upgrade):
 	gold_per_click += 1
 
 func get_building_by_name(name):
-	var count = 0
-	
-	for upgrade in upgrades:
-		if (upgrade.name == name):
-			count += 1
-		
-	return count
+	for b in buildings:
+		if b.name == name:
+			return b
+	return null
 	
