@@ -25,6 +25,6 @@ func update_ui(current_gold: int):
 	
 	info_label.text = "Кол-во: " + str(building.count) + \
 	" | Цена: " + str(building.cost) + \
-	" | +" + str(building.income) + "/сек"
+	" | +" + str(building.income * building.income_multiplier) + "/сек"
 	
 	buy_button.disabled = current_gold < building.cost

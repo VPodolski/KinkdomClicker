@@ -3,6 +3,7 @@ extends Control
 var gold: float = 0.0
 var gold_per_click = 1
 var gold_boost_cost: int = 10
+var global_income_multiplier: float = 1.0
 var ui_update_timer := 0.0
 var buildings = []
 var upgrades = []
@@ -26,15 +27,26 @@ func _ready():
 	buildings.append(BuildingData.new("Ферма", 10, 1))
 	buildings.append(BuildingData.new("Лесопилка", 50, 5))
 	buildings.append(BuildingData.new("Каменоломня", 150, 15))
-	buildings.append(BuildingData.new("Кузница", 500, 50))
+	buildings.append(BuildingData.new("Кузница", 10, 50))
 	buildings.append(BuildingData.new("Рынок", 1500, 150))
 	buildings.append(BuildingData.new("Гильдия", 5000, 500))
 	buildings.append(BuildingData.new("Банк", 20000, 2000))
 	buildings.append(BuildingData.new("Замок", 100000, 10000))
 	
-	upgrades.append(UpgradeData.new("Улучшенные инструменты", 100, 5))
-	upgrades.append(UpgradeData.new("Закалённая сталь", 500, 10))
-	upgrades.append(UpgradeData.new("Мастерская ковка", 1500, 20))
+	upgrades.append(UpgradeData.new(
+		"Острые инструменты", 10, 5,
+		"click_bonus", 1
+	))
+
+	upgrades.append(UpgradeData.new(
+		"Улучшенные фермы", 10, 8,
+		"income_multiplier", 0.5, "Ферма"
+	))
+
+	upgrades.append(UpgradeData.new(
+		"Золотые контракты", 1000, 15,
+		"global_multiplier", 0.2
+	))
 
 	create_building_ui()
 	create_upgrades_ui()
@@ -48,7 +60,6 @@ func _ready():
 	tab_container.set_tab_hidden(index, true)
 	
 	update_ui()
-	print("upgrades count: ", upgrades.size())
 	
 func create_building_ui():
 	for i in range(buildings.size()):
@@ -73,7 +84,7 @@ func create_upgrades_ui():
 		item.setup(upgrade, i)
 		
 		item.craft_pressed.connect(_on_upgrade_pressed)
-		
+
 func _on_upgrade_pressed(index):
 	start_upgrade(index)
 	update_upgrades_ui()
@@ -81,6 +92,16 @@ func _on_upgrade_pressed(index):
 func _on_building_buy(index):
 	buy_building(index)
 	update_buildings_ui()
+
+func is_upgrade_unlocked(upgrade):
+	if upgrade.required_building == "":
+		return true
+	
+	var b = get_building_by_name(upgrade.required_building)
+	if b == null:
+		return false
+	
+	return b.count >= upgrade.required_count
 
 func update_buildings_ui():
 	for child in buildings_container.get_children():
@@ -90,7 +111,7 @@ func get_total_income():
 	var total = 0
 	for b in buildings:
 		total += b.get_income()
-	return total
+	return total * global_income_multiplier
 
 func _on_gold_button_pressed():
 	gold_button.scale = Vector2(1, 1)
@@ -177,18 +198,29 @@ func get_forge_speed_multiplier():
 	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
 
 func update_crafting(delta):
+	var remaining = 0.0
+	
 	for upgrade in upgrades:
 		if upgrade.is_crafting:
 			var speed = get_forge_speed_multiplier()
 			upgrade.progress += delta * speed
+			remaining = (upgrade.base_time - upgrade.progress) / speed
 			
 			if upgrade.progress >= upgrade.base_time:
 				complete_upgrade(upgrade)
 	update_upgrades_ui() 
 
+
 func update_upgrades_ui():
 	for child in upgrades_container.get_children():
-		child.update_ui()
+		var u = child.upgrade
+		
+		child.update_ui(
+			gold,
+			is_upgrade_unlocked(u),
+			get_upgrade_preview_text(u),
+			get_upgrade_remaining_time_text(u)
+		)
 
 func start_upgrade(index):
 	var u = upgrades[index]
@@ -198,15 +230,97 @@ func start_upgrade(index):
 		u.is_crafting = true
 
 func complete_upgrade(upgrade):
-	upgrade.is_crafting = false
-	upgrade.progress = 0
+	apply_upgrade(upgrade)
 	
-	# пример эффекта
-	gold_per_click += 1
+	upgrades.erase(upgrade)
+	
+	create_upgrades_ui()
+	
+func apply_upgrade(upgrade):
+	match upgrade.effect_type:
+		"click_bonus":
+			gold_per_click += upgrade.effect_value
+		
+		"income_multiplier":
+			var b = get_building_by_name(upgrade.target)
+			if b:
+				b.income_multiplier += upgrade.effect_value
+		
+		"global_multiplier":
+			global_income_multiplier += upgrade.effect_value
 
-func get_building_by_name(name):
+func get_building_by_name(building_name):
 	for b in buildings:
-		if b.name == name:
+		if b.name == building_name:
 			return b
 	return null
 	
+func get_upgrade_preview_text(upgrade):
+	match upgrade.effect_type:
+		
+		"click_bonus":
+			var before = gold_per_click
+			var after = before + upgrade.effect_value
+			return "Клик: %d → %d" % [before, after]
+		
+		"income_multiplier":
+			var b = get_building_by_name(upgrade.target)
+			if b == null:
+				return ""
+			
+			var before = b.income * b.income_multiplier
+			var after = before * (1.0 + upgrade.effect_value)
+			
+			return "%s: %s → %s за шт." % [
+				b.name,
+				format_float(before),
+				format_float(after)
+			]
+
+		"global_multiplier":
+			var before = get_total_income()
+			var after = float(before * (1.0 + upgrade.effect_value))
+			
+			return "Доход: %s → %s / сек" % [format_float(before), format_float(after)]
+	
+	return ""
+
+func get_upgrade_remaining_time(upgrade):
+	var speed = get_forge_speed_multiplier()
+	var remaining = (upgrade.base_time - upgrade.progress) / speed
+	
+	return max(0.0, remaining)
+
+func get_upgrade_time_text(upgrade):
+	var base = upgrade.base_time
+	var current = get_upgrade_time_with_speed(upgrade)
+	
+	# если ускорения нет — не дублируем
+	if abs(base - current) < 0.01:
+		return "Время: %s" % format_time(base)
+	
+	return "Время: %s (сейчас: %s)" % [
+		format_time(base),
+		format_time(current)
+	]
+
+func get_upgrade_time_with_speed(upgrade):
+	var speed = get_forge_speed_multiplier()
+	return upgrade.base_time / speed
+
+func get_upgrade_remaining_time_text(upgrade):
+	return format_time(get_upgrade_remaining_time(upgrade))
+
+func format_float(value: float) -> String:
+	var s = "%.2f" % value
+	s = s.rstrip("0").rstrip(".")
+	return s
+	
+func format_time(seconds: float) -> String:
+	if seconds < 60:
+		return "%.1f сек" % seconds
+	
+	var minutes = int(seconds / 60)
+	var sec = int(seconds) % 60
+	
+	return "%dм %dс" % [minutes, sec]
