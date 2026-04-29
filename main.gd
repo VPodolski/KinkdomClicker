@@ -2,16 +2,97 @@ extends Control
 
 var gold: float = 0.0
 var gold_per_click = 1
+var click_income_ratio = 0.0
 var gold_boost_cost: int = 10
 var global_income_multiplier: float = 1.0
 var ui_update_timer := 0.0
 var buildings = []
-var upgrades = []
+var active_upgrades = []
+
+var upgrades = [
+	UpgradeData.new(
+		"Острые инструменты", 50, 3,
+		"click_bonus", 1
+	),
+	UpgradeData.new(
+		"Тяжёлый молот", 150, 5,
+		"click_bonus", 3
+	),
+	UpgradeData.new(
+		"Золотое касание", 500, 8,
+		"click_from_income", 0.01  # 1% от дохода
+	),
+	UpgradeData.new(
+		"Жадность короля", 2000, 12,
+		"click_from_income", 0.03  # 3%
+	),
+	# 🌾 ФЕРМЫ
+	UpgradeData.new(
+		"Удобрения", 200, 6,
+		"income_multiplier", 0.5, "Ферма"
+	),
+	UpgradeData.new(
+		"Железные плуги", 600, 8,
+		"income_multiplier", 1.0, "Ферма"
+	),
+	UpgradeData.new(
+		"Фермерская кооперация", 1200, 10,
+		"building_synergy", 0.01, "Ферма", "Ферма"
+	),
+	# 🪵 ЛЕСОПИЛКИ
+	UpgradeData.new(
+		"Острые пилы", 400, 6,
+		"income_multiplier", 0.5, "Лесопилка"
+	),
+	UpgradeData.new(
+		"Массовая заготовка", 1200, 10,
+		"income_multiplier", 1.0, "Лесопилка"
+	),
+	UpgradeData.new(
+		"Древесные контракты", 2500, 12,
+		"global_multiplier", 0.1
+	),
+	# 🔨 КУЗНИЦА
+	UpgradeData.new(
+		"Угольная печь", 800, 8,
+		"forge_speed", 0.2
+	),
+	UpgradeData.new(
+		"Мастера кузнецы", 2000, 12,
+		"building_synergy", 0.02, "Ферма", "Кузница"
+	),
+	UpgradeData.new(
+		"Гильдия кузнецов", 5000, 15,
+		"global_multiplier", 0.15
+	),
+	# 🏪 РЫНОК / ПОЗДНЯЯ ИГРА
+	UpgradeData.new(
+		"Торговые пути", 3000, 10,
+		"global_multiplier", 0.1
+	),
+	UpgradeData.new(
+		"Королевские налоги", 8000, 15,
+		"global_multiplier", 0.25
+	),
+	# 🔥 СИНЕРГИЯ (ключевая механика)
+	UpgradeData.new(
+		"Инструменты фермеров", 1000, 10,
+		"building_synergy", 0.02, "Ферма", "Кузница"
+	),
+	UpgradeData.new(
+		"Деревянные конструкции", 1500, 10,
+		"building_synergy", 0.015, "Кузница", "Лесопилка"
+	),
+	UpgradeData.new(
+		"Городская экономика", 7000, 15,
+		"building_synergy", 0.01, "Рынок", "Ферма"
+	)
+]
 
 @onready var gold_button = $TabContainer/MainTab/GoldButton
 @onready var gold_label = $TabContainer/MainTab/GoldLabel
 @onready var buildings_container = $TabContainer/MainTab/BuildingsContainer
-@onready var upgrades_container = $TabContainer/ForgeTab/UpgradesContainer
+@onready var upgrades_container = $TabContainer/ForgeTab/ScrollContainer/UpgradesContainer
 @onready var tab_container = $TabContainer
 @onready var forge_tab = $TabContainer/ForgeTab
 
@@ -32,21 +113,6 @@ func _ready():
 	buildings.append(BuildingData.new("Гильдия", 5000, 500))
 	buildings.append(BuildingData.new("Банк", 20000, 2000))
 	buildings.append(BuildingData.new("Замок", 100000, 10000))
-	
-	upgrades.append(UpgradeData.new(
-		"Острые инструменты", 10, 5,
-		"click_bonus", 1
-	))
-
-	upgrades.append(UpgradeData.new(
-		"Улучшенные фермы", 10, 8,
-		"income_multiplier", 0.5, "Ферма"
-	))
-
-	upgrades.append(UpgradeData.new(
-		"Золотые контракты", 1000, 15,
-		"global_multiplier", 0.2
-	))
 
 	create_building_ui()
 	create_upgrades_ui()
@@ -116,7 +182,8 @@ func get_total_income():
 func _on_gold_button_pressed():
 	gold_button.scale = Vector2(1, 1)
 	
-	gold += gold_per_click
+	var bonus = get_total_income() * click_income_ratio
+	gold += gold_per_click + bonus
 	
 	animate_button_press(gold_button) 
 	spawn_floating_text(gold_per_click)
@@ -144,6 +211,7 @@ func buy_building(index):
 	if gold >= b.cost:
 		gold -= b.cost
 		b.buy()
+		update_synergies()
 		update_ui()
 		
 	if buildings[index].name == "Кузница" and buildings[index].count == 1:
@@ -232,6 +300,9 @@ func start_upgrade(index):
 func complete_upgrade(upgrade):
 	apply_upgrade(upgrade)
 	
+	active_upgrades.append(upgrade)
+	update_synergies()  
+	
 	upgrades.erase(upgrade)
 	
 	create_upgrades_ui()
@@ -248,6 +319,28 @@ func apply_upgrade(upgrade):
 		
 		"global_multiplier":
 			global_income_multiplier += upgrade.effect_value
+			
+		"building_synergy":
+			var source = get_building_by_name(upgrade.source_building)
+			var target = get_building_by_name(upgrade.target)
+			
+			if source and target:
+				target.income_multiplier += source.count * upgrade.effect_value
+				
+		"click_from_income":
+			click_income_ratio += upgrade.effect_value
+
+func update_synergies():
+	for b in buildings:
+		b.synergy_bonus = 0.0
+	
+	for upgrade in active_upgrades:
+		if upgrade.effect_type == "building_synergy":
+			var source = get_building_by_name(upgrade.source_building)
+			var target = get_building_by_name(upgrade.target)
+			
+			if source and target:
+				target.synergy_bonus += source.count * upgrade.effect_value
 
 func get_building_by_name(building_name):
 	for b in buildings:

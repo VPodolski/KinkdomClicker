@@ -45,12 +45,18 @@ layout_mode = 2
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="ForgeTitle" type="Label" parent="TabContainer/ForgeTab" unique_id=580593036]
-layout_mode = 2
-
-[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/ForgeTab" unique_id=1631420813]
+[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/ForgeTab" unique_id=1764712141]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/scrollbar_h_separation = 10
+theme_override_constants/scrollbar_v_separation = 20
+
+[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/ForgeTab/ScrollContainer" unique_id=1631420813]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ForgeTitle" type="Label" parent="TabContainer/ForgeTab" unique_id=580593036]
+layout_mode = 2
 
 [node name="Queue" type="Label" parent="TabContainer/ForgeTab" unique_id=1944781138]
 layout_mode = 2

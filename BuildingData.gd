@@ -7,6 +7,7 @@ var cost: int
 var income: int
 var income_multiplier: float = 1.0
 var count: int = 0
+var synergy_bonus: float = 0.0
 
 func _init(_name, _base_cost, _income):
 	name = _name
@@ -19,4 +20,4 @@ func buy():
 	cost = int(base_cost * pow(1.2, count))
 
 func get_income():
-	return income * income_multiplier * count
+	return income * (income_multiplier + synergy_bonus) * count
