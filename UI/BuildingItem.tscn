@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bnnssnqqewrut"]
 
-[ext_resource type="Script" uid="uid://b1jx68vnw8apb" path="res://BuildingItem.gd" id="1_6nidc"]
+[ext_resource type="Script" uid="uid://b1jx68vnw8apb" path="res://UI/BuildingItem.gd" id="1_6nidc"]
 
 [node name="BuildingItem" type="HBoxContainer" unique_id=119485372]
 anchors_preset = 1

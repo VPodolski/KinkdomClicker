@@ -1,10 +1,6 @@
 extends Control
 
-var gold: float = 0.0
-var gold_per_click = 1
-var click_income_ratio = 0.0
 var gold_boost_cost: int = 10
-var global_income_multiplier: float = 1.0
 var ui_update_timer := 0.0
 var buildings = []
 var active_upgrades = []

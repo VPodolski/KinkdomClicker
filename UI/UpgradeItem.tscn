@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://e45egfnu0t8v"]
 
-[ext_resource type="Script" uid="uid://4w1t8t2nlulq" path="res://UpgradeItem.gd" id="1_o32h2"]
+[ext_resource type="Script" uid="uid://4w1t8t2nlulq" path="res://UI/UpgradeItem.gd" id="1_o32h2"]
 
 [node name="UpgradeItem" type="VBoxContainer" unique_id=27434265]
 script = ExtResource("1_o32h2")
