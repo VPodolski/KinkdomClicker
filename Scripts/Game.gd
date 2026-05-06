@@ -35,10 +35,10 @@ func start_upgrade(index):
 		u.is_crafting = true
 		emit_signal("gold_changed", economy.gold)
 
-func update(delta):
+func _process(delta):
 	var income = buildings.get_total_income(economy.global_income_multiplier)
 	economy.add_gold(income * delta)
-	
+
 	var forge = buildings.get_building_by_name("Кузница")
 	var speed = 1.0 + forge.count * 0.01
 	

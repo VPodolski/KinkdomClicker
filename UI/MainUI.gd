@@ -12,6 +12,7 @@ extends Control
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 
+var ui_update_timer = 0.0
 
 func _ready():
 	await get_tree().process_frame
@@ -25,6 +26,15 @@ func _ready():
 	create_buildings_ui()
 	create_upgrades_ui()
 
+
+func _process(delta):
+	ui_update_timer += delta
+	
+	if ui_update_timer >= 0.05: # 20 раз в секунду
+			update_gold(game.economy.gold)
+			update_upgrades_ui()
+			update_buildings_ui()
+			update_visibility()
 
 # =========================
 # 🖱️ INPUT
@@ -47,7 +57,10 @@ func _on_upgrade_pressed(index):
 # =========================
 
 func update_gold(value):
-	gold_label.text = str(int(value))
+	var text ="Золото: %.1f" % value + \
+	"\n(+" + str(game.buildings.get_total_income(game.economy.global_income_multiplier)) + "/сек)"
+	
+	gold_label.text = str(text)
 
 
 # =========================
@@ -70,7 +83,7 @@ func create_buildings_ui():
 
 func update_buildings_ui():
 	for child in buildings_container.get_children():
-		child.update_ui()
+		child.update_ui(game.economy.gold)
 
 
 # =========================
