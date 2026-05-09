@@ -28,18 +28,38 @@ func buy_building(index):
 		emit_signal("buildings_changed")
 		emit_signal("gold_changed", economy.gold)
 
-func start_upgrade(index):
-	var u = upgrades.upgrades[index]
-	
-	if economy.spend_gold(u.cost):
-		u.is_crafting = true
-		emit_signal("gold_changed", economy.gold)
+func start_upgrade(upgrade: UpgradeData) -> void:
+	if upgrade == null:
+		return
+
+	# Защита от повторной покупки
+	if not upgrades.upgrades.has(upgrade):
+		return
+
+	if economy.spend_gold(upgrade.cost):
+		upgrade.is_crafting = true
+		gold_changed.emit(economy.gold)
+		upgrades_changed.emit()
 
 func _process(delta):
 	var income = buildings.get_total_income(economy.global_income_multiplier)
 	economy.add_gold(income * delta)
-
-	var forge = buildings.get_building_by_name("Кузница")
-	var speed = 1.0 + forge.count * 0.01
+	var speed = get_forge_speed_multiplier();
 	
 	upgrades.update_crafting(delta, speed)
+
+
+func get_forge_speed_multiplier():
+	var forge = buildings.get_building_by_name("Кузница")
+	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
+
+func format_number(value: float) -> String:
+	# Простое красивое форматирование без лишних нулей.
+	if value >= 1000000.0:
+		return "%.2fM" % (value / 1000000.0)
+	elif value >= 1000.0:
+		return "%.1fK" % (value / 1000.0)
+	elif value == floor(value):
+		return str(int(value))
+	else:
+		return "%.2f" % value

@@ -11,6 +11,7 @@ extends Control
 
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
+var floating_text_scene = preload("res://ui/FloatingText.tscn")
 
 var ui_update_timer = 0.0
 
@@ -41,15 +42,28 @@ func _process(delta):
 # =========================
 
 func _on_gold_button_pressed():
+	var click_amount = game.economy.gold_per_click
+
+	var total_income = game.buildings.get_total_income(
+		game.economy.global_income_multiplier
+	)
+
+	click_amount += total_income * game.economy.click_income_ratio
+
+	# Выполняем сам клик
 	game.on_click()
+
+	# Визуальные эффекты
+	spawn_floating_text(click_amount)
+	animate_button_press(gold_button)
 
 
 func _on_building_pressed(index):
 	game.buy_building(index)
 
 
-func _on_upgrade_pressed(index):
-	game.start_upgrade(index)
+func _on_upgrade_pressed(upgrade: UpgradeData) -> void:
+	game.start_upgrade(upgrade)
 
 
 # =========================
@@ -106,37 +120,76 @@ func create_upgrades_ui():
 
 func update_upgrades_ui():
 	for child in upgrades_container.get_children():
-		child.update_ui()
-	
+		var upgrade = child.upgrade
+
+		# Текущее количество золота
+		var current_gold = game.economy.gold
+
+		# Доступен ли апгрейд для покупки
+		var is_unlocked = current_gold >= upgrade.cost and not upgrade.is_crafting
+
+		# Текст предпросмотра эффекта
+		var preview_text = ""
+		if upgrade.has_method("get_preview_text"):
+			preview_text = upgrade.get_preview_text(game)
+
+		# Оставшееся время крафта
+		var remaining_text = ""
+		if upgrade.is_crafting:
+			var remaining = max(0.0, upgrade.base_time - upgrade.progress)
+			remaining_text = "%.1f сек" % remaining
+
+		# Передаём все параметры в UpgradeItem
+		child.update_ui(
+			current_gold,
+			is_unlocked,
+			preview_text,
+			remaining_text
+		)
+
 	update_visibility()
-	sort_upgrade_items()
-
-
+	#sort_upgrade_items()
 # =========================
 # 👁️ VISIBILITY
 # =========================
 
-func update_visibility():
+func update_visibility() -> void:
 	for child in upgrades_container.get_children():
-		var u = child.upgrade
-		
-		if u.is_crafting:
+		var upgrade = child.upgrade
+
+		# Если апгрейд уже завершён и находится в списке активных,
+		# полностью скрываем его.
+		if game.upgrades.active_upgrades.has(upgrade):
+			child.visible = false
+			continue
+
+		# Если апгрейд сейчас создаётся — всегда показываем.
+		if upgrade.is_crafting:
 			child.visible = true
 			child.modulate.a = 1.0
 			continue
-		
-		var max_cost = game.economy.gold * 5.0
-		
-		if u.cost > max_cost:
-			child.visible = false
-		else:
-			child.visible = true
-			
-			if u.cost > game.economy.gold * 2:
-				child.modulate.a = 0.5
-			else:
-				child.modulate.a = 1.0
 
+		var current_gold = game.economy.gold
+		var max_visible_cost = current_gold * 1.5
+
+		# Если золота мало (например, 0), всё равно показываем
+		# хотя бы самые дешёвые апгрейды.
+		if current_gold < 1.0:
+			max_visible_cost = 100.0
+
+		# Слишком дорогие скрываем.
+		if upgrade.cost > max_visible_cost:
+			child.visible = false
+			continue
+
+		# Показываем апгрейд.
+		child.visible = true
+
+		# Если пока нельзя купить — делаем полупрозрачным.
+		if upgrade.cost > current_gold:
+			child.modulate.a = 0.5
+		else:
+			child.modulate.a = 1.0
 
 # =========================
 # 🔽 SORT
@@ -157,3 +210,45 @@ func sort_upgrade_items():
 	
 	for i in range(items.size()):
 		upgrades_container.move_child(items[i], i)
+
+func spawn_floating_text(amount: float) -> void:
+	var text = floating_text_scene.instantiate()
+
+	text.text = "+" + game.format_number(amount)
+
+	var mouse_pos = get_viewport().get_mouse_position()
+	text.position = mouse_pos
+	text.position += Vector2(
+		randf_range(-20, 20),
+		randf_range(-10, 10)
+	)
+
+	add_child(text)
+
+
+# =========================
+# 🔘 АНИМАЦИЯ КНОПКИ
+# =========================
+
+func animate_button_press(button: Control) -> void:
+	var tween = create_tween()
+
+	tween.set_trans(Tween.TRANS_BACK)
+	tween.set_ease(Tween.EASE_OUT)
+
+	# Масштабируем относительно центра
+	button.pivot_offset = button.size / 2.0
+
+	tween.tween_property(
+		button,
+		"scale",
+		Vector2(0.9, 0.9),
+		0.05
+	)
+
+	tween.tween_property(
+		button,
+		"scale",
+		Vector2.ONE,
+		0.10
+	)
