@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bwvcs0gygt11q"]
 
-[ext_resource type="Script" uid="uid://bv55fqs28jk4" path="res://FloatingText.gd" id="1_bmcqi"]
+[ext_resource type="Script" uid="uid://bv55fqs28jk4" path="res://UI/FloatingText.gd" id="1_bmcqi"]
 
 [node name="FloatingText" type="Label" unique_id=1703850373]
 theme_override_font_sizes/font_size = 24

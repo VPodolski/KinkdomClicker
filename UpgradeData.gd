@@ -1,53 +1,121 @@
 class_name UpgradeData
-extends RefCounted
 
 var name: String
-var cost: int
+var description: String
+var cost: float
 var base_time: float
-
-var required_building: String = ""
-var required_count: int = 0
 
 var effect_type: String
 var effect_value: float
-
-var source_building: String = ""  # кто даёт бонус
-var target: String = ""           # кого усиливает
+var target: String = ""
+var source_building: String = ""
 
 var is_crafting: bool = false
 var progress: float = 0.0
 
 
-func _init(_name, _cost, _time, _type, _value, _source_building="", _target="", _req_building="", _req_count=0):
+func _init(
+	_name: String,
+	_description: String,
+	_cost: float,
+	_base_time: float,
+	_effect_type: String,
+	_effect_value: float,
+	_target: String = "",
+	_source_building: String = ""
+):
 	name = _name
+	description = _description
 	cost = _cost
-	base_time = _time
-	effect_type = _type
-	effect_value = _value
+	base_time = _base_time
+	effect_type = _effect_type
+	effect_value = _effect_value
 	target = _target
-	required_building = _req_building
-	required_count = _req_count
 	source_building = _source_building
 
-
-func get_effect_description():
+func get_preview_text(game) -> String:
 	match effect_type:
 		"click_bonus":
-			return "+%d к золоту за клик" % effect_value
-
-		"income_multiplier":
-			return "+%d%% к доходу (%s)" % [int(effect_value * 100), target]
-
-		"global_multiplier":
-			return "+%d%% ко всему доходу" % int(effect_value * 100)
-
-		"building_synergy":
-			return "Каждая %s даёт +%d%% к %s" % [source_building, int(effect_value * 100), target]
+			var before = game.economy.gold_per_click
+			var after = before + effect_value
+			return "Клик: %s → %s" % [
+				game.format_number(before),
+				game.format_number(after)
+			]
 
 		"click_from_income":
-			return "Клик получает +%d%% от дохода в секунду" % int(effect_value * 100)
+			var total_income = game.buildings.get_total_income(
+				game.economy.global_income_multiplier
+			)
+
+			var before = game.economy.gold_per_click + \
+				total_income * game.economy.click_income_ratio
+
+			var after = game.economy.gold_per_click + \
+				total_income * (
+					game.economy.click_income_ratio + effect_value
+				)
+
+			return "Клик: %s → %s" % [
+				game.format_number(before),
+				game.format_number(after)
+			]
+
+		"income_multiplier":
+			var building = game.buildings.get_building_by_name(target)
+			if building == null:
+				return ""
+
+			var before = building.get_income_per_unit()
+			var after = building.income * (
+				building.income_multiplier +
+				building.synergy_bonus +
+				effect_value
+			)
+
+			return "%s: %s → %s за шт." % [
+				building.name,
+				game.format_number(before),
+				game.format_number(after)
+			]
+
+		"global_multiplier":
+			var before = game.buildings.get_total_income(
+				game.economy.global_income_multiplier
+			)
+
+			var after = game.buildings.get_total_income(
+				game.economy.global_income_multiplier + effect_value
+			)
+
+			return "Доход: %s/с → %s/с" % [
+				game.format_number(before),
+				game.format_number(after)
+			]
 
 		"forge_speed":
-			return "Скорость кузницы +%d%%" % int(effect_value * 100)
+			var before = game.get_forge_speed_multiplier()
+			var after = before + effect_value
+
+			return "Скорость кузницы: x%s → x%s" % [
+				game.format_number(before),
+				game.format_number(after)
+			]
+
+		"building_synergy":
+			var source = game.buildings.get_building_by_name(source_building)
+			var target_building = game.buildings.get_building_by_name(target)
+
+			if source == null or target_building == null:
+				return ""
+
+			var current_bonus = source.count * effect_value * 100.0
+
+			return "Каждая %s даёт +%s%% к %s\nСейчас бонус: +%s%%" % [
+				source.name,
+				game.format_number(effect_value * 100.0),
+				target_building.name,
+				game.format_number(current_bonus)
+			]
 
 	return ""
