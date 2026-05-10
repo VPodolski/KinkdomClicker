@@ -11,55 +11,70 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
 
-[node name="TabContainer" type="TabContainer" parent="." unique_id=565127916]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=707017350]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-current_tab = 0
 
-[node name="MainTab" type="VBoxContainer" parent="TabContainer" unique_id=1750776209]
+[node name="LeftPanel" type="VBoxContainer" parent="HBoxContainer" unique_id=171810049]
 layout_mode = 2
-metadata/_tab_index = 0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
 
-[node name="GoldButton" type="Button" parent="TabContainer/MainTab" unique_id=1397629066]
+[node name="GoldButton" type="Button" parent="HBoxContainer/LeftPanel" unique_id=1397629066]
 custom_minimum_size = Vector2(300, 100)
 layout_mode = 2
 text = "Собрать золото"
 
-[node name="GoldLabel" type="Label" parent="TabContainer/MainTab" unique_id=605480262]
+[node name="GoldLabel" type="Label" parent="HBoxContainer/LeftPanel" unique_id=605480262]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Золото: 0"
 
-[node name="AutoGoldTimer" type="Timer" parent="TabContainer/MainTab" unique_id=154780128]
+[node name="AutoGoldTimer" type="Timer" parent="HBoxContainer/LeftPanel" unique_id=154780128]
 autostart = true
 
-[node name="BuildingsContainer" type="VBoxContainer" parent="TabContainer/MainTab" unique_id=1449457944]
+[node name="RightPanel" type="TabContainer" parent="HBoxContainer" unique_id=565127916]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+tab_alignment = 1
+current_tab = 0
+
+[node name="BuildingTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=1750776209]
+layout_mode = 2
+metadata/_tab_index = 0
+
+[node name="Buildings" type="ScrollContainer" parent="HBoxContainer/RightPanel/BuildingTab" unique_id=1640981212]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BuildingsContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/BuildingTab/Buildings" unique_id=1449457944]
 layout_mode = 2
 
-[node name="ForgeTab" type="VBoxContainer" parent="TabContainer" unique_id=199863777]
+[node name="ForgeTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=199863777]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="ScrollContainer" type="ScrollContainer" parent="TabContainer/ForgeTab" unique_id=1764712141]
+[node name="Upgrades" type="ScrollContainer" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=1764712141]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/scrollbar_h_separation = 10
 theme_override_constants/scrollbar_v_separation = 20
 
-[node name="UpgradesContainer" type="VBoxContainer" parent="TabContainer/ForgeTab/ScrollContainer" unique_id=1631420813]
+[node name="UpgradesContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/ForgeTab/Upgrades" unique_id=1631420813]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ForgeTitle" type="Label" parent="TabContainer/ForgeTab" unique_id=580593036]
+[node name="ForgeTitle" type="Label" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=580593036]
 layout_mode = 2
 
-[node name="Queue" type="Label" parent="TabContainer/ForgeTab" unique_id=1944781138]
+[node name="Queue" type="Label" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=1944781138]
 layout_mode = 2
 
-[connection signal="pressed" from="TabContainer/MainTab/GoldButton" to="." method="_on_gold_button_pressed"]
-[connection signal="timeout" from="TabContainer/MainTab/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
+[connection signal="pressed" from="HBoxContainer/LeftPanel/GoldButton" to="." method="_on_gold_button_pressed"]
+[connection signal="timeout" from="HBoxContainer/LeftPanel/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]

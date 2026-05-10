@@ -3,11 +3,12 @@ extends Control
 @onready var game = GameLogic  # если добавишь Game в AutoLoad
 
 # UI элементы
-@onready var gold_label = $TabContainer/MainTab/GoldLabel
-@onready var gold_button = $TabContainer/MainTab/GoldButton
+@onready var gold_label = $HBoxContainer/LeftPanel/GoldLabel
+@onready var gold_button = $HBoxContainer/LeftPanel/GoldButton
 
-@onready var buildings_container = $TabContainer/MainTab/BuildingsContainer
-@onready var upgrades_container = $TabContainer/ForgeTab/ScrollContainer/UpgradesContainer
+@onready var right_panel = $HBoxContainer/RightPanel
+@onready var buildings_container = $HBoxContainer/RightPanel/BuildingTab/Buildings/BuildingsContainer
+@onready var upgrades_container = $HBoxContainer/RightPanel/ForgeTab/Upgrades/UpgradesContainer
 
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
@@ -27,6 +28,8 @@ func _ready():
 	create_buildings_ui()
 	create_upgrades_ui()
 
+	right_panel.set_tab_title(0, "Постройки")
+	right_panel.set_tab_title(1, "Кузница")
 
 func _process(delta):
 	ui_update_timer += delta
