@@ -42,9 +42,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 tab_alignment = 1
-current_tab = 0
+current_tab = 2
 
 [node name="BuildingTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=1750776209]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
@@ -75,6 +76,24 @@ layout_mode = 2
 
 [node name="Queue" type="Label" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=1944781138]
 layout_mode = 2
+size_flags_vertical = 1
+
+[node name="AchievementsTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=342712051]
+layout_mode = 2
+metadata/_tab_index = 2
+
+[node name="MultiplierLabel" type="Label" parent="HBoxContainer/RightPanel/AchievementsTab" unique_id=877100526]
+layout_mode = 2
+text = "Бонус к доходу"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/RightPanel/AchievementsTab" unique_id=380021549]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AchievementsContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/AchievementsTab/ScrollContainer" unique_id=819671266]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [connection signal="pressed" from="HBoxContainer/LeftPanel/GoldButton" to="." method="_on_gold_button_pressed"]
 [connection signal="timeout" from="HBoxContainer/LeftPanel/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]

@@ -10,6 +10,10 @@ extends Control
 @onready var buildings_container = $HBoxContainer/RightPanel/BuildingTab/Buildings/BuildingsContainer
 @onready var upgrades_container = $HBoxContainer/RightPanel/ForgeTab/Upgrades/UpgradesContainer
 
+@onready var achievements_tab = $HBoxContainer/RightPanel/AchievementsTab
+@onready var multiplier_label = $HBoxContainer/RightPanel/AchievementsTab/MultiplierLabel
+@onready var achievements_container = $HBoxContainer/RightPanel/AchievementsTab/ScrollContainer/AchievementsContainer
+
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 var floating_text_scene = preload("res://ui/FloatingText.tscn")
@@ -18,18 +22,23 @@ var ui_update_timer = 0.0
 
 func _ready():
 	await get_tree().process_frame
+	achievements_tab.visible = false
+	
 	# подписки на события
 	game.gold_changed.connect(update_gold)
 	game.buildings_changed.connect(update_buildings_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
-	
+	game.achievement_unlocked.connect(_on_achievement_unlocked)
+
 	# первичная инициализация
 	update_gold(game.economy.gold)
 	create_buildings_ui()
 	create_upgrades_ui()
+	update_achievements_ui()
 
 	right_panel.set_tab_title(0, "Постройки")
 	right_panel.set_tab_title(1, "Кузница")
+	right_panel.set_tab_title(2, "Достижения")
 
 func _process(delta):
 	ui_update_timer += delta
@@ -68,6 +77,10 @@ func _on_building_pressed(index):
 func _on_upgrade_pressed(upgrade: UpgradeData) -> void:
 	game.start_upgrade(upgrade)
 
+
+func _on_achievement_unlocked(_achievement) -> void:
+	achievements_tab.visible = true
+	update_achievements_ui()
 
 # =========================
 # 💰 UI ОБНОВЛЕНИЕ
@@ -151,7 +164,50 @@ func update_upgrades_ui():
 		)
 
 	update_visibility()
-	#sort_upgrade_items()
+	
+func update_achievements_ui() -> void:
+	var unlocked = game.achievements.get_unlocked_achievements()
+	print("Unlocked achievements: ", unlocked.size())
+	# Скрываем вкладку, если достижений нет
+	if unlocked.is_empty():
+		achievements_tab.visible = false
+		return
+
+	# Показываем вкладку
+	achievements_tab.visible = true
+
+	# Обновляем текст множителя
+	var multiplier = game.achievements.get_income_multiplier()
+	multiplier_label.text = "Бонус к доходу: x%s" % game.format_number(multiplier)
+
+	# Удаляем старые элементы
+	for child in achievements_container.get_children():
+		child.queue_free()
+
+	# Создаём новые элементы
+	for achievement in unlocked:
+		var item = VBoxContainer.new()
+		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var title_label = Label.new()
+		title_label.text = "🏆 " + achievement.title
+		title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var description_label = Label.new()
+		description_label.text = achievement.description
+		description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		description_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		item.add_child(title_label)
+		item.add_child(description_label)
+
+		achievements_container.add_child(item)
+		
+func update_achievements_tab_visibility() -> void:
+	var tab_index = achievements_tab.get_index()
+	var has_achievements = game.get_unlocked_achievement_count() > 0
+
+	right_panel.set_tab_hidden(tab_index, not has_achievements)
 # =========================
 # 👁️ VISIBILITY
 # =========================

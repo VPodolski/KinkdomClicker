@@ -75,6 +75,12 @@ func _on_achievement_unlocked(achievement: AchievementData) -> void:
 	achievement_unlocked.emit(achievement)
 	gold_changed.emit(economy.gold)
 
+func get_unlocked_achievement_count() -> int:
+	return achievements.get_unlocked_count()
+	
+func get_achievement_multiplier() -> float:
+	return achievements.get_income_multiplier()
+
 func get_forge_speed_multiplier():
 	var forge = buildings.get_building_by_name("Кузница")
 	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
