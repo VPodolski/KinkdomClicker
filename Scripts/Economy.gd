@@ -15,3 +15,6 @@ func spend_gold(amount: float) -> bool:
 		gold -= amount
 		return true
 	return false
+
+func get_total_income() -> float:
+	return 0.0;

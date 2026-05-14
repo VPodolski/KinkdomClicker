@@ -4,19 +4,27 @@ extends Node
 signal gold_changed
 signal upgrades_changed
 signal buildings_changed
+signal achievement_unlocked
 
 var economy: Economy
 var buildings: BuildingManager
 var upgrades: UpgradeManager
+var achievements: AchievementManager
+
+var currentGoldPerSecond = 0.0
 
 func _ready():
 	economy = Economy.new()
 	buildings = BuildingManager.new()
 	upgrades = UpgradeManager.new(economy, buildings)
+	achievements = AchievementManager.new()
+	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
 
 func on_click():
 	var income = buildings.get_total_income(economy.global_income_multiplier)
 	var value = economy.gold_per_click + income * economy.click_income_ratio
+	
+	achievements.check(self)
 	
 	economy.add_gold(value)
 	emit_signal("gold_changed", economy.gold)
@@ -24,6 +32,8 @@ func on_click():
 func buy_building(index):
 	if buildings.buy_building(index, economy):
 		buildings.update_synergies(upgrades.active_upgrades)
+		
+		achievements.check(self)
 		
 		emit_signal("buildings_changed")
 		emit_signal("gold_changed", economy.gold)
@@ -37,17 +47,33 @@ func start_upgrade(upgrade: UpgradeData) -> void:
 		return
 
 	if economy.spend_gold(upgrade.cost):
+		achievements.check(self)
 		upgrade.is_crafting = true
 		gold_changed.emit(economy.gold)
 		upgrades_changed.emit()
 
 func _process(delta):
-	var income = buildings.get_total_income(economy.global_income_multiplier)
+	var achievement_multiplier = achievements.get_income_multiplier()
+
+	var income = buildings.get_total_income(
+		economy.global_income_multiplier
+	)
+
+	income *= achievement_multiplier
+
+	currentGoldPerSecond = income
+
 	economy.add_gold(income * delta)
-	var speed = get_forge_speed_multiplier();
-	
+
+	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
 
+	achievements.check(self)
+
+
+func _on_achievement_unlocked(achievement: AchievementData) -> void:
+	achievement_unlocked.emit(achievement)
+	gold_changed.emit(economy.gold)
 
 func get_forge_speed_multiplier():
 	var forge = buildings.get_building_by_name("Кузница")

@@ -75,7 +75,7 @@ func _on_upgrade_pressed(upgrade: UpgradeData) -> void:
 
 func update_gold(value):
 	var text ="Золото: %.1f" % value + \
-	"\n(+" + str(game.buildings.get_total_income(game.economy.global_income_multiplier)) + "/сек)"
+	"\n(+" + str(game.currentGoldPerSecond) + "/сек)"
 	
 	gold_label.text = str(text)
 
