@@ -44,3 +44,10 @@ func update_synergies(active_upgrades):
 			
 			if source and target:
 				target.synergy_bonus += source.count * upgrade.effect_value
+
+func reset():
+	for b in buildings:
+		b.count = 0
+		b.cost = b.base_cost
+		b.income_multiplier = 1.0
+		b.synergy_bonus = 0.0

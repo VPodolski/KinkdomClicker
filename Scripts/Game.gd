@@ -20,12 +20,16 @@ func _ready():
 	achievements = AchievementManager.new()
 	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
 
-func on_click():
+func get_click_value() -> float:
+	var achievement_multiplier = achievements.get_income_multiplier()
 	var income = buildings.get_total_income(economy.global_income_multiplier)
-	var value = economy.gold_per_click + income * economy.click_income_ratio
-	
+	income *= achievement_multiplier
+	income *= economy.prestige_multiplier
+	return economy.gold_per_click + income * economy.click_income_ratio
+
+func on_click():
+	var value = get_click_value()
 	achievements.check(self)
-	
 	economy.add_gold(value)
 	emit_signal("gold_changed", economy.gold)
 
@@ -60,6 +64,7 @@ func _process(delta):
 	)
 
 	income *= achievement_multiplier
+	income *= economy.prestige_multiplier
 
 	currentGoldPerSecond = income
 
@@ -95,3 +100,30 @@ func format_number(value: float) -> String:
 		return str(int(value))
 	else:
 		return "%.2f" % value
+
+func get_expected_prestige_bonus(gold_amount: float) -> float:
+	return (gold_amount / 500000.0) * 0.1
+
+func ascend() -> bool:
+	if economy.gold < 500000.0:
+		return false
+	
+	var bonus = get_expected_prestige_bonus(economy.gold)
+	economy.prestige_multiplier += bonus
+	economy.times_ascended += 1
+	
+	# Reset economy
+	economy.gold = 0.0
+	economy.gold_per_click = 1.0
+	economy.click_income_ratio = 0.0
+	economy.global_income_multiplier = 1.0
+	
+	# Reset systems
+	buildings.reset()
+	upgrades.reset()
+	
+	gold_changed.emit(economy.gold)
+	buildings_changed.emit()
+	upgrades_changed.emit()
+	
+	return true

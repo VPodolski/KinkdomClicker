@@ -14,6 +14,11 @@ extends Control
 @onready var multiplier_label = $HBoxContainer/RightPanel/AchievementsTab/MultiplierLabel
 @onready var achievements_container = $HBoxContainer/RightPanel/AchievementsTab/ScrollContainer/AchievementsContainer
 
+@onready var ascension_tab = $HBoxContainer/LeftPanel/AscensionPanel
+@onready var prestige_current_label = $HBoxContainer/LeftPanel/AscensionPanel/CurrentBonusLabel
+@onready var prestige_expected_label = $HBoxContainer/LeftPanel/AscensionPanel/ExpectedBonusLabel
+@onready var ascend_button = $HBoxContainer/LeftPanel/AscensionPanel/AscendButton
+
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 var floating_text_scene = preload("res://ui/FloatingText.tscn")
@@ -29,12 +34,14 @@ func _ready():
 	game.buildings_changed.connect(update_buildings_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
+	ascend_button.pressed.connect(_on_ascend_pressed)
 
 	# первичная инициализация
 	update_gold(game.economy.gold)
 	create_buildings_ui()
 	create_upgrades_ui()
 	update_achievements_ui()
+	update_prestige_ui()
 
 	right_panel.set_tab_title(0, "Постройки")
 	right_panel.set_tab_title(1, "Кузница")
@@ -48,19 +55,14 @@ func _process(delta):
 			update_upgrades_ui()
 			update_buildings_ui()
 			update_visibility()
+			update_prestige_ui()
 
 # =========================
 # 🖱️ INPUT
 # =========================
 
 func _on_gold_button_pressed():
-	var click_amount = game.economy.gold_per_click
-
-	var total_income = game.buildings.get_total_income(
-		game.economy.global_income_multiplier
-	)
-
-	click_amount += total_income * game.economy.click_income_ratio
+	var click_amount = game.get_click_value()
 
 	# Выполняем сам клик
 	game.on_click()
@@ -311,3 +313,37 @@ func animate_button_press(button: Control) -> void:
 		Vector2.ONE,
 		0.10
 	)
+
+
+func update_prestige_ui():
+	if prestige_current_label == null or prestige_expected_label == null or ascend_button == null:
+		return
+
+	# Текущий бонус престижа
+	var current_bonus = (game.economy.prestige_multiplier - 1.0) * 100.0
+	prestige_current_label.text = "Текущий бонус престижа: +%.1f%%" % current_bonus
+
+	# Ожидаемый бонус престижа при сбросе
+	var expected_bonus = game.get_expected_prestige_bonus(game.economy.gold) * 100.0
+	prestige_expected_label.text = "Ожидаемый бонус при сбросе: +%.1f%%" % expected_bonus
+
+	# Кнопка активна при золоте >= 500 000
+	var can_ascend = game.economy.gold >= 500000.0
+	ascend_button.disabled = not can_ascend
+
+	# Показываем задизейбленную кнопку возвышения, когда до стоимости покупки не хватает 35% (т.е. 500000 * 0.65 = 325000)
+	ascension_tab.visible = game.economy.gold >= 325000.0
+
+	if can_ascend:
+		ascend_button.text = "Совершить Возвышение!"
+	else:
+		ascend_button.text = "Совершить Возвышение (требуется 500K золота)"
+
+
+func _on_ascend_pressed():
+	if game.ascend():
+		create_buildings_ui()
+		create_upgrades_ui()
+		update_achievements_ui()
+		update_prestige_ui()
+		right_panel.current_tab = 0

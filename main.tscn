@@ -37,6 +37,31 @@ text = "Золото: 0"
 [node name="AutoGoldTimer" type="Timer" parent="HBoxContainer/LeftPanel" unique_id=154780128]
 autostart = true
 
+[node name="Spacer" type="Control" parent="HBoxContainer/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AscensionPanel" type="VBoxContainer" parent="HBoxContainer/LeftPanel" unique_id=987654321]
+visible = false
+layout_mode = 2
+
+[node name="AscensionDesc" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654322]
+layout_mode = 2
+text = "Возвышение сбрасывает золото, постройки и улучшения, но дарует постоянный бонус к доходу."
+autowrap_mode = 2
+
+[node name="CurrentBonusLabel" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654323]
+layout_mode = 2
+text = "Текущий бонус престижа: +0%"
+
+[node name="ExpectedBonusLabel" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654324]
+layout_mode = 2
+text = "Ожидаемый бонус: +0%"
+
+[node name="AscendButton" type="Button" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654325]
+layout_mode = 2
+text = "Совершить Возвышение (требуется 500K золота)"
+
 [node name="RightPanel" type="TabContainer" parent="HBoxContainer" unique_id=565127916]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -94,6 +119,8 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+
 
 [connection signal="pressed" from="HBoxContainer/LeftPanel/GoldButton" to="." method="_on_gold_button_pressed"]
 [connection signal="timeout" from="HBoxContainer/LeftPanel/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
