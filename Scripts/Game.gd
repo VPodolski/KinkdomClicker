@@ -91,15 +91,24 @@ func get_forge_speed_multiplier():
 	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
 
 func format_number(value: float) -> String:
-	# Простое красивое форматирование без лишних нулей.
-	if value >= 1000000.0:
-		return "%.2fM" % (value / 1000000.0)
-	elif value >= 1000.0:
-		return "%.1fK" % (value / 1000.0)
-	elif value == floor(value):
-		return str(int(value))
-	else:
-		return "%.2f" % value
+	if value < 1000.0:
+		if value == floor(value):
+			return str(int(value))
+		else:
+			# Для маленьких чисел с дробной частью
+			return ("%.1f" % value).rstrip("0").rstrip(".")
+			
+	var suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
+	var suffix_index = 0
+	var temp = value
+	
+	while temp >= 1000.0 and suffix_index < suffixes.size() - 1:
+		temp /= 1000.0
+		suffix_index += 1
+		
+	# Форматируем до 2 знаков после запятой и убираем лишние нули в конце
+	var formatted = ("%.2f" % temp).rstrip("0").rstrip(".")
+	return formatted + suffixes[suffix_index]
 
 func get_expected_prestige_bonus(gold_amount: float) -> float:
 	return (gold_amount / 500000.0) * 0.1

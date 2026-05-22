@@ -109,10 +109,10 @@ func _on_achievement_unlocked(achievement) -> void:
 # =========================
 
 func update_gold(value):
-	var text ="Золото: %.1f" % value + \
-	"\n(+" + str(game.currentGoldPerSecond) + "/сек)"
+	var text = "Золото: " + game.format_number(value) + \
+	"\n(+" + game.format_number(game.currentGoldPerSecond) + "/сек)"
 	
-	gold_label.text = str(text)
+	gold_label.text = text
 
 
 # =========================
