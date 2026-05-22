@@ -3,11 +3,12 @@ extends PanelContainer
 var building
 var index
 
+@onready var icon_rect = $HBoxContainer/IconRect
 @onready var name_label = $HBoxContainer/TextVBox/NameLabel
 @onready var info_label = $HBoxContainer/TextVBox/InfoLabel
-@onready var buy1_button = $HBoxContainer/ActionHBox/Buy1Button
-@onready var buy10_button = $HBoxContainer/ActionHBox/Buy10Button
-@onready var buymax_button = $HBoxContainer/ActionHBox/BuyMaxButton
+@onready var buy1_button = $HBoxContainer/TextVBox/ActionHBox/Buy1Button
+@onready var buy10_button = $HBoxContainer/TextVBox/ActionHBox/Buy10Button
+@onready var buymax_button = $HBoxContainer/TextVBox/ActionHBox/BuyMaxButton
 
 var current_gold_cache: float = 0.0
 
@@ -22,6 +23,11 @@ func setup(_building, _index):
 	building = _building
 	index = _index
 	
+	if building != null:
+		var tex = load("res://assets/buildings/%s.jpg" % building.id)
+		if tex:
+			icon_rect.texture = tex
+			
 	update_ui(0)
 
 func _on_buy_pressed(amount: int):

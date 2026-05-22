@@ -13,12 +13,15 @@ layout_mode = 2
 
 [node name="NameLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=81604852]
 layout_mode = 2
+autowrap_mode = 3
 
 [node name="InfoLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=844861484]
 layout_mode = 2
+autowrap_mode = 3
 
 [node name="PreviewLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=1661154566]
 layout_mode = 2
+autowrap_mode = 3
 
 [node name="TimeLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=1025507662]
 layout_mode = 2

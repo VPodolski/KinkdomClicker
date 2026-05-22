@@ -3,14 +3,14 @@ class_name BuildingManager
 var buildings = []
 
 func _init():
-	buildings.append(BuildingData.new("Ферма", 10, 1))
-	buildings.append(BuildingData.new("Лесопилка", 50, 5))
-	buildings.append(BuildingData.new("Каменоломня", 150, 15))
-	buildings.append(BuildingData.new("Кузница", 10, 50))
-	buildings.append(BuildingData.new("Рынок", 1500, 150))
-	buildings.append(BuildingData.new("Гильдия", 5000, 500))
-	buildings.append(BuildingData.new("Банк", 20000, 2000))
-	buildings.append(BuildingData.new("Замок", 100000, 10000))
+	buildings.append(BuildingData.new("farm", "Ферма", 10, 1))
+	buildings.append(BuildingData.new("sawmill", "Лесопилка", 50, 5))
+	buildings.append(BuildingData.new("quarry", "Каменоломня", 150, 15))
+	buildings.append(BuildingData.new("forge", "Кузница", 10, 50))
+	buildings.append(BuildingData.new("market", "Рынок", 1500, 150))
+	buildings.append(BuildingData.new("guild", "Гильдия", 5000, 500))
+	buildings.append(BuildingData.new("bank", "Банк", 20000, 2000))
+	buildings.append(BuildingData.new("castle", "Замок", 100000, 10000))
 
 func get_building_by_name(name):
 	for b in buildings:

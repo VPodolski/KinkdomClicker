@@ -1,5 +1,6 @@
 class_name BuildingData
 
+var id: String
 var name: String
 var base_cost: float
 var cost: float
@@ -15,7 +16,8 @@ var income_multiplier: float = 1.0
 var synergy_bonus: float = 0.0
 
 
-func _init(_name: String, _base_cost: float, _income: float):
+func _init(_id: String, _name: String, _base_cost: float, _income: float):
+	id = _id
 	name = _name
 	base_cost = _base_cost
 	cost = _base_cost

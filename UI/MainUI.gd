@@ -47,6 +47,7 @@ func _ready():
 	create_upgrades_ui()
 	update_achievements_ui()
 	update_prestige_ui()
+	right_panel.current_tab = 0
 
 	notifications_container = VBoxContainer.new()
 	notifications_container.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
@@ -329,7 +330,9 @@ func update_visibility() -> void:
 			
 	var forge_tab = $HBoxContainer/RightPanel/ForgeTab
 	if forge_tab:
-		right_panel.set_tab_hidden(forge_tab.get_index(), visible_upgrades == 0)
+		var forge = game.buildings.get_building_by_name("Кузница")
+		var has_forge = forge != null and forge.count > 0
+		right_panel.set_tab_hidden(forge_tab.get_index(), not has_forge or visible_upgrades == 0)
 
 	var building_tab = $HBoxContainer/RightPanel/BuildingTab
 	if building_tab:
@@ -530,6 +533,10 @@ func apply_medieval_theme() -> void:
 	scroll.corner_radius_top_right = 4
 	scroll.corner_radius_bottom_left = 4
 	scroll.corner_radius_bottom_right = 4
+	scroll.content_margin_left = 10
+	scroll.content_margin_right = 10
+	scroll.content_margin_top = 10
+	scroll.content_margin_bottom = 10
 	th.set_stylebox("scroll", "VScrollBar", scroll)
 	th.set_stylebox("scroll", "HScrollBar", scroll)
 	

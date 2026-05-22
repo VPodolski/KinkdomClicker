@@ -67,7 +67,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 tab_alignment = 1
-current_tab = 2
+current_tab = 0
 
 [node name="BuildingTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=1750776209]
 visible = false
