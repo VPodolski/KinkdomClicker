@@ -3,14 +3,19 @@ class_name BuildingManager
 var buildings = []
 
 func _init():
-	buildings.append(BuildingData.new("farm", "Ферма", 10, 1))
-	buildings.append(BuildingData.new("sawmill", "Лесопилка", 50, 5))
-	buildings.append(BuildingData.new("quarry", "Каменоломня", 150, 15))
-	buildings.append(BuildingData.new("forge", "Кузница", 10, 50))
-	buildings.append(BuildingData.new("market", "Рынок", 1500, 150))
-	buildings.append(BuildingData.new("guild", "Гильдия", 5000, 500))
-	buildings.append(BuildingData.new("bank", "Банк", 20000, 2000))
-	buildings.append(BuildingData.new("castle", "Замок", 100000, 10000))
+	var file = FileAccess.open("res://data/buildings.json", FileAccess.READ)
+	if file:
+		var json_string = file.get_as_text()
+		var json = JSON.new()
+		var error = json.parse(json_string)
+		if error == OK:
+			var data = json.data
+			for b in data:
+				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b["income"])))
+		else:
+			print("Error parsing buildings.json: ", json.get_error_message())
+	else:
+		print("Failed to open buildings.json")
 
 func get_building_by_name(name):
 	for b in buildings:

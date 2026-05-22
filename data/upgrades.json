@@ -1,0 +1,74 @@
+[
+	{
+		"name": "Острые инструменты", "description": "Увеличивает золото за клик на 1.",
+		"cost": 50, "base_time": 3.0, "effect_type": "click_bonus", "effect_value": 1.0
+	},
+	{
+		"name": "Тяжёлый молот", "description": "Увеличивает золото за клик на 3.",
+		"cost": 150, "base_time": 5.0, "effect_type": "click_bonus", "effect_value": 3.0
+	},
+	{
+		"name": "Удобрения", "description": "Доход ферм увеличивается на 50%.",
+		"cost": 200, "base_time": 6.0, "effect_type": "income_multiplier", "effect_value": 0.5, "target": "Ферма"
+	},
+	{
+		"name": "Острые пилы", "description": "Доход лесопилок увеличивается на 50%.",
+		"cost": 400, "base_time": 6.0, "effect_type": "income_multiplier", "effect_value": 0.5, "target": "Лесопилка"
+	},
+	{
+		"name": "Золотое касание", "description": "Клик приносит дополнительно 1% от текущего дохода.",
+		"cost": 500, "base_time": 8.0, "effect_type": "click_from_income", "effect_value": 0.01
+	},
+	{
+		"name": "Железные плуги", "description": "Доход ферм увеличивается на 100%.",
+		"cost": 600, "base_time": 8.0, "effect_type": "income_multiplier", "effect_value": 1.0, "target": "Ферма"
+	},
+	{
+		"name": "Угольная печь", "description": "Ускоряет работу кузницы на 20%.",
+		"cost": 800, "base_time": 8.0, "effect_type": "forge_speed", "effect_value": 0.20
+	},
+	{
+		"name": "Инструменты фермеров", "description": "Каждая кузница увеличивает доход ферм на 2%.",
+		"cost": 1000, "base_time": 10.0, "effect_type": "building_synergy", "effect_value": 0.02, "target": "Ферма", "source_building": "Кузница"
+	},
+	{
+		"name": "Фермерская кооперация", "description": "Каждая ферма усиливает другие фермы на 1%.",
+		"cost": 1200, "base_time": 10.0, "effect_type": "building_synergy", "effect_value": 0.01, "target": "Ферма", "source_building": "Ферма"
+	},
+	{
+		"name": "Массовая заготовка", "description": "Доход лесопилок увеличивается на 100%.",
+		"cost": 1200, "base_time": 10.0, "effect_type": "income_multiplier", "effect_value": 1.0, "target": "Лесопилка"
+	},
+	{
+		"name": "Деревянные конструкции", "description": "Каждая лесопилка увеличивает доход кузниц на 1.5%.",
+		"cost": 1500, "base_time": 10.0, "effect_type": "building_synergy", "effect_value": 0.015, "target": "Кузница", "source_building": "Лесопилка"
+	},
+	{
+		"name": "Жадность короля", "description": "Клик приносит дополнительно 3% от текущего дохода.",
+		"cost": 2000, "base_time": 12.0, "effect_type": "click_from_income", "effect_value": 0.03
+	},
+	{
+		"name": "Мастера кузнецы", "description": "Каждая кузница увеличивает доход ферм на 2%.",
+		"cost": 2000, "base_time": 12.0, "effect_type": "building_synergy", "effect_value": 0.02, "target": "Ферма", "source_building": "Кузница"
+	},
+	{
+		"name": "Древесные контракты", "description": "Общий доход увеличивается на 10%.",
+		"cost": 2500, "base_time": 12.0, "effect_type": "global_multiplier", "effect_value": 0.10
+	},
+	{
+		"name": "Торговые пути", "description": "Общий доход увеличивается на 10%.",
+		"cost": 3000, "base_time": 10.0, "effect_type": "global_multiplier", "effect_value": 0.10
+	},
+	{
+		"name": "Гильдия кузнецов", "description": "Общий доход увеличивается на 15%.",
+		"cost": 5000, "base_time": 15.0, "effect_type": "global_multiplier", "effect_value": 0.15
+	},
+	{
+		"name": "Городская экономика", "description": "Каждый рынок увеличивает доход ферм на 1%.",
+		"cost": 7000, "base_time": 15.0, "effect_type": "building_synergy", "effect_value": 0.01, "target": "Ферма", "source_building": "Рынок"
+	},
+	{
+		"name": "Королевские налоги", "description": "Общий доход увеличивается на 25%.",
+		"cost": 8000, "base_time": 15.0, "effect_type": "global_multiplier", "effect_value": 0.25
+	}
+]

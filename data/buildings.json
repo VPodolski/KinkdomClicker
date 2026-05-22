@@ -1,0 +1,10 @@
+[
+	{ "id": "farm", "name": "Ферма", "base_cost": 10, "income": 1 },
+	{ "id": "sawmill", "name": "Лесопилка", "base_cost": 50, "income": 5 },
+	{ "id": "quarry", "name": "Каменоломня", "base_cost": 150, "income": 15 },
+	{ "id": "forge", "name": "Кузница", "base_cost": 10, "income": 50 },
+	{ "id": "market", "name": "Рынок", "base_cost": 1500, "income": 150 },
+	{ "id": "guild", "name": "Гильдия", "base_cost": 5000, "income": 500 },
+	{ "id": "bank", "name": "Банк", "base_cost": 20000, "income": 2000 },
+	{ "id": "castle", "name": "Замок", "base_cost": 100000, "income": 10000 }
+]

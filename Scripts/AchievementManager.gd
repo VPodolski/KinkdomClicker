@@ -6,33 +6,19 @@ var achievements: Array[AchievementData] = []
 
 
 func _init():
-	achievements = [
-		AchievementData.new(
-			"first_click",
-			"Первый клик",
-			"Соберите первое золото."
-		),
-		AchievementData.new(
-			"first_farm",
-			"Первый фермер",
-			"Постройте первую ферму."
-		),
-		AchievementData.new(
-			"100_gold",
-			"Сотня золота",
-			"Накопите 100 золота."
-		),
-		AchievementData.new(
-			"1000_gold",
-			"Богач",
-			"Накопите 1000 золота."
-		),
-		AchievementData.new(
-			"first_upgrade",
-			"Изобретатель",
-			"Создайте первое улучшение."
-		)
-	]
+	var file = FileAccess.open("res://data/achievements.json", FileAccess.READ)
+	if file:
+		var json_string = file.get_as_text()
+		var json = JSON.new()
+		var error = json.parse(json_string)
+		if error == OK:
+			var data = json.data
+			for a in data:
+				achievements.append(AchievementData.new(a["id"], a["title"], a["description"]))
+		else:
+			print("Error parsing achievements.json: ", json.get_error_message())
+	else:
+		print("Failed to open achievements.json")
 
 
 func check(game: Game) -> void:

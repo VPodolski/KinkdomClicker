@@ -1,0 +1,7 @@
+[
+	{ "id": "first_click", "title": "Первый клик", "description": "Соберите первое золото." },
+	{ "id": "first_farm", "title": "Первый фермер", "description": "Постройте первую ферму." },
+	{ "id": "100_gold", "title": "Сотня золота", "description": "Накопите 100 золота." },
+	{ "id": "1000_gold", "title": "Богач", "description": "Накопите 1000 золота." },
+	{ "id": "first_upgrade", "title": "Изобретатель", "description": "Создайте первое улучшение." }
+]
