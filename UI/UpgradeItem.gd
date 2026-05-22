@@ -1,16 +1,16 @@
-extends VBoxContainer
+extends PanelContainer
 class_name UpgradeItem
 
 signal craft_pressed(upgrade)
 
 var upgrade: UpgradeData
 
-@onready var name_label: Label = $VBoxContainer/NameLabel
-@onready var description_label: Label = $VBoxContainer/InfoLabel
-@onready var preview_label: Label = $VBoxContainer/PreviewLabel
-@onready var time_label: Label = $VBoxContainer/TimeLabel
-@onready var progress_bar: ProgressBar = $VBoxContainer/ProgressBar
-@onready var craft_button: Button = $CraftButton
+@onready var name_label: Label = $MainVBox/VBoxContainer/NameLabel
+@onready var description_label: Label = $MainVBox/VBoxContainer/InfoLabel
+@onready var preview_label: Label = $MainVBox/VBoxContainer/PreviewLabel
+@onready var time_label: Label = $MainVBox/VBoxContainer/TimeLabel
+@onready var progress_bar: ProgressBar = $MainVBox/VBoxContainer/ProgressBar
+@onready var craft_button: Button = $MainVBox/CraftButton
 
 
 func _ready() -> void:

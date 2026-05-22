@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b1jx68vnw8apb" path="res://UI/BuildingItem.gd" id="1_6nidc"]
 
-[node name="BuildingItem" type="HBoxContainer" unique_id=119485372]
+[node name="BuildingItem" type="PanelContainer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -11,12 +11,51 @@ offset_bottom = 31.0
 grow_horizontal = 0
 script = ExtResource("1_6nidc")
 
-[node name="NameLabel" type="Label" parent="." unique_id=1291934162]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 15
 
-[node name="InfoLabel" type="Label" parent="." unique_id=312039930]
+[node name="IconPlaceholder" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
+size_flags_vertical = 4
+color = Color(0.12549, 0.0823529, 0.0588235, 1)
 
-[node name="BuyButton" type="Button" parent="." unique_id=1034583106]
+[node name="TextVBox" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
-text = "Купить"
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/TextVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.780392, 0.482353, 1)
+theme_override_font_sizes/font_size = 18
+text = "Название здания"
+
+[node name="InfoLabel" type="Label" parent="HBoxContainer/TextVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "Описание здания..."
+autowrap_mode = 3
+
+[node name="ActionHBox" type="HBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Buy1Button" type="Button" parent="HBoxContainer/ActionHBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "x1"
+
+[node name="Buy10Button" type="Button" parent="HBoxContainer/ActionHBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "x10"
+
+[node name="BuyMaxButton" type="Button" parent="HBoxContainer/ActionHBox"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "Макс"

@@ -33,8 +33,8 @@ func on_click():
 	economy.add_gold(value)
 	emit_signal("gold_changed", economy.gold)
 
-func buy_building(index):
-	if buildings.buy_building(index, economy):
+func buy_building(index, amount = 1):
+	if buildings.buy_building(index, economy, amount):
 		buildings.update_synergies(upgrades.active_upgrades)
 		
 		achievements.check(self)
@@ -127,3 +127,33 @@ func ascend() -> bool:
 	upgrades_changed.emit()
 	
 	return true
+
+func get_affordable_upgrades() -> Array:
+	var available = []
+	for u in upgrades.upgrades:
+		if not u.is_crafting and not upgrades.active_upgrades.has(u):
+			available.append(u)
+			
+	available.sort_custom(func(a, b): return a.cost < b.cost)
+	
+	var affordable = []
+	var temp_gold = economy.gold
+	for u in available:
+		if temp_gold >= u.cost:
+			affordable.append(u)
+			temp_gold -= u.cost
+			
+	return affordable
+
+func buy_all_affordable_upgrades() -> void:
+	var list = get_affordable_upgrades()
+	if list.is_empty():
+		return
+		
+	for u in list:
+		if economy.spend_gold(u.cost):
+			u.is_crafting = true
+			
+	achievements.check(self)
+	gold_changed.emit(economy.gold)
+	upgrades_changed.emit()

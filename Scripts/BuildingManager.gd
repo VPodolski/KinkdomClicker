@@ -24,11 +24,12 @@ func get_total_income(global_multiplier):
 		total += b.get_income()
 	return total * global_multiplier
 
-func buy_building(index, economy):
+func buy_building(index, economy, amount = 1):
 	var b = buildings[index]
+	var total_cost = b.get_cost_for(amount)
 	
-	if economy.spend_gold(b.cost):
-		b.buy()
+	if economy.spend_gold(total_cost):
+		b.buy_multiple(amount)
 		return true
 	
 	return false
