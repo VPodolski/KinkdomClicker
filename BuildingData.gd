@@ -15,6 +15,7 @@ var count: int = 0
 var income_multiplier: float = 1.0
 var synergy_bonus: float = 0.0
 
+var has_been_seen: bool = false
 
 func _init(_id: String, _name: String, _base_cost: float, _income: float):
 	id = _id

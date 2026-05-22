@@ -313,8 +313,10 @@ func update_visibility() -> void:
 		if current_gold < 1.0:
 			max_visible_cost = 100.0
 
-		# Слишком дорогие скрываем.
-		if upgrade.cost > max_visible_cost:
+		if upgrade.cost <= max_visible_cost:
+			upgrade.has_been_seen = true
+
+		if not upgrade.has_been_seen:
 			child.visible = false
 			continue
 
@@ -328,6 +330,27 @@ func update_visibility() -> void:
 		else:
 			child.modulate.a = 1.0
 			
+	var current_gold = game.economy.gold
+	var max_visible_cost = current_gold * 1.5
+	if current_gold < 1.0:
+		max_visible_cost = 100.0
+
+	var visible_buildings = 0
+	for child in buildings_container.get_children():
+		var b = child.building
+		if b.id == "farm" or b.cost <= max_visible_cost:
+			b.has_been_seen = true
+			
+		if b.has_been_seen:
+			child.visible = true
+			visible_buildings += 1
+			if b.cost > current_gold:
+				child.modulate.a = 0.5
+			else:
+				child.modulate.a = 1.0
+		else:
+			child.visible = false
+			
 	var forge_tab = $HBoxContainer/RightPanel/ForgeTab
 	if forge_tab:
 		var forge = game.buildings.get_building_by_name("Кузница")
@@ -336,7 +359,6 @@ func update_visibility() -> void:
 
 	var building_tab = $HBoxContainer/RightPanel/BuildingTab
 	if building_tab:
-		var visible_buildings = buildings_container.get_child_count()
 		right_panel.set_tab_hidden(building_tab.get_index(), visible_buildings == 0)
 
 # =========================
