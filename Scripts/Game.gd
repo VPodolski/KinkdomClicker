@@ -16,7 +16,7 @@ var currentGoldPerSecond = 0.0
 func _ready():
 	economy = Economy.new()
 	buildings = BuildingManager.new()
-	upgrades = UpgradeManager.new(economy, buildings)
+	upgrades = UpgradeManager.new(self)
 	achievements = AchievementManager.new()
 	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
 
@@ -88,7 +88,7 @@ func get_achievement_multiplier() -> float:
 
 func get_forge_speed_multiplier():
 	var forge = buildings.get_building_by_name("Кузница")
-	return 1.0 + (forge.count * 0.01)  # +1% за кузницу
+	return 1.0 + economy.forge_speed_multiplier + (forge.count * 0.01)
 
 func format_number(value: float) -> String:
 	if value < 1000.0:

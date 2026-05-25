@@ -57,4 +57,5 @@ func reset():
 		b.cost = b.base_cost
 		b.income_multiplier = 1.0
 		b.synergy_bonus = 0.0
+		b.cost_multiplier = 1.0
 		b.has_been_seen = false

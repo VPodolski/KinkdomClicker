@@ -23,13 +23,30 @@ func _init():
 
 func check(game: Game) -> void:
 	_unlock_if("first_click", game.economy.gold > 0)
-	_unlock_if(
-		"first_farm",
-		game.buildings.get_building_by_name("Ферма").count >= 1
-	)
 	_unlock_if("100_gold", game.economy.gold >= 100)
-	_unlock_if("1000_gold", game.economy.gold >= 1000)
+	_unlock_if("10k_gold", game.economy.gold >= 10_000)
+	_unlock_if("1M_gold", game.economy.gold >= 1_000_000)
+	_unlock_if("1B_gold", game.economy.gold >= 1_000_000_000)
+	_unlock_if("1T_gold", game.economy.gold >= 1_000_000_000_000)
+	_unlock_if("1Qa_gold", game.economy.gold >= 1_000_000_000_000_000)
+	
+	var farm = game.buildings.get_building_by_name("Ферма")
+	if farm: _unlock_if("first_farm", farm.count >= 1)
 	_unlock_if("first_upgrade", game.upgrades.active_upgrades.size() >= 1)
+	
+	for count in [10, 50, 100]:
+		if farm: _unlock_if("farms_" + str(count), farm.count >= count)
+		var sawmill = game.buildings.get_building_by_name("Лесопилка")
+		if sawmill: _unlock_if("sawmills_" + str(count), sawmill.count >= count)
+		var quarry = game.buildings.get_building_by_name("Каменоломня")
+		if quarry: _unlock_if("quarries_" + str(count), quarry.count >= count)
+
+	var all_10 = true
+	for b in game.buildings.buildings:
+		if b.count < 10:
+			all_10 = false
+			break
+	_unlock_if("all_buildings_10", all_10)
 
 
 func _unlock_if(id: String, condition: bool) -> void:

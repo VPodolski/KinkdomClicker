@@ -1,10 +1,92 @@
 [
-	{ "id": "farm", "name": "Ферма", "base_cost": 10, "income": 1 },
-	{ "id": "sawmill", "name": "Лесопилка", "base_cost": 50, "income": 5 },
-	{ "id": "quarry", "name": "Каменоломня", "base_cost": 150, "income": 15 },
-	{ "id": "forge", "name": "Кузница", "base_cost": 10, "income": 50 },
-	{ "id": "market", "name": "Рынок", "base_cost": 1500, "income": 150 },
-	{ "id": "guild", "name": "Гильдия", "base_cost": 5000, "income": 500 },
-	{ "id": "bank", "name": "Банк", "base_cost": 20000, "income": 2000 },
-	{ "id": "castle", "name": "Замок", "base_cost": 100000, "income": 10000 }
+  {
+    "id": "farm",
+    "name": "Ферма",
+    "base_cost": 10,
+    "income": 1
+  },
+  {
+    "id": "sawmill",
+    "name": "Лесопилка",
+    "base_cost": 50,
+    "income": 4
+  },
+  {
+    "id": "quarry",
+    "name": "Каменоломня",
+    "base_cost": 250,
+    "income": 20
+  },
+  {
+    "id": "forge",
+    "name": "Кузница",
+    "base_cost": 1000,
+    "income": 50
+  },
+  {
+    "id": "market",
+    "name": "Рынок",
+    "base_cost": 4000,
+    "income": 300
+  },
+  {
+    "id": "tavern",
+    "name": "Таверна",
+    "base_cost": 100000,
+    "income": 8000
+  },
+  {
+    "id": "barracks",
+    "name": "Казармы",
+    "base_cost": 1000000,
+    "income": 75000
+  },
+  {
+    "id": "guild",
+    "name": "Гильдия",
+    "base_cost": 15000000,
+    "income": 1000000
+  },
+  {
+    "id": "bank",
+    "name": "Банк",
+    "base_cost": 250000000,
+    "income": 15000000
+  },
+  {
+    "id": "port",
+    "name": "Порт",
+    "base_cost": 5000000000,
+    "income": 250000000
+  },
+  {
+    "id": "shipyard",
+    "name": "Верфь",
+    "base_cost": 100000000000,
+    "income": 4000000000
+  },
+  {
+    "id": "alchemy_lab",
+    "name": "Лаборатория Алхимии",
+    "base_cost": 2000000000000,
+    "income": 75000000000
+  },
+  {
+    "id": "mage_tower",
+    "name": "Башня Магов",
+    "base_cost": 50000000000000,
+    "income": 1500000000000
+  },
+  {
+    "id": "castle",
+    "name": "Замок",
+    "base_cost": 1000000000000000,
+    "income": 25000000000000
+  },
+  {
+    "id": "wonders",
+    "name": "Чудеса Света",
+    "base_cost": 50000000000000000,
+    "income": 1000000000000000
+  }
 ]

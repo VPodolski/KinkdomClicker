@@ -14,6 +14,7 @@ var count: int = 0
 # Множители
 var income_multiplier: float = 1.0
 var synergy_bonus: float = 0.0
+var cost_multiplier: float = 1.0
 
 var has_been_seen: bool = false
 
@@ -30,19 +31,19 @@ func buy() -> void:
 
 func buy_multiple(amount: int) -> void:
 	count += amount
-	cost = int(base_cost * pow(1.2, count))
+	cost = int(base_cost * cost_multiplier * pow(1.2, count))
 
 func get_cost_for(amount: int) -> float:
 	var total = 0.0
 	for i in range(amount):
-		total += int(base_cost * pow(1.2, count + i))
+		total += int(base_cost * cost_multiplier * pow(1.2, count + i))
 	return total
 
 func get_max_affordable(current_gold: float) -> int:
 	var affordable = 0
 	var total_cost = 0.0
 	while true:
-		var next_cost = int(base_cost * pow(1.2, count + affordable))
+		var next_cost = int(base_cost * cost_multiplier * pow(1.2, count + affordable))
 		if total_cost + next_cost > current_gold:
 			break
 		total_cost += next_cost

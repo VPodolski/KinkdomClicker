@@ -1,7 +1,97 @@
 [
-	{ "id": "first_click", "title": "Первый клик", "description": "Соберите первое золото." },
-	{ "id": "first_farm", "title": "Первый фермер", "description": "Постройте первую ферму." },
-	{ "id": "100_gold", "title": "Сотня золота", "description": "Накопите 100 золота." },
-	{ "id": "1000_gold", "title": "Богач", "description": "Накопите 1000 золота." },
-	{ "id": "first_upgrade", "title": "Изобретатель", "description": "Создайте первое улучшение." }
+  {
+    "id": "first_click",
+    "title": "Первый клик",
+    "description": "Соберите первое золото."
+  },
+  {
+    "id": "100_gold",
+    "title": "Сотня золота",
+    "description": "Накопите 100 золота."
+  },
+  {
+    "id": "10k_gold",
+    "title": "Богач",
+    "description": "Накопите 10K золота."
+  },
+  {
+    "id": "1M_gold",
+    "title": "Миллионер",
+    "description": "Накопите 1M золота."
+  },
+  {
+    "id": "1B_gold",
+    "title": "Миллиардер",
+    "description": "Накопите 1B золота."
+  },
+  {
+    "id": "1T_gold",
+    "title": "Триллионер",
+    "description": "Накопите 1T золота."
+  },
+  {
+    "id": "1Qa_gold",
+    "title": "Квадриллионер",
+    "description": "Накопите 1Qa золота."
+  },
+  {
+    "id": "first_farm",
+    "title": "Первый фермер",
+    "description": "Постройте первую ферму."
+  },
+  {
+    "id": "first_upgrade",
+    "title": "Изобретатель",
+    "description": "Создайте первое улучшение."
+  },
+  {
+    "id": "farms_10",
+    "title": "Магнат ферм 10",
+    "description": "Постройте 10 ферм."
+  },
+  {
+    "id": "sawmills_10",
+    "title": "Лесоруб 10",
+    "description": "Постройте 10 лесопилок."
+  },
+  {
+    "id": "quarries_10",
+    "title": "Шахтер 10",
+    "description": "Постройте 10 каменоломен."
+  },
+  {
+    "id": "farms_50",
+    "title": "Магнат ферм 50",
+    "description": "Постройте 50 ферм."
+  },
+  {
+    "id": "sawmills_50",
+    "title": "Лесоруб 50",
+    "description": "Постройте 50 лесопилок."
+  },
+  {
+    "id": "quarries_50",
+    "title": "Шахтер 50",
+    "description": "Постройте 50 каменоломен."
+  },
+  {
+    "id": "farms_100",
+    "title": "Магнат ферм 100",
+    "description": "Постройте 100 ферм."
+  },
+  {
+    "id": "sawmills_100",
+    "title": "Лесоруб 100",
+    "description": "Постройте 100 лесопилок."
+  },
+  {
+    "id": "quarries_100",
+    "title": "Шахтер 100",
+    "description": "Постройте 100 каменоломен."
+  },
+  {
+    "id": "all_buildings_10",
+    "title": "Городской планировщик",
+    "description": "Постройте минимум 10 зданий каждого типа."
+  }
 ]
