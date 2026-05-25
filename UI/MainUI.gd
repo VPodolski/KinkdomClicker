@@ -600,3 +600,13 @@ func apply_medieval_theme() -> void:
 	bg.add_theme_stylebox_override("panel", bg_style)
 	add_child(bg)
 	move_child(bg, 0)
+func _input(event):
+	if event is InputEventKey and event.keycode == KEY_F11 and event.pressed and not event.echo:
+		_toggle_fullscreen()
+
+func _toggle_fullscreen():
+	var mode = DisplayServer.window_get_mode()
+	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
