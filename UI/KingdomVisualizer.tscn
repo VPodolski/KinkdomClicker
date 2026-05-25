@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://cm3y61l8qj7d3"]
+
+[ext_resource type="Script" path="res://UI/KingdomVisualizer.gd" id="1_kvis"]
+[ext_resource type="Texture2D" uid="uid://ddlxy123456" path="res://assets/buildings/castle.jpg" id="2_cstl"]
+
+[node name="KingdomVisualizer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+script = ExtResource("1_kvis")
+
+[node name="Canvas" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CitadelButton" type="TextureButton" parent="Canvas"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -100.0
+offset_right = 100.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(100, 100)
+texture_normal = ExtResource("2_cstl")
+ignore_texture_size = true
+stretch_mode = 0
