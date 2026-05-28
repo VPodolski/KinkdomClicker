@@ -24,9 +24,9 @@ func setup(_building, _index):
 	index = _index
 	
 	if building != null:
-		var tex = load("res://assets/buildings/%s.jpg" % building.id)
-		if tex:
-			icon_rect.texture = tex
+		var path = "res://assets/buildings/%s.jpg" % building.id
+		if ResourceLoader.exists(path):
+			icon_rect.texture = load(path)
 			
 	update_ui(0)
 
@@ -38,15 +38,53 @@ func update_ui(current_gold: float):
 	if building == null:
 		return
 	
+	if building.is_masked:
+		name_label.text = "???"
+		icon_rect.texture = null
+		info_label.text = "Кол-во: 0\nДоход: ???\nЦена: %s" % _format_number(building.cost)
+		buy1_button.disabled = true
+		buy10_button.disabled = true
+		buymax_button.disabled = true
+		buy10_button.visible = false
+		buymax_button.visible = false
+		return
+		
 	name_label.text = building.name
+	
+	if icon_rect.texture == null:
+		var path = "res://assets/buildings/%s.jpg" % building.id
+		if ResourceLoader.exists(path):
+			icon_rect.texture = load(path)
 	
 	var max_affordable = building.get_max_affordable(current_gold)
 	if max_affordable == 0:
 		max_affordable = 1 # Show cost for 1 if can't afford any
 
-	info_label.text = "Кол-во: %d\nДоход: +%s/сек\nЦена: %s" % [
+	var global_mult = GameLogic.economy.global_income_multiplier * GameLogic.get_achievement_multiplier() * GameLogic.economy.prestige_multiplier
+	var upkeep_mult = GameLogic.economy.upkeep_reduction_multiplier
+		
+	var actual_income = building.get_income_per_unit() * global_mult
+
+	var income_str = "+%s 🪙/сек" % _format_number(actual_income)
+	if building.count > 0:
+		income_str += " (Всего: %s)" % _format_number(actual_income * building.count)
+		
+	if building.prayer_income > 0:
+		var prayer_mult = GameLogic.economy.prayer_multiplier
+		var actual_prayer = building.get_prayer_income_per_unit() * prayer_mult
+		var actual_upkeep = building.get_upkeep_per_unit() * upkeep_mult
+		
+		income_str = "+%s 🙏/сек" % _format_number(actual_prayer)
+		if building.count > 0:
+			income_str += " (Всего: %s)" % _format_number(actual_prayer * building.count)
+			
+		income_str += "\nРасход: -%s 🪙/сек" % _format_number(actual_upkeep)
+		if building.count > 0:
+			income_str += " (Всего: -%s)" % _format_number(actual_upkeep * building.count)
+		
+	info_label.text = "Кол-во: %d\nДоход: %s\nЦена: %s" % [
 		building.count,
-		_format_number(building.income * building.income_multiplier),
+		income_str,
 		_format_number(building.cost)
 	]
 	
@@ -61,12 +99,10 @@ func update_ui(current_gold: float):
 		buymax_button.text = "Макс"
 		buymax_button.disabled = true
 
+	var has_buy_max = GameLogic.ascension.has_skill("buy_max")
+	
+	buy10_button.visible = has_buy_max
+	buymax_button.visible = has_buy_max
+
 func _format_number(value: float) -> String:
-	if value >= 1000000.0:
-		return "%.2fM" % (value / 1000000.0)
-	elif value >= 1000.0:
-		return "%.1fK" % (value / 1000.0)
-	elif value == floor(value):
-		return str(int(value))
-	else:
-		return "%.2f" % value
+	return GameLogic.format_number(value)

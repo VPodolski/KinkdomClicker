@@ -1,6 +1,6 @@
 class_name BuildingManager
 
-var buildings = []
+var buildings: Array[BuildingData] = []
 
 func _init():
 	var file = FileAccess.open("res://data/buildings.json", FileAccess.READ)
@@ -11,7 +11,7 @@ func _init():
 		if error == OK:
 			var data = json.data
 			for b in data:
-				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b["income"])))
+				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b["income"]), float(b.get("prayer_income", 0.0)), float(b.get("gold_upkeep", 0.0))))
 		else:
 			print("Error parsing buildings.json: ", json.get_error_message())
 	else:
@@ -28,6 +28,18 @@ func get_total_income(global_multiplier):
 	for b in buildings:
 		total += b.get_income()
 	return total * global_multiplier
+
+func get_total_prayer_income(prayer_multiplier):
+	var total = 0.0
+	for b in buildings:
+		total += b.get_prayer_income()
+	return total * prayer_multiplier
+
+func get_total_upkeep(upkeep_reduction_multiplier):
+	var total = 0.0
+	for b in buildings:
+		total += b.get_total_upkeep()
+	return total * upkeep_reduction_multiplier
 
 func buy_building(index, economy, amount = 1):
 	var b = buildings[index]

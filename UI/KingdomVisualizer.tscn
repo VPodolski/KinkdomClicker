@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://cm3y61l8qj7d3"]
 
 [ext_resource type="Script" path="res://UI/KingdomVisualizer.gd" id="1_kvis"]
-[ext_resource type="Texture2D" uid="uid://ddlxy123456" path="res://assets/buildings/castle.jpg" id="2_cstl"]
+[ext_resource type="Texture2D" path="res://assets/buildings/castle.jpg" id="2_cstl"]
 
 [node name="KingdomVisualizer" type="Control"]
+clip_contents = true
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

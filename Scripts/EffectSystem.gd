@@ -3,7 +3,7 @@ class_name EffectSystem
 static func apply(game: Node, upgrade: UpgradeData) -> void:
 	var val = upgrade.effect_value
 	var target = upgrade.target
-	var source = upgrade.source_building
+	var _source = upgrade.source_building
 	
 	match upgrade.effect_type:
 		"click_bonus":
@@ -33,25 +33,42 @@ static func get_text(game: Node, upgrade: UpgradeData) -> String:
 	var target = upgrade.target
 	var source = upgrade.source_building
 	
+	var global_mult = 1.0
+	var ach_mult = 1.0
+	var pres_mult = 1.0
+	
+	if game.has_method("get_achievement_multiplier"):
+		ach_mult = game.get_achievement_multiplier()
+	elif game.get("achievements"):
+		ach_mult = game.achievements.get_income_multiplier()
+		
+	if game.get("economy"):
+		pres_mult = game.economy.prestige_multiplier
+		global_mult = game.economy.global_income_multiplier
+		
+	var total_global_mult = global_mult * ach_mult * pres_mult
+	
 	match upgrade.effect_type:
 		"click_bonus":
-			var b = game.economy.gold_per_click
-			return "Клик: %s → %s" % [game.format_number(b), game.format_number(b + val)]
+			var b = game.get_click_value() if game.has_method("get_click_value") else game.economy.gold_per_click
+			var a = b + val
+			return "Клик: %s → %s" % [game.format_number(b), game.format_number(a)]
 		"click_from_income":
-			var total_income = game.buildings.get_total_income(game.economy.global_income_multiplier)
-			var b = game.economy.gold_per_click + total_income * game.economy.click_income_ratio
-			var a = game.economy.gold_per_click + total_income * (game.economy.click_income_ratio + val)
+			var b = game.get_click_value() if game.has_method("get_click_value") else 0.0
+			var total_income = game.buildings.get_total_income(1.0) * total_global_mult
+			var a = b + (total_income * val)
 			return "Клик: %s → %s" % [game.format_number(b), game.format_number(a)]
 		"income_multiplier":
 			var b = game.buildings.get_building_by_name(target)
 			if not b:
 				return ""
-			var before = b.get_income_per_unit()
-			var after = b.income * (b.income_multiplier + b.synergy_bonus + val)
+			var before = b.get_income_per_unit() * total_global_mult
+			var after = b.income * (b.income_multiplier + b.synergy_bonus + val) * total_global_mult
 			return "%s: %s → %s за шт." % [b.name, game.format_number(before), game.format_number(after)]
 		"global_multiplier":
-			var before = game.buildings.get_total_income(game.economy.global_income_multiplier)
-			var after = game.buildings.get_total_income(game.economy.global_income_multiplier + val)
+			var total_income = game.buildings.get_total_income(1.0)
+			var before = total_income * total_global_mult
+			var after = total_income * (global_mult + val) * ach_mult * pres_mult
 			return "Доход: %s/с → %s/с" % [game.format_number(before), game.format_number(after)]
 		"forge_speed":
 			var before = game.get_forge_speed_multiplier()

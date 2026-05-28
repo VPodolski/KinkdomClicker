@@ -1,9 +1,9 @@
-[gd_scene format=3 uid="uid://hbt2mawi1kq5"]
+[gd_scene load_steps=3 format=3 uid="uid://hbt2mawi1kq5"]
 
-[ext_resource type="Script" uid="uid://bdqfolihqom5u" path="res://UI/MainUI.gd" id="1_ig7tw"]
+[ext_resource type="Script" path="res://UI/MainUI.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cm3y61l8qj7d3" path="res://UI/KingdomVisualizer.tscn" id="2_kvis"]
 
-[node name="Main" type="Control" unique_id=243547217]
+[node name="Main" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ig7tw")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=707017350]
+[node name="RootVBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,111 +20,125 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="LeftPanel" type="VBoxContainer" parent="HBoxContainer" unique_id=171810049]
+[node name="TopPanel" type="PanelContainer" parent="RootVBox"]
+layout_mode = 2
+
+[node name="TopHBox" type="HBoxContainer" parent="RootVBox/TopPanel"]
+layout_mode = 2
+alignment = 1
+
+[node name="GoldLabel" type="Label" parent="RootVBox/TopPanel/TopHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "💰 Золото: 0 (+0/сек)"
+vertical_alignment = 1
+
+[node name="AscensionPanel" type="HBoxContainer" parent="RootVBox/TopPanel/TopHBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="PrestigeLabel" type="Label" parent="RootVBox/TopPanel/TopHBox/AscensionPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Бонус: +0% | Молитв/сек: 0"
+vertical_alignment = 1
+
+[node name="AscendButton" type="Button" parent="RootVBox/TopPanel/TopHBox/AscensionPanel"]
+layout_mode = 2
+text = "Возвыситься"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="VBoxContainer" parent="RootVBox/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 3.0
 
-
-[node name="GoldLabel" type="Label" parent="HBoxContainer/LeftPanel" unique_id=605480262]
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Золото: 0"
-
-[node name="AutoGoldTimer" type="Timer" parent="HBoxContainer/LeftPanel" unique_id=154780128]
+[node name="AutoGoldTimer" type="Timer" parent="RootVBox/HBoxContainer/LeftPanel"]
 autostart = true
 
-[node name="KingdomVisualizer" parent="HBoxContainer/LeftPanel" instance=ExtResource("2_kvis")]
+[node name="KingdomVisualizer" parent="RootVBox/HBoxContainer/LeftPanel" instance=ExtResource("2_kvis")]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="AscensionPanel" type="VBoxContainer" parent="HBoxContainer/LeftPanel" unique_id=987654321]
-visible = false
-layout_mode = 2
-
-[node name="AscensionDesc" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654322]
-layout_mode = 2
-text = "Возвышение сбрасывает золото, постройки и улучшения, но дарует постоянный бонус к доходу."
-autowrap_mode = 2
-
-[node name="CurrentBonusLabel" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654323]
-layout_mode = 2
-text = "Текущий бонус престижа: +0%"
-
-[node name="ExpectedBonusLabel" type="Label" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654324]
-layout_mode = 2
-text = "Ожидаемый бонус: +0%"
-
-[node name="AscendButton" type="Button" parent="HBoxContainer/LeftPanel/AscensionPanel" unique_id=987654325]
-layout_mode = 2
-text = "Совершить Возвышение (требуется 500K золота)"
-
-[node name="RightPanel" type="TabContainer" parent="HBoxContainer" unique_id=565127916]
+[node name="RightPanel" type="TabContainer" parent="RootVBox/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 tab_alignment = 1
 current_tab = 0
 
-[node name="BuildingTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=1750776209]
+[node name="BuildingTab" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 0
 
-[node name="Buildings" type="ScrollContainer" parent="HBoxContainer/RightPanel/BuildingTab" unique_id=1640981212]
+[node name="Buildings" type="ScrollContainer" parent="RootVBox/HBoxContainer/RightPanel/BuildingTab"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="BuildingsContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/BuildingTab/Buildings" unique_id=1449457944]
+[node name="BuildingsContainer" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel/BuildingTab/Buildings"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ForgeTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=199863777]
+[node name="ForgeTab" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel"]
 visible = false
 layout_mode = 2
 metadata/_tab_index = 1
 
-[node name="Upgrades" type="ScrollContainer" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=1764712141]
+[node name="Upgrades" type="ScrollContainer" parent="RootVBox/HBoxContainer/RightPanel/ForgeTab"]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 theme_override_constants/scrollbar_h_separation = 10
 theme_override_constants/scrollbar_v_separation = 20
 
-[node name="UpgradesContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/ForgeTab/Upgrades" unique_id=1631420813]
+[node name="UpgradesContainer" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel/ForgeTab/Upgrades"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ForgeTitle" type="Label" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=580593036]
+[node name="ForgeTitle" type="Label" parent="RootVBox/HBoxContainer/RightPanel/ForgeTab"]
 layout_mode = 2
 
-[node name="BuyAllUpgradesButton" type="Button" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=987654321]
+[node name="BuyAllUpgradesButton" type="Button" parent="RootVBox/HBoxContainer/RightPanel/ForgeTab"]
 layout_mode = 2
 text = "Купить всё"
 
-[node name="Queue" type="Label" parent="HBoxContainer/RightPanel/ForgeTab" unique_id=1944781138]
+[node name="Queue" type="Label" parent="RootVBox/HBoxContainer/RightPanel/ForgeTab"]
 layout_mode = 2
 size_flags_vertical = 1
 
-[node name="AchievementsTab" type="VBoxContainer" parent="HBoxContainer/RightPanel" unique_id=342712051]
+[node name="AchievementsTab" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel"]
+visible = false
 layout_mode = 2
 metadata/_tab_index = 2
 
-[node name="MultiplierLabel" type="Label" parent="HBoxContainer/RightPanel/AchievementsTab" unique_id=877100526]
+[node name="MultiplierLabel" type="Label" parent="RootVBox/HBoxContainer/RightPanel/AchievementsTab"]
 layout_mode = 2
 text = "Бонус к доходу"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/RightPanel/AchievementsTab" unique_id=380021549]
+[node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/HBoxContainer/RightPanel/AchievementsTab"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="AchievementsContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/AchievementsTab/ScrollContainer" unique_id=819671266]
+[node name="AchievementsContainer" type="VBoxContainer" parent="RootVBox/HBoxContainer/RightPanel/AchievementsTab/ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="AscensionConfirmDialog" type="ConfirmationDialog" parent="."]
+title = "Подтверждение"
+initial_position = 2
+size = Vector2i(400, 150)
+dialog_text = "Вы уверены, что хотите Возвыситься?
+Ваше текущее королевство будет переведено в состояние перерождения, и вы перейдете в Древо Возвышения."
 
-
-[connection signal="pressed" from="HBoxContainer/LeftPanel/GoldButton" to="." method="_on_gold_button_pressed"]
-[connection signal="timeout" from="HBoxContainer/LeftPanel/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
+[connection signal="timeout" from="RootVBox/HBoxContainer/LeftPanel/AutoGoldTimer" to="." method="_on_auto_gold_timer_timeout"]
+[connection signal="pressed" from="RootVBox/TopPanel/TopHBox/AscensionPanel/AscendButton" to="." method="_on_ascend_pressed"]
+[connection signal="confirmed" from="AscensionConfirmDialog" to="." method="_on_ascension_confirmed"]

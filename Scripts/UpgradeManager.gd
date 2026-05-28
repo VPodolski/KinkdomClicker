@@ -1,7 +1,7 @@
 class_name UpgradeManager
 
-var upgrades = []
-var active_upgrades = []
+var upgrades: Array[UpgradeData] = []
+var active_upgrades: Array[UpgradeData] = []
 
 var game: Node
 
@@ -24,6 +24,7 @@ func _init_upgrades():
 					u["name"], u["description"], float(u["cost"]), float(u["base_time"]),
 					u["effect_type"], float(u["effect_value"]), target, source_building
 				))
+			upgrades.sort_custom(func(a, b): return a.cost < b.cost)
 		else:
 			print("Error parsing upgrades.json: ", json.get_error_message())
 	else:
@@ -31,13 +32,15 @@ func _init_upgrades():
 
 func reset():
 	active_upgrades.clear()
+	upgrades.clear()
 	_init_upgrades()
 
 func apply_upgrade(upgrade):
 	EffectSystem.apply(game, upgrade)
 
 func update_crafting(delta, forge_speed):
-	for upgrade in upgrades:
+	for i in range(upgrades.size() - 1, -1, -1):
+		var upgrade = upgrades[i]
 		if upgrade.is_crafting:
 			upgrade.progress += delta * forge_speed
 			
@@ -48,4 +51,8 @@ func update_crafting(delta, forge_speed):
 func complete_upgrade(upgrade):
 	apply_upgrade(upgrade)
 	active_upgrades.append(upgrade)
+	if game.has_method("recalculate_income"):
+		game.recalculate_income()
+	if game.has_signal("upgrades_changed"):
+		game.upgrades_changed.emit()
 	upgrades.erase(upgrade)

@@ -29,7 +29,7 @@ func setup(_upgrade: UpgradeData, _index: int = -1) -> void:
 
 
 func update_ui(
-	current_gold: float,
+	_current_gold: float,
 	is_unlocked: bool,
 	preview_text: String,
 	remaining_text: String
@@ -78,12 +78,4 @@ func _on_craft_button_pressed() -> void:
 
 
 func _format_number(value: float) -> String:
-	# Простое красивое форматирование без лишних нулей.
-	if value >= 1000000.0:
-		return "%.2fM" % (value / 1000000.0)
-	elif value >= 1000.0:
-		return "%.1fK" % (value / 1000.0)
-	elif value == floor(value):
-		return str(int(value))
-	else:
-		return "%.2f" % value
+	return GameLogic.format_number(value)

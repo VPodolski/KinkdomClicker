@@ -38,12 +38,17 @@ func _on_citadel_pressed():
 func _on_buildings_changed():
 	var all_buildings = game.buildings.buildings
 	for b in all_buildings:
-		if b.count > 0:
-			var visuals_needed = min(b.count, max_visuals_per_building)
-			if not building_nodes.has(b.id):
-				building_nodes[b.id] = []
-			
-			while building_nodes[b.id].size() < visuals_needed:
+		var visuals_needed = min(b.count, max_visuals_per_building)
+		if not building_nodes.has(b.id):
+			building_nodes[b.id] = []
+		
+		var current_size = building_nodes[b.id].size()
+		if current_size > visuals_needed:
+			for i in range(current_size - visuals_needed):
+				var tile = building_nodes[b.id].pop_back()
+				tile.queue_free()
+		elif current_size < visuals_needed:
+			for i in range(current_size, visuals_needed):
 				_spawn_building_tile(b)
 
 func _spawn_building_tile(building_data):
@@ -56,7 +61,8 @@ func _spawn_building_tile(building_data):
 	elif ResourceLoader.exists(path_png):
 		tile.texture = load(path_png)
 	else:
-		return # No texture found
+		tile.texture = load("res://icon.svg") # Fallback texture
+
 			
 	tile.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tile.custom_minimum_size = Vector2(120, 120)

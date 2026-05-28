@@ -36,10 +36,26 @@
     "income": 8000
   },
   {
+    "id": "chapel",
+    "name": "Часовня",
+    "base_cost": 500000,
+    "income": 0,
+    "prayer_income": 0.1,
+    "gold_upkeep": 5000
+  },
+  {
     "id": "barracks",
     "name": "Казармы",
     "base_cost": 1000000,
     "income": 75000
+  },
+  {
+    "id": "church",
+    "name": "Церковь",
+    "base_cost": 10000000,
+    "income": 0,
+    "prayer_income": 0.5,
+    "gold_upkeep": 50000
   },
   {
     "id": "guild",
@@ -54,16 +70,40 @@
     "income": 15000000
   },
   {
+    "id": "temple",
+    "name": "Храм",
+    "base_cost": 500000000,
+    "income": 0,
+    "prayer_income": 2,
+    "gold_upkeep": 1000000
+  },
+  {
     "id": "port",
     "name": "Порт",
     "base_cost": 5000000000,
     "income": 250000000
   },
   {
+    "id": "cathedral",
+    "name": "Собор",
+    "base_cost": 10000000000,
+    "income": 0,
+    "prayer_income": 10,
+    "gold_upkeep": 10000000
+  },
+  {
     "id": "shipyard",
     "name": "Верфь",
     "base_cost": 100000000000,
     "income": 4000000000
+  },
+  {
+    "id": "grand_cathedral",
+    "name": "Великий собор",
+    "base_cost": 500000000000,
+    "income": 0,
+    "prayer_income": 50,
+    "gold_upkeep": 250000000
   },
   {
     "id": "alchemy_lab",
@@ -76,6 +116,14 @@
     "name": "Башня Магов",
     "base_cost": 50000000000000,
     "income": 1500000000000
+  },
+  {
+    "id": "patriarchal_cathedral",
+    "name": "Патриарший собор",
+    "base_cost": 100000000000000,
+    "income": 0,
+    "prayer_income": 250,
+    "gold_upkeep": 50000000000
   },
   {
     "id": "castle",

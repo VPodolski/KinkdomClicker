@@ -10,15 +10,31 @@ var economy: Economy
 var buildings: BuildingManager
 var upgrades: UpgradeManager
 var achievements: AchievementManager
+var ascension: AscensionManager
 
 var currentGoldPerSecond = 0.0
+var currentPrayerIncome = 0.0
 
+func recalculate_income():
+	var achievement_multiplier = achievements.get_income_multiplier()
+
+	var income = buildings.get_total_income(economy.global_income_multiplier)
+	income *= achievement_multiplier
+	income *= economy.prestige_multiplier
+	
+	var upkeep = buildings.get_total_upkeep(economy.upkeep_reduction_multiplier)
+	var final_income = income - upkeep
+
+	currentGoldPerSecond = final_income
+	currentPrayerIncome = buildings.get_total_prayer_income(economy.prayer_multiplier)
 func _ready():
 	economy = Economy.new()
 	buildings = BuildingManager.new()
 	upgrades = UpgradeManager.new(self)
 	achievements = AchievementManager.new()
 	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
+	ascension = AscensionManager.new()
+	recalculate_income()
 
 func get_click_value() -> float:
 	var achievement_multiplier = achievements.get_income_multiplier()
@@ -39,6 +55,8 @@ func buy_building(index, amount = 1):
 		
 		achievements.check(self)
 		
+		recalculate_income()
+		
 		emit_signal("buildings_changed")
 		emit_signal("gold_changed", economy.gold)
 
@@ -57,18 +75,11 @@ func start_upgrade(upgrade: UpgradeData) -> void:
 		upgrades_changed.emit()
 
 func _process(delta):
-	var achievement_multiplier = achievements.get_income_multiplier()
-
-	var income = buildings.get_total_income(
-		economy.global_income_multiplier
-	)
-
-	income *= achievement_multiplier
-	income *= economy.prestige_multiplier
-
-	currentGoldPerSecond = income
-
-	economy.add_gold(income * delta)
+	economy.add_gold(currentGoldPerSecond * delta)
+	if economy.gold < 0.0:
+		economy.gold = 0.0
+		
+	economy.add_prayers(currentPrayerIncome * delta)
 
 	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
@@ -77,6 +88,7 @@ func _process(delta):
 
 
 func _on_achievement_unlocked(achievement: AchievementData) -> void:
+	recalculate_income()
 	achievement_unlocked.emit(achievement)
 	gold_changed.emit(economy.gold)
 
@@ -92,11 +104,7 @@ func get_forge_speed_multiplier():
 
 func format_number(value: float) -> String:
 	if value < 1000.0:
-		if value == floor(value):
-			return str(int(value))
-		else:
-			# Для маленьких чисел с дробной частью
-			return ("%.1f" % value).rstrip("0").rstrip(".")
+		return "%.1f" % value
 			
 	var suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
 	var suffix_index = 0
@@ -106,30 +114,21 @@ func format_number(value: float) -> String:
 		temp /= 1000.0
 		suffix_index += 1
 		
-	# Форматируем до 2 знаков после запятой и убираем лишние нули в конце
-	var formatted = ("%.2f" % temp).rstrip("0").rstrip(".")
-	return formatted + suffixes[suffix_index]
+	return "%.2f%s" % [temp, suffixes[suffix_index]]
 
-func get_expected_prestige_bonus(gold_amount: float) -> float:
-	return (gold_amount / 500000.0) * 0.1
-
-func ascend() -> bool:
-	if economy.gold < 500000.0:
-		return false
-	
-	var bonus = get_expected_prestige_bonus(economy.gold)
-	economy.prestige_multiplier += bonus
-	economy.times_ascended += 1
-	
-	# Reset economy
+func perform_rebirth() -> bool:
 	economy.gold = 0.0
 	economy.gold_per_click = 1.0
 	economy.click_income_ratio = 0.0
 	economy.global_income_multiplier = 1.0
 	
-	# Reset systems
+	# Применяем скиллы возвышения
+	ascension.reapply_all_skills(economy)
+	
 	buildings.reset()
 	upgrades.reset()
+	
+	recalculate_income()
 	
 	gold_changed.emit(economy.gold)
 	buildings_changed.emit()

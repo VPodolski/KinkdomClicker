@@ -3,22 +3,22 @@ extends Control
 @onready var game = GameLogic  # если добавишь Game в AutoLoad
 
 # UI элементы
-@onready var gold_label = $HBoxContainer/LeftPanel/GoldLabel
-@onready var gold_button = $HBoxContainer/LeftPanel/GoldButton
+@onready var gold_label = $RootVBox/TopPanel/TopHBox/GoldLabel
 
-@onready var right_panel = $HBoxContainer/RightPanel
-@onready var buildings_container = $HBoxContainer/RightPanel/BuildingTab/Buildings/BuildingsContainer
-@onready var upgrades_container = $HBoxContainer/RightPanel/ForgeTab/Upgrades/UpgradesContainer
-@onready var buy_all_upgrades_button = $HBoxContainer/RightPanel/ForgeTab/BuyAllUpgradesButton
+@onready var right_panel = $RootVBox/HBoxContainer/RightPanel
+@onready var buildings_container = $RootVBox/HBoxContainer/RightPanel/BuildingTab/Buildings/BuildingsContainer
+@onready var upgrades_container = $RootVBox/HBoxContainer/RightPanel/ForgeTab/Upgrades/UpgradesContainer
+@onready var buy_all_upgrades_button = $RootVBox/HBoxContainer/RightPanel/ForgeTab/BuyAllUpgradesButton
 
-@onready var achievements_tab = $HBoxContainer/RightPanel/AchievementsTab
-@onready var multiplier_label = $HBoxContainer/RightPanel/AchievementsTab/MultiplierLabel
-@onready var achievements_container = $HBoxContainer/RightPanel/AchievementsTab/ScrollContainer/AchievementsContainer
+@onready var achievements_tab = $RootVBox/HBoxContainer/RightPanel/AchievementsTab
+@onready var multiplier_label = $RootVBox/HBoxContainer/RightPanel/AchievementsTab/MultiplierLabel
+@onready var achievements_container = $RootVBox/HBoxContainer/RightPanel/AchievementsTab/ScrollContainer/AchievementsContainer
 
-@onready var ascension_tab = $HBoxContainer/LeftPanel/AscensionPanel
-@onready var prestige_current_label = $HBoxContainer/LeftPanel/AscensionPanel/CurrentBonusLabel
-@onready var prestige_expected_label = $HBoxContainer/LeftPanel/AscensionPanel/ExpectedBonusLabel
-@onready var ascend_button = $HBoxContainer/LeftPanel/AscensionPanel/AscendButton
+@onready var ascension_tab = $RootVBox/TopPanel/TopHBox/AscensionPanel
+@onready var prestige_label = $RootVBox/TopPanel/TopHBox/AscensionPanel/PrestigeLabel
+@onready var ascend_button = $RootVBox/TopPanel/TopHBox/AscensionPanel/AscendButton
+
+@onready var confirm_dialog = $AscensionConfirmDialog
 
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
@@ -38,7 +38,8 @@ func _ready():
 	game.buildings_changed.connect(update_buildings_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
-	ascend_button.pressed.connect(_on_ascend_pressed)
+	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
+		ascend_button.pressed.connect(_on_ascend_pressed)
 	buy_all_upgrades_button.pressed.connect(_on_buy_all_upgrades_pressed)
 
 	# первичная инициализация
@@ -79,14 +80,7 @@ func _process(delta):
 # =========================
 
 func _on_gold_button_pressed():
-	var click_amount = game.get_click_value()
-
-	# Выполняем сам клик
-	game.on_click()
-
-	# Визуальные эффекты
-	spawn_floating_text(click_amount)
-	animate_button_press(gold_button)
+	pass
 
 
 func _on_building_pressed(index, amount = 1):
@@ -109,8 +103,11 @@ func _on_achievement_unlocked(achievement) -> void:
 # =========================
 
 func update_gold(value):
-	var text = "Золото: " + game.format_number(value) + \
-	"\n(+" + game.format_number(game.currentGoldPerSecond) + "/сек)"
+	var text = "🪙 Золото: " + game.format_number(value) + " (+" + game.format_number(game.currentGoldPerSecond) + " 🪙/сек)"
+	
+	var chapel = game.buildings.get_building_by_name("Часовня")
+	if game.economy.lifetime_prayers > 0 or (chapel and chapel.count > 0):
+		text += "   |   🙏 Молитвы: " + game.format_number(floor(game.economy.prayers))
 	
 	gold_label.text = text
 
@@ -192,6 +189,8 @@ func update_upgrades_ui():
 	else:
 		buy_all_upgrades_button.text = "Купить всё"
 		buy_all_upgrades_button.disabled = true
+		
+	buy_all_upgrades_button.visible = game.ascension.has_skill("buy_all")
 
 	update_visibility()
 	
@@ -288,6 +287,11 @@ func update_achievements_tab_visibility() -> void:
 # =========================
 
 func update_visibility() -> void:
+	var current_gold = game.economy.gold
+	var max_visible_cost = current_gold * 1.5
+	if current_gold < 1.0:
+		max_visible_cost = 100.0
+		
 	var visible_upgrades = 0
 	for child in upgrades_container.get_children():
 		var upgrade = child.upgrade
@@ -305,13 +309,6 @@ func update_visibility() -> void:
 			visible_upgrades += 1
 			continue
 
-		var current_gold = game.economy.gold
-		var max_visible_cost = current_gold * 1.5
-
-		# Если золота мало (например, 0), всё равно показываем
-		# хотя бы самые дешёвые апгрейды.
-		if current_gold < 1.0:
-			max_visible_cost = 100.0
 
 		if upgrade.cost <= max_visible_cost:
 			upgrade.has_been_seen = true
@@ -330,18 +327,16 @@ func update_visibility() -> void:
 		else:
 			child.modulate.a = 1.0
 			
-	var current_gold = game.economy.gold
-	var max_visible_cost = current_gold * 1.5
-	if current_gold < 1.0:
-		max_visible_cost = 100.0
 
 	var visible_buildings = 0
+	var first_unseen_found = false
 	for child in buildings_container.get_children():
 		var b = child.building
 		if b.id == "farm" or b.cost <= max_visible_cost:
 			b.has_been_seen = true
 			
 		if b.has_been_seen:
+			b.is_masked = false
 			child.visible = true
 			visible_buildings += 1
 			if b.cost > current_gold:
@@ -349,15 +344,22 @@ func update_visibility() -> void:
 			else:
 				child.modulate.a = 1.0
 		else:
-			child.visible = false
+			if not first_unseen_found:
+				b.is_masked = true
+				child.visible = true
+				child.modulate.a = 0.5
+				first_unseen_found = true
+				visible_buildings += 1
+			else:
+				child.visible = false
 			
-	var forge_tab = $HBoxContainer/RightPanel/ForgeTab
+	var forge_tab = $RootVBox/HBoxContainer/RightPanel/ForgeTab
 	if forge_tab:
 		var forge = game.buildings.get_building_by_name("Кузница")
 		var has_forge = forge != null and forge.count > 0
 		right_panel.set_tab_hidden(forge_tab.get_index(), not has_forge or visible_upgrades == 0)
 
-	var building_tab = $HBoxContainer/RightPanel/BuildingTab
+	var building_tab = $RootVBox/HBoxContainer/RightPanel/BuildingTab
 	if building_tab:
 		right_panel.set_tab_hidden(building_tab.get_index(), visible_buildings == 0)
 
@@ -425,40 +427,56 @@ func animate_button_press(button: Control) -> void:
 
 
 func update_prestige_ui():
-	if prestige_current_label == null or prestige_expected_label == null or ascend_button == null:
+	if prestige_label == null or ascend_button == null:
 		return
 
-	# Текущий бонус престижа
 	var current_bonus = (game.economy.prestige_multiplier - 1.0) * 100.0
-	prestige_current_label.text = "Текущий бонус престижа: +%.1f%%" % current_bonus
+	var prayers_sec = game.buildings.get_total_prayer_income(game.economy.prayer_multiplier)
+	prestige_label.text = "Бонус: +%.1f%%  |  🙏/сек: %s" % [current_bonus, game.format_number(prayers_sec)]
 
-	# Ожидаемый бонус престижа при сбросе
-	var expected_bonus = game.get_expected_prestige_bonus(game.economy.gold) * 100.0
-	prestige_expected_label.text = "Ожидаемый бонус при сбросе: +%.1f%%" % expected_bonus
-
-	# Кнопка активна при золоте >= 500 000
-	var can_ascend = game.economy.gold >= 500000.0
-	ascend_button.disabled = not can_ascend
-
-	# Показываем задизейбленную кнопку возвышения, когда до стоимости покупки не хватает 35% (т.е. 500000 * 0.65 = 325000)
-	ascension_tab.visible = game.economy.gold >= 325000.0
+	var has_chapel = false
+	var chapel = game.buildings.get_building_by_name("Часовня")
+	if chapel and chapel.count > 0:
+		has_chapel = true
+		
+	var can_ascend = has_chapel or game.economy.lifetime_prayers > 0
+	ascension_tab.visible = can_ascend
 
 	if can_ascend:
-		ascend_button.text = "Совершить Возвышение!"
+		ascend_button.disabled = false
+		ascend_button.text = "Открыть Древо Возвышения"
 	else:
-		ascend_button.text = "Совершить Возвышение (требуется 500K золота)"
+		ascend_button.disabled = true
+		ascend_button.text = "Возвышение недоступно"
 
+var ascension_shop = null
 
 func _on_ascend_pressed():
-	if game.ascend():
-		create_buildings_ui()
-		create_upgrades_ui()
-		update_achievements_ui()
-		update_prestige_ui()
-		right_panel.current_tab = 0
+	confirm_dialog.popup_centered()
+
+func _on_ascension_confirmed():
+	if ascension_shop == null:
+		var scene = preload("res://UI/AscensionShop.tscn")
+		ascension_shop = scene.instantiate()
+		add_child(ascension_shop)
+	ascension_shop.open()
+
+func _on_rebirth_completed():
+	create_buildings_ui()
+	create_upgrades_ui()
+	update_achievements_ui()
+	update_prestige_ui()
+	right_panel.current_tab = 0
 
 func apply_medieval_theme() -> void:
 	var th = Theme.new()
+	
+	var font_var = FontVariation.new()
+	font_var.base_font = ThemeDB.fallback_font
+	var tnum_tag = TextServerManager.get_primary_interface().name_to_tag("tnum")
+	font_var.opentype_features = { tnum_tag: 1 }
+	th.set_font("font", "Label", font_var)
+	th.set_font("font", "Button", font_var)
 	
 	# Medieval Colors
 	var color_wood_dark = Color("#2C1E16")
@@ -467,7 +485,7 @@ func apply_medieval_theme() -> void:
 	var color_gold = Color("#C5A059")
 	var color_gold_hover = Color("#E8C77B")
 	var color_gold_dark = Color("#8B6E32")
-	var color_parchment = Color("#E8DCC4")
+	var _color_parchment = Color("#E8DCC4")
 	var color_text_light = Color("#FCEFC7")
 	
 	# PanelContainer / Panel
