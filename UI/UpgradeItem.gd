@@ -5,12 +5,12 @@ signal craft_pressed(upgrade)
 
 var upgrade: UpgradeData
 
-@onready var name_label: Label = $MainVBox/VBoxContainer/NameLabel
-@onready var description_label: Label = $MainVBox/VBoxContainer/InfoLabel
-@onready var preview_label: Label = $MainVBox/VBoxContainer/PreviewLabel
-@onready var time_label: Label = $MainVBox/VBoxContainer/TimeLabel
-@onready var progress_bar: ProgressBar = $MainVBox/VBoxContainer/ProgressBar
-@onready var craft_button: Button = $MainVBox/CraftButton
+@onready var name_label: Label = $HBoxContainer/MainVBox/VBoxContainer/NameLabel
+@onready var description_label: Label = $HBoxContainer/MainVBox/VBoxContainer/InfoLabel
+@onready var preview_label: Label = $HBoxContainer/MainVBox/VBoxContainer/PreviewLabel
+@onready var time_label: Label = $HBoxContainer/MainVBox/VBoxContainer/TimeLabel
+@onready var progress_bar: ProgressBar = $HBoxContainer/MainVBox/VBoxContainer/ProgressBar
+@onready var craft_button: Button = $HBoxContainer/MainVBox/CraftButton
 
 
 func _ready() -> void:
@@ -54,15 +54,16 @@ func update_ui(
 		time_label.visible = true
 		time_label.text = remaining_text
 
-		progress_bar.visible = true
+		progress_bar.modulate.a = 1.0
 		progress_bar.max_value = upgrade.base_time
 		progress_bar.value = min(upgrade.progress, upgrade.base_time)
 	else:
-		progress_bar.visible = false
+		progress_bar.modulate.a = 0.0
 
 		# Показываем длительность крафта
 		time_label.visible = true
-		time_label.text = "Время: %.1f сек" % upgrade.base_time
+		var speed = GameLogic.get_forge_speed_multiplier()
+		time_label.text = "Время: %.1f сек" % (upgrade.base_time / speed)
 
 		# Кнопка покупки
 		craft_button.disabled = not is_unlocked

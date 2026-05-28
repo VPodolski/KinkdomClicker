@@ -5,6 +5,7 @@ signal gold_changed
 signal upgrades_changed
 signal buildings_changed
 signal achievement_unlocked
+signal upgrade_completed
 
 var economy: Economy
 var buildings: BuildingManager
@@ -50,7 +51,7 @@ func on_click():
 	emit_signal("gold_changed", economy.gold)
 
 func buy_building(index, amount = 1):
-	if buildings.buy_building(index, economy, amount):
+	if buildings.buy_building(index, economy, currentGoldPerSecond, amount):
 		buildings.update_synergies(upgrades.active_upgrades)
 		
 		achievements.check(self)

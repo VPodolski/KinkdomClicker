@@ -38,6 +38,8 @@ func _ready():
 	game.buildings_changed.connect(update_buildings_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
+	if game.has_signal("upgrade_completed"):
+		game.upgrade_completed.connect(_on_upgrade_completed)
 	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
 		ascend_button.pressed.connect(_on_ascend_pressed)
 	buy_all_upgrades_button.pressed.connect(_on_buy_all_upgrades_pressed)
@@ -97,6 +99,9 @@ func _on_buy_all_upgrades_pressed() -> void:
 func _on_achievement_unlocked(achievement) -> void:
 	update_achievements_ui()
 	show_achievement_notification(achievement)
+
+func _on_upgrade_completed(upgrade) -> void:
+	show_upgrade_notification(upgrade)
 
 # =========================
 # 💰 UI ОБНОВЛЕНИЕ
@@ -171,7 +176,8 @@ func update_upgrades_ui():
 		# Оставшееся время крафта
 		var remaining_text = ""
 		if upgrade.is_crafting:
-			var remaining = max(0.0, upgrade.base_time - upgrade.progress)
+			var speed = game.get_forge_speed_multiplier()
+			var remaining = max(0.0, (upgrade.base_time - upgrade.progress) / speed)
 			remaining_text = "%.1f сек" % remaining
 
 		# Передаём все параметры в UpgradeItem
@@ -183,10 +189,14 @@ func update_upgrades_ui():
 		)
 
 	var affordable_upgrades = game.get_affordable_upgrades()
+	var forge_tab_idx = right_panel.get_node("ForgeTab").get_index()
+	
 	if affordable_upgrades.size() > 0:
+		right_panel.set_tab_title(forge_tab_idx, "Кузница (%d)" % affordable_upgrades.size())
 		buy_all_upgrades_button.text = "Купить всё (%d)" % affordable_upgrades.size()
 		buy_all_upgrades_button.disabled = false
 	else:
+		right_panel.set_tab_title(forge_tab_idx, "Кузница")
 		buy_all_upgrades_button.text = "Купить всё"
 		buy_all_upgrades_button.disabled = true
 		
@@ -277,6 +287,51 @@ func show_achievement_notification(achievement) -> void:
 	tween.tween_property(panel, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(panel.queue_free)
 		
+func show_upgrade_notification(upgrade) -> void:
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color("#1E2C28")
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_left = 8
+	style.corner_radius_bottom_right = 8
+	style.border_width_bottom = 3
+	style.border_width_top = 3
+	style.border_width_left = 3
+	style.border_width_right = 3
+	style.border_color = Color("#59C59A")
+	style.shadow_color = Color(0,0,0, 0.7)
+	style.shadow_size = 8
+	style.content_margin_left = 15
+	style.content_margin_right = 15
+	style.content_margin_top = 15
+	style.content_margin_bottom = 15
+	panel.add_theme_stylebox_override("panel", style)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var vbox = VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(vbox)
+	
+	var title = Label.new()
+	title.text = "🔨 Улучшение готово!"
+	title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.8))
+	vbox.add_child(title)
+	
+	var desc = Label.new()
+	desc.text = upgrade.name + "\n" + upgrade.description
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(desc)
+	
+	notifications_container.add_child(panel)
+	
+	panel.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(panel, "modulate:a", 1.0, 0.5)
+	tween.tween_interval(4.0)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(panel.queue_free)
+
 func update_achievements_tab_visibility() -> void:
 	var tab_index = achievements_tab.get_index()
 	var has_achievements = game.get_unlocked_achievement_count() > 0

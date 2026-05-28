@@ -1,35 +1,66 @@
 [gd_scene format=3 uid="uid://e45egfnu0t8v"]
 
 [ext_resource type="Script" uid="uid://4w1t8t2nlulq" path="res://UI/UpgradeItem.gd" id="1_o32h2"]
+[ext_resource type="Texture2D" uid="uid://b5k8q50c5o3r" path="res://icon.svg" id="2_placeholder"]
 
-[node name="UpgradeItem" type="PanelContainer" unique_id=27434265]
+[node name="UpgradeItem" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_o32h2")
 
-[node name="MainVBox" type="VBoxContainer" parent="." unique_id=9999999]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 15
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MainVBox" unique_id=1146131859]
+[node name="IconRect" type="TextureRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_placeholder")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="NameLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=81604852]
+[node name="MainVBox" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.909804, 0.780392, 0.482353, 1)
+theme_override_font_sizes/font_size = 18
+text = "Upgrade Name"
 autowrap_mode = 3
 
-[node name="InfoLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=844861484]
+[node name="InfoLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "Upgrade Description"
 autowrap_mode = 3
 
-[node name="PreviewLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=1661154566]
+[node name="PreviewLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.521569, 0.772549, 0.847059, 1)
+theme_override_font_sizes/font_size = 14
+text = "Preview Text"
 autowrap_mode = 3
 
-[node name="TimeLabel" type="Label" parent="MainVBox/VBoxContainer" unique_id=1025507662]
+[node name="TimeLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Время: 0.0 сек"
 
-[node name="ProgressBar" type="ProgressBar" parent="MainVBox/VBoxContainer" unique_id=103895422]
+[node name="ProgressBar" type="ProgressBar" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
 max_value = 1.0
 
-[node name="CraftButton" type="Button" parent="MainVBox" unique_id=1858319139]
+[node name="CraftButton" type="Button" parent="HBoxContainer/MainVBox"]
 layout_mode = 2
 text = "Создать"

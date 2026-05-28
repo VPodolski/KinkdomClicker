@@ -73,6 +73,7 @@ func update_ui(current_gold: float):
 		var prayer_mult = GameLogic.economy.prayer_multiplier
 		var actual_prayer = building.get_prayer_income_per_unit() * prayer_mult
 		var actual_upkeep = building.get_upkeep_per_unit() * upkeep_mult
+		var total_upkeep = building.get_total_upkeep() * upkeep_mult
 		
 		income_str = "+%s 🙏/сек" % _format_number(actual_prayer)
 		if building.count > 0:
@@ -80,7 +81,7 @@ func update_ui(current_gold: float):
 			
 		income_str += "\nРасход: -%s 🪙/сек" % _format_number(actual_upkeep)
 		if building.count > 0:
-			income_str += " (Всего: -%s)" % _format_number(actual_upkeep * building.count)
+			income_str += " (Всего: -%s)" % _format_number(total_upkeep)
 		
 	info_label.text = "Кол-во: %d\nДоход: %s\nЦена: %s" % [
 		building.count,
@@ -88,10 +89,14 @@ func update_ui(current_gold: float):
 		_format_number(building.cost)
 	]
 	
-	buy1_button.disabled = current_gold < building.cost
-	buy10_button.disabled = current_gold < building.get_cost_for(10)
+	var net_income = GameLogic.currentGoldPerSecond
+	var can_afford_upkeep_1 = building.gold_upkeep == 0.0 or (building.get_upkeep_for(1) * upkeep_mult < net_income)
+	var can_afford_upkeep_10 = building.gold_upkeep == 0.0 or (building.get_upkeep_for(10) * upkeep_mult < net_income)
+
+	buy1_button.disabled = current_gold < building.cost or not can_afford_upkeep_1
+	buy10_button.disabled = current_gold < building.get_cost_for(10) or not can_afford_upkeep_10
 	
-	var actual_max = building.get_max_affordable(current_gold)
+	var actual_max = building.get_max_affordable(current_gold, net_income, upkeep_mult)
 	if actual_max > 0:
 		buymax_button.text = "Макс (%d)" % actual_max
 		buymax_button.disabled = false

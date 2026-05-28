@@ -44,14 +44,22 @@ func get_cost_for(amount: int) -> float:
 		total += int(base_cost * cost_multiplier * pow(1.2, count + i))
 	return total
 
-func get_max_affordable(current_gold: float) -> int:
+func get_max_affordable(current_gold: float, net_income: float = INF, upkeep_mult: float = 1.0) -> int:
 	var affordable = 0
 	var total_cost = 0.0
+	var total_upkeep = 0.0
 	while true:
 		var next_cost = int(base_cost * cost_multiplier * pow(1.2, count + affordable))
+		var next_upkeep = gold_upkeep * pow(1.2, count + affordable) * upkeep_mult
+		
 		if total_cost + next_cost > current_gold:
 			break
+			
+		if gold_upkeep > 0.0 and (total_upkeep + next_upkeep) >= net_income:
+			break
+			
 		total_cost += next_cost
+		total_upkeep += next_upkeep
 		affordable += 1
 		if affordable > 10000: # Safe guard
 			break
@@ -75,10 +83,19 @@ func get_prayer_income_per_unit() -> float:
 func get_prayer_income() -> float:
 	return get_prayer_income_per_unit() * count
 
-# Стоимость обслуживания одного здания
+# Стоимость обслуживания одного (следующего) здания
 func get_upkeep_per_unit() -> float:
-	return gold_upkeep
+	return gold_upkeep * pow(1.2, count)
+
+func get_upkeep_for(amount: int) -> float:
+	var total = 0.0
+	for i in range(amount):
+		total += gold_upkeep * pow(1.2, count + i)
+	return total
 
 # Общая стоимость обслуживания
 func get_total_upkeep() -> float:
-	return get_upkeep_per_unit() * count
+	var total = 0.0
+	for i in range(count):
+		total += gold_upkeep * pow(1.2, i)
+	return total

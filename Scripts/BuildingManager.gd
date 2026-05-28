@@ -41,9 +41,14 @@ func get_total_upkeep(upkeep_reduction_multiplier):
 		total += b.get_total_upkeep()
 	return total * upkeep_reduction_multiplier
 
-func buy_building(index, economy, amount = 1):
+func buy_building(index, economy, net_income, amount = 1):
 	var b = buildings[index]
 	var total_cost = b.get_cost_for(amount)
+	
+	if b.gold_upkeep > 0.0:
+		var additional_upkeep = b.get_upkeep_for(amount) * economy.upkeep_reduction_multiplier
+		if additional_upkeep >= net_income:
+			return false
 	
 	if economy.spend_gold(total_cost):
 		b.buy_multiple(amount)
