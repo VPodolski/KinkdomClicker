@@ -166,3 +166,13 @@ func buy_all_affordable_upgrades() -> void:
 	achievements.check(self)
 	gold_changed.emit(economy.gold)
 	upgrades_changed.emit()
+
+func _input(event):
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F12:
+			if Engine.time_scale == 1.0:
+				Engine.time_scale = 10.0
+				print("Developer Mode: ON (Speed x10)")
+			else:
+				Engine.time_scale = 1.0
+				print("Developer Mode: OFF (Speed x1)")
