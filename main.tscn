@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://hbt2mawi1kq5"]
+[gd_scene load_steps=4 format=3 uid="uid://hbt2mawi1kq5"]
 
 [ext_resource type="Script" path="res://UI/MainUI.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cm3y61l8qj7d3" path="res://UI/KingdomVisualizer.tscn" id="2_kvis"]
+[ext_resource type="PackedScene" uid="uid://d3yq8v12wx5a9" path="res://UI/WarVisualizer.tscn" id="3_wvis"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -48,6 +49,11 @@ vertical_alignment = 1
 [node name="AscendButton" type="Button" parent="RootVBox/TopPanel/TopHBox/AscensionPanel"]
 layout_mode = 2
 text = "Возвыситься"
+
+[node name="ModeToggleButton" type="Button" parent="RootVBox/TopPanel/TopHBox"]
+visible = false
+layout_mode = 2
+text = "⚔️ Война"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="RootVBox"]
 layout_mode = 2
@@ -131,6 +137,58 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="WarScreen" type="HBoxContainer" parent="RootVBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="VBoxContainer" parent="RootVBox/WarScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="Panel" type="PanelContainer" parent="RootVBox/WarScreen/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RootVBox/WarScreen/LeftPanel/Panel"]
+layout_mode = 2
+
+[node name="WarInfo" type="Label" parent="RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Военная мощь: 0"
+horizontal_alignment = 1
+
+[node name="WarVisualizer" parent="RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer" instance=ExtResource("3_wvis")]
+layout_mode = 2
+
+[node name="RightPanel" type="TabContainer" parent="RootVBox/WarScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="Обучение" type="VBoxContainer" parent="RootVBox/WarScreen/RightPanel"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/WarScreen/RightPanel/Обучение"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TroopsContainer" type="VBoxContainer" parent="RootVBox/WarScreen/RightPanel/Обучение/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Походы" type="VBoxContainer" parent="RootVBox/WarScreen/RightPanel"]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RootVBox/WarScreen/RightPanel/Походы"]
+layout_mode = 2
+text = "Скоро здесь будут походы!"
+horizontal_alignment = 1
 
 [node name="AscensionConfirmDialog" type="ConfirmationDialog" parent="."]
 title = "Подтверждение"

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "militia",
+    "name": "Ополченцы",
+    "description": "Слабые, но дешевые воины. Отлично подходят для пушечного мяса.",
+    "base_power": 1,
+    "base_cost": 100,
+    "base_time": 5
+  },
+  {
+    "id": "swordsman",
+    "name": "Мечники",
+    "description": "Основа любой армии. Надежные солдаты в ближнем бою.",
+    "base_power": 5,
+    "base_cost": 1500,
+    "base_time": 15
+  },
+  {
+    "id": "archer",
+    "name": "Лучники",
+    "description": "Атакуют издалека, нанося урон врагам до того, как они приблизятся.",
+    "base_power": 15,
+    "base_cost": 8000,
+    "base_time": 30
+  },
+  {
+    "id": "cavalry",
+    "name": "Конница",
+    "description": "Быстрые и разрушительные. Уничтожают фланги врага.",
+    "base_power": 50,
+    "base_cost": 50000,
+    "base_time": 60
+  },
+  {
+    "id": "knight",
+    "name": "Рыцари",
+    "description": "Тяжелобронированная элита. Их атаки пробивают любые щиты.",
+    "base_power": 250,
+    "base_cost": 400000,
+    "base_time": 120
+  },
+  {
+    "id": "paladin",
+    "name": "Паладины",
+    "description": "Святые воины, благословленные на битву с тьмой.",
+    "base_power": 1500,
+    "base_cost": 5000000,
+    "base_time": 300
+  }
+]

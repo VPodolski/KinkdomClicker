@@ -20,9 +20,17 @@ extends Control
 
 @onready var confirm_dialog = $AscensionConfirmDialog
 
+@onready var mode_toggle_button = $RootVBox/TopPanel/TopHBox/ModeToggleButton
+@onready var kingdom_screen = $RootVBox/HBoxContainer
+@onready var war_screen = $RootVBox/WarScreen
+@onready var troops_container = $RootVBox/WarScreen/RightPanel/Обучение/ScrollContainer/TroopsContainer
+@onready var war_info_label = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarInfo
+@onready var war_visualizer = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarVisualizer
+
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 var floating_text_scene = preload("res://ui/FloatingText.tscn")
+var troop_item_scene = preload("res://UI/TroopItem.tscn")
 
 var ui_update_timer = 0.0
 var notifications_container: VBoxContainer
@@ -40,6 +48,12 @@ func _ready():
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
 	if game.has_signal("upgrade_completed"):
 		game.upgrade_completed.connect(_on_upgrade_completed)
+		
+	mode_toggle_button.pressed.connect(_on_mode_toggle_pressed)
+	game.war.military_power_changed.connect(update_war_info)
+	game.war.troops_changed.connect(update_troops_ui)
+	game.war.troops_changed.connect(war_visualizer.update_visuals)
+		
 	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
 		ascend_button.pressed.connect(_on_ascend_pressed)
 	buy_all_upgrades_button.pressed.connect(_on_buy_all_upgrades_pressed)
@@ -50,6 +64,8 @@ func _ready():
 	create_upgrades_ui()
 	update_achievements_ui()
 	update_prestige_ui()
+	create_troops_ui()
+	check_war_mode_unlock()
 	right_panel.current_tab = 0
 
 	notifications_container = VBoxContainer.new()
@@ -104,6 +120,45 @@ func _on_upgrade_completed(upgrade) -> void:
 	show_upgrade_notification(upgrade)
 
 # =========================
+# ⚔️ ВОЙНА UI
+# =========================
+
+func _on_mode_toggle_pressed():
+	if kingdom_screen.visible:
+		kingdom_screen.visible = false
+		war_screen.visible = true
+		mode_toggle_button.text = "🏰 Королевство"
+	else:
+		kingdom_screen.visible = true
+		war_screen.visible = false
+		mode_toggle_button.text = "⚔️ Война"
+
+func check_war_mode_unlock():
+	var barracks = game.buildings.get_building_by_name("Казармы")
+	if barracks and barracks.count > 0:
+		mode_toggle_button.visible = true
+
+func update_war_info(power: float):
+	war_info_label.text = "Военная мощь: %s" % game.format_number(power)
+
+func create_troops_ui():
+	for child in troops_container.get_children():
+		child.queue_free()
+	
+	for troop in game.war.troops:
+		var item = troop_item_scene.instantiate()
+		troops_container.add_child(item)
+		item.setup(troop)
+		item.train_pressed.connect(game.war.start_training)
+	update_troops_ui()
+	war_visualizer.update_visuals()
+
+func update_troops_ui():
+	for child in troops_container.get_children():
+		if child is TroopItem:
+			child.update_ui(game.economy.gold)
+
+# =========================
 # 💰 UI ОБНОВЛЕНИЕ
 # =========================
 
@@ -115,6 +170,7 @@ func update_gold(value):
 		text += "   |   🙏 Молитвы: " + game.format_number(floor(game.economy.prayers))
 	
 	gold_label.text = text
+	update_troops_ui()
 
 
 # =========================
@@ -138,6 +194,7 @@ func create_buildings_ui():
 func update_buildings_ui():
 	for child in buildings_container.get_children():
 		child.update_ui(game.economy.gold)
+	check_war_mode_unlock()
 
 
 # =========================

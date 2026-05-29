@@ -55,6 +55,6 @@ func complete_upgrade(upgrade):
 		game.recalculate_income()
 	if game.has_signal("upgrades_changed"):
 		game.upgrades_changed.emit()
-	if game.has_signal("upgrade_completed"):
-		game.upgrade_completed.emit(upgrade)
+	if game.has_method("emit_upgrade_completed"):
+		game.emit_upgrade_completed(upgrade)
 	upgrades.erase(upgrade)

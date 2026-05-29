@@ -1,9 +1,9 @@
-[gd_scene format=3 uid="uid://e45egfnu0t8v"]
+[gd_scene format=3 uid="uid://troop_item_123"]
 
-[ext_resource type="Script" path="res://UI/UpgradeItem.gd" id="1_o32h2"]
+[ext_resource type="Script" path="res://UI/TroopItem.gd" id="1_o32h2"]
 [ext_resource type="Texture2D" path="res://icon.svg" id="2_placeholder"]
 
-[node name="UpgradeItem" type="PanelContainer"]
+[node name="TroopItem" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -33,23 +33,23 @@ size_flags_vertical = 3
 
 [node name="NameLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.909804, 0.780392, 0.482353, 1)
+theme_override_colors/font_color = Color(0.9, 0.4, 0.4, 1)
 theme_override_font_sizes/font_size = 18
-text = "Upgrade Name"
+text = "Troop Name"
 autowrap_mode = 3
 
 [node name="InfoLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
 theme_override_font_sizes/font_size = 14
-text = "Upgrade Description"
+text = "Troop Description"
 autowrap_mode = 3
 
-[node name="PreviewLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
+[node name="StatsLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.521569, 0.772549, 0.847059, 1)
+theme_override_colors/font_color = Color(1.0, 0.8, 0.4, 1)
 theme_override_font_sizes/font_size = 14
-text = "Preview Text"
+text = "Power: 0 | Count: 0"
 autowrap_mode = 3
 
 [node name="TimeLabel" type="Label" parent="HBoxContainer/MainVBox/VBoxContainer"]
@@ -61,6 +61,21 @@ text = "Время: 0.0 сек"
 layout_mode = 2
 max_value = 1.0
 
-[node name="CraftButton" type="Button" parent="HBoxContainer/MainVBox"]
+[node name="ActionHBox" type="HBoxContainer" parent="HBoxContainer/MainVBox"]
 layout_mode = 2
-text = "Создать"
+theme_override_constants/separation = 8
+
+[node name="Buy1Button" type="Button" parent="HBoxContainer/MainVBox/ActionHBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "Нанять"
+
+[node name="Buy10Button" type="Button" parent="HBoxContainer/MainVBox/ActionHBox"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "x10"
+
+[node name="BuyMaxButton" type="Button" parent="HBoxContainer/MainVBox/ActionHBox"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Макс"

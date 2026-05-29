@@ -12,6 +12,7 @@ var buildings: BuildingManager
 var upgrades: UpgradeManager
 var achievements: AchievementManager
 var ascension: AscensionManager
+var war: WarManager
 
 var currentGoldPerSecond = 0.0
 var currentPrayerIncome = 0.0
@@ -35,6 +36,7 @@ func _ready():
 	achievements = AchievementManager.new()
 	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
 	ascension = AscensionManager.new()
+	war = WarManager.new(self)
 	recalculate_income()
 
 func get_click_value() -> float:
@@ -84,6 +86,7 @@ func _process(delta):
 
 	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
+	war.update_training(delta)
 
 	achievements.check(self)
 
@@ -92,6 +95,9 @@ func _on_achievement_unlocked(achievement: AchievementData) -> void:
 	recalculate_income()
 	achievement_unlocked.emit(achievement)
 	gold_changed.emit(economy.gold)
+
+func emit_upgrade_completed(upgrade) -> void:
+	upgrade_completed.emit(upgrade)
 
 func get_unlocked_achievement_count() -> int:
 	return achievements.get_unlocked_count()
