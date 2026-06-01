@@ -13,6 +13,14 @@ var lifetime_prayers: float = 0.0
 var prayer_multiplier: float = 1.0
 var upkeep_reduction_multiplier: float = 1.0
 
+var troop_power_multiplier: float = 1.0
+var troop_cost_multiplier: float = 1.0
+var troop_speed_multiplier: float = 1.0
+var troop_upkeep_multipliers: Dictionary = {}
+
+func get_troop_upkeep_multiplier(troop_id: String) -> float:
+	return troop_upkeep_multipliers.get(troop_id, 1.0)
+
 var ui_update_timer := 0.0
 
 func add_gold(amount: float):

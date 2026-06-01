@@ -25,6 +25,8 @@ func recalculate_income():
 	income *= economy.prestige_multiplier
 	
 	var upkeep = buildings.get_total_upkeep(economy.upkeep_reduction_multiplier)
+	if war:
+		upkeep += war.get_total_upkeep() * economy.upkeep_reduction_multiplier
 	var final_income = income - upkeep
 
 	currentGoldPerSecond = final_income
@@ -37,6 +39,7 @@ func _ready():
 	achievements.achievement_unlocked.connect(_on_achievement_unlocked)
 	ascension = AscensionManager.new()
 	war = WarManager.new(self)
+	war.troops_changed.connect(recalculate_income)
 	recalculate_income()
 
 func get_click_value() -> float:
@@ -134,6 +137,7 @@ func perform_rebirth() -> bool:
 	
 	buildings.reset()
 	upgrades.reset()
+	war.reset()
 	
 	recalculate_income()
 	
@@ -177,8 +181,8 @@ func _input(event):
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F12:
 			if Engine.time_scale == 1.0:
-				Engine.time_scale = 10.0
-				print("Developer Mode: ON (Speed x10)")
+				Engine.time_scale = 1000.0
+				print("Developer Mode: ON (Speed x1000)")
 			else:
 				Engine.time_scale = 1.0
 				print("Developer Mode: OFF (Speed x1)")

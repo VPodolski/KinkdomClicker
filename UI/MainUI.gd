@@ -44,6 +44,7 @@ func _ready():
 	# подписки на события
 	game.gold_changed.connect(update_gold)
 	game.buildings_changed.connect(update_buildings_ui)
+	game.buildings_changed.connect(update_troops_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
 	if game.has_signal("upgrade_completed"):
@@ -156,7 +157,15 @@ func create_troops_ui():
 func update_troops_ui():
 	for child in troops_container.get_children():
 		if child is TroopItem:
-			child.update_ui(game.economy.gold)
+			var is_unlocked = game.war.is_troop_unlocked(child.troop)
+			child.visible = is_unlocked
+			if is_unlocked:
+				var speed = child.troop.speed_multiplier
+				if child.troop.required_building != "":
+					var b = game.buildings.get_building_by_id(child.troop.required_building)
+					if b and b.count > 0:
+						speed *= (1.0 + b.count * 0.05)
+				child.update_ui(game.economy.gold, speed, game.currentGoldPerSecond, game.economy.upkeep_reduction_multiplier)
 
 # =========================
 # 💰 UI ОБНОВЛЕНИЕ

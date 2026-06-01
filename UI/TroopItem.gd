@@ -5,6 +5,7 @@ signal train_pressed(troop, amount)
 
 var troop: TroopData
 
+@onready var icon_rect: TextureRect = $HBoxContainer/IconRect
 @onready var name_label: Label = $HBoxContainer/MainVBox/VBoxContainer/NameLabel
 @onready var description_label: Label = $HBoxContainer/MainVBox/VBoxContainer/InfoLabel
 @onready var stats_label: Label = $HBoxContainer/MainVBox/VBoxContainer/StatsLabel
@@ -20,28 +21,39 @@ var current_gold_cache: float = 0.0
 func _ready() -> void:
 	buy1_button.pressed.connect(_on_buy_pressed.bind(1))
 	buy10_button.pressed.connect(_on_buy_pressed.bind(10))
-	buymax_button.pressed.connect(func(): _on_buy_pressed(troop.get_max_affordable(current_gold_cache)))
+	buymax_button.pressed.connect(func(): _on_buy_pressed(troop.get_max_affordable(current_gold_cache, GameLogic.currentGoldPerSecond, GameLogic.economy.upkeep_reduction_multiplier)))
 
 func setup(_troop: TroopData) -> void:
 	troop = _troop
 	name_label.text = troop.name
 	description_label.text = troop.description
+	
+	var path = "res://assets/troops/%s.png" % troop.id
+	if ResourceLoader.exists(path):
+		icon_rect.texture = load(path)
 
-func update_ui(current_gold: float) -> void:
+func update_ui(current_gold: float, current_speed: float = 1.0, net_income: float = 0.0, upkeep_mult: float = 1.0) -> void:
 	if troop == null:
 		return
 		
 	current_gold_cache = current_gold
 
-	stats_label.text = "Сила: %s | Кол-во: %d" % [GameLogic.format_number(troop.base_power * troop.power_multiplier), troop.count]
+	stats_label.text = "Сила: %s | Кол-во: %d\nСодержание: -%s 🪙/сек на юнита" % [
+		GameLogic.format_number(troop.base_power * troop.power_multiplier), 
+		troop.count,
+		GameLogic.format_number(troop.upkeep * troop.upkeep_multiplier)
+	]
 	if troop.training_amount > 0:
 		stats_label.text += " (+%d нанимается)" % troop.training_amount
 
 	# Кнопки покупки
-	buy1_button.disabled = current_gold < troop.get_cost_for(1)
-	buy10_button.disabled = current_gold < troop.get_cost_for(10)
+	var can_afford_1 = (1 * troop.upkeep * troop.upkeep_multiplier * upkeep_mult) <= net_income * 0.8
+	var can_afford_10 = (10 * troop.upkeep * troop.upkeep_multiplier * upkeep_mult) <= net_income * 0.8
 	
-	var actual_max = troop.get_max_affordable(current_gold)
+	buy1_button.disabled = current_gold < troop.get_cost_for(1) or not can_afford_1
+	buy10_button.disabled = current_gold < troop.get_cost_for(10) or not can_afford_10
+	
+	var actual_max = troop.get_max_affordable(current_gold, net_income, upkeep_mult)
 	if actual_max > 0:
 		buymax_button.text = "Макс (%d)" % actual_max
 		buymax_button.disabled = false
@@ -49,7 +61,7 @@ func update_ui(current_gold: float) -> void:
 		buymax_button.text = "Макс"
 		buymax_button.disabled = true
 	
-	var speed = troop.speed_multiplier
+	var speed = current_speed
 	var duration = troop.base_time / speed
 
 	if troop.is_training:

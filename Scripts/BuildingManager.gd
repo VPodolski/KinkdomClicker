@@ -11,7 +11,7 @@ func _init():
 		if error == OK:
 			var data = json.data
 			for b in data:
-				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b["income"]), float(b.get("prayer_income", 0.0)), float(b.get("gold_upkeep", 0.0))))
+				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b.get("income", 0.0)), float(b.get("prayer_income", 0.0)), float(b.get("gold_upkeep", 0.0))))
 		else:
 			print("Error parsing buildings.json: ", json.get_error_message())
 	else:
@@ -20,6 +20,12 @@ func _init():
 func get_building_by_name(name):
 	for b in buildings:
 		if b.name == name:
+			return b
+	return null
+
+func get_building_by_id(id: String):
+	for b in buildings:
+		if b.id == id:
 			return b
 	return null
 

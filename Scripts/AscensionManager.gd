@@ -8,13 +8,35 @@ var skills = {
 	"buy_max": { "name": "Покупка Макс. зданий", "cost": 50 },
 	"gold_multiplier": { "name": "Множитель золота x2", "cost": 100, "repeatable": true, "cost_mult": 2.0 },
 	"forge_speed": { "name": "Скорость кузницы x2", "cost": 75, "repeatable": true, "cost_mult": 1.5 },
-	"upkeep_reduction": { "name": "Снижение расхода 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 10 }
+	"upkeep_reduction": { "name": "Снижение расхода 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 10 },
+	"troop_power": { "name": "Сила войск +50%", "cost": 100, "repeatable": true, "cost_mult": 1.5 },
+	"troop_cost": { "name": "Удешевление найма войск 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"troop_speed": { "name": "Скорость найма +50%", "cost": 75, "repeatable": true, "cost_mult": 1.5 },
+	"upkeep_militia": { "name": "Содержание (Ополченцы) -10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_pikeman": { "name": "Содержание (Копейщики) -10%", "cost": 75, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_swordsman": { "name": "Содержание (Мечники) -10%", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_archer": { "name": "Содержание (Лучники) -10%", "cost": 150, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_cavalry": { "name": "Содержание (Конница) -10%", "cost": 200, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_knight": { "name": "Содержание (Рыцари) -10%", "cost": 250, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_paladin": { "name": "Содержание (Паладины) -10%", "cost": 300, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
+	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 }
 }
 
 var skill_levels = {
 	"gold_multiplier": 0,
 	"forge_speed": 0,
-	"upkeep_reduction": 0
+	"upkeep_reduction": 0,
+	"troop_power": 0,
+	"troop_cost": 0,
+	"troop_speed": 0,
+	"upkeep_militia": 0,
+	"upkeep_pikeman": 0,
+	"upkeep_swordsman": 0,
+	"upkeep_archer": 0,
+	"upkeep_cavalry": 0,
+	"upkeep_knight": 0,
+	"upkeep_paladin": 0,
+	"upkeep_griffon_rider": 0
 }
 
 func has_skill(skill_id: String) -> bool:
@@ -66,6 +88,16 @@ func apply_skill(skill_id: String, economy):
 			economy.upkeep_reduction_multiplier -= 0.1
 			if economy.upkeep_reduction_multiplier < 0.0:
 				economy.upkeep_reduction_multiplier = 0.0
+		"troop_power":
+			economy.troop_power_multiplier += 0.5
+		"troop_cost":
+			economy.troop_cost_multiplier = max(0.1, economy.troop_cost_multiplier - 0.1)
+		"troop_speed":
+			economy.troop_speed_multiplier += 0.5
+		"upkeep_militia", "upkeep_pikeman", "upkeep_swordsman", "upkeep_archer", "upkeep_cavalry", "upkeep_knight", "upkeep_paladin", "upkeep_griffon_rider":
+			var troop_id = skill_id.replace("upkeep_", "")
+			var current = economy.troop_upkeep_multipliers.get(troop_id, 1.0)
+			economy.troop_upkeep_multipliers[troop_id] = max(0.0, current - 0.1)
 
 func reapply_all_skills(economy):
 	economy.prestige_multiplier = 1.0
@@ -81,3 +113,14 @@ func reapply_all_skills(economy):
 		
 	if economy.upkeep_reduction_multiplier < 0.0:
 		economy.upkeep_reduction_multiplier = 0.0
+		
+	economy.troop_power_multiplier = 1.0 + (0.5 * skill_levels["troop_power"])
+	economy.troop_cost_multiplier = max(0.1, 1.0 - (0.1 * skill_levels["troop_cost"]))
+	economy.troop_speed_multiplier = 1.0 + (0.5 * skill_levels["troop_speed"])
+	
+	economy.troop_upkeep_multipliers.clear()
+	for troop_id in ["militia", "pikeman", "swordsman", "archer", "cavalry", "knight", "paladin", "griffon_rider"]:
+		var skill = "upkeep_" + troop_id
+		var level = skill_levels[skill]
+		if level > 0:
+			economy.troop_upkeep_multipliers[troop_id] = max(0.0, 1.0 - 0.1 * level)

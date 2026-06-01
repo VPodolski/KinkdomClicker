@@ -30,6 +30,11 @@
     "income": 300
   },
   {
+    "id": "barracks",
+    "name": "Казармы",
+    "base_cost": 50000
+  },
+  {
     "id": "tavern",
     "name": "Таверна",
     "base_cost": 100000,
@@ -44,10 +49,9 @@
     "gold_upkeep": 5000
   },
   {
-    "id": "barracks",
-    "name": "Казармы",
-    "base_cost": 1000000,
-    "income": 75000
+    "id": "training_camp",
+    "name": "Тренировочный лагерь",
+    "base_cost": 2000000
   },
   {
     "id": "church",
@@ -64,6 +68,11 @@
     "income": 1000000
   },
   {
+    "id": "armory",
+    "name": "Оружейная",
+    "base_cost": 25000000
+  },
+  {
     "id": "bank",
     "name": "Банк",
     "base_cost": 250000000,
@@ -78,6 +87,11 @@
     "gold_upkeep": 1000000
   },
   {
+    "id": "archery_range",
+    "name": "Стрельбище",
+    "base_cost": 1000000000
+  },
+  {
     "id": "port",
     "name": "Порт",
     "base_cost": 5000000000,
@@ -90,6 +104,11 @@
     "income": 0,
     "prayer_income": 10,
     "gold_upkeep": 10000000
+  },
+  {
+    "id": "stables",
+    "name": "Конюшни",
+    "base_cost": 50000000000
   },
   {
     "id": "shipyard",
@@ -112,6 +131,11 @@
     "income": 75000000000
   },
   {
+    "id": "knight_order",
+    "name": "Орден рыцарей",
+    "base_cost": 2500000000000
+  },
+  {
     "id": "mage_tower",
     "name": "Башня Магов",
     "base_cost": 50000000000000,
@@ -124,6 +148,11 @@
     "income": 0,
     "prayer_income": 250,
     "gold_upkeep": 50000000000
+  },
+  {
+    "id": "griffon_nest",
+    "name": "Гнездо грифонов",
+    "base_cost": 500000000000000
   },
   {
     "id": "castle",

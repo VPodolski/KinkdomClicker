@@ -4,47 +4,87 @@
     "name": "Ополченцы",
     "description": "Слабые, но дешевые воины. Отлично подходят для пушечного мяса.",
     "base_power": 1,
-    "base_cost": 100,
-    "base_time": 5
+    "base_power": 1,
+    "base_cost": 500,
+    "upkeep": 100,
+    "base_time": 5,
+    "required_building": "barracks"
+  },
+  {
+    "id": "pikeman",
+    "name": "Копейщики",
+    "description": "Эффективны в обороне и могут держать дистанцию в ближнем бою.",
+    "base_power": 2,
+    "base_power": 2,
+    "base_cost": 5000,
+    "upkeep": 1000,
+    "base_time": 8,
+    "required_building": "training_camp"
   },
   {
     "id": "swordsman",
     "name": "Мечники",
     "description": "Основа любой армии. Надежные солдаты в ближнем бою.",
     "base_power": 5,
-    "base_cost": 1500,
-    "base_time": 15
+    "base_power": 5,
+    "base_cost": 50000,
+    "upkeep": 25000,
+    "base_time": 15,
+    "required_building": "armory"
   },
   {
     "id": "archer",
     "name": "Лучники",
     "description": "Атакуют издалека, нанося урон врагам до того, как они приблизятся.",
     "base_power": 15,
-    "base_cost": 8000,
-    "base_time": 30
+    "base_power": 15,
+    "base_cost": 2000000,
+    "upkeep": 1000000,
+    "base_time": 30,
+    "required_building": "archery_range"
   },
   {
     "id": "cavalry",
     "name": "Конница",
     "description": "Быстрые и разрушительные. Уничтожают фланги врага.",
     "base_power": 50,
-    "base_cost": 50000,
-    "base_time": 60
+    "base_power": 50,
+    "base_cost": 100000000,
+    "upkeep": 50000000,
+    "base_time": 60,
+    "required_building": "stables"
   },
   {
     "id": "knight",
     "name": "Рыцари",
     "description": "Тяжелобронированная элита. Их атаки пробивают любые щиты.",
     "base_power": 250,
-    "base_cost": 400000,
-    "base_time": 120
+    "base_power": 250,
+    "base_cost": 5000000000,
+    "upkeep": 2000000000,
+    "base_time": 120,
+    "required_building": "knight_order"
   },
   {
     "id": "paladin",
     "name": "Паладины",
     "description": "Святые воины, благословленные на битву с тьмой.",
     "base_power": 1500,
-    "base_cost": 5000000,
-    "base_time": 300
+    "base_power": 1500,
+    "base_cost": 1000000000000,
+    "upkeep": 20000000000,
+    "base_time": 300,
+    "required_building": "grand_cathedral"
+  },
+  {
+    "id": "griffon_rider",
+    "name": "Всадники на грифонах",
+    "description": "Покорители небес. Пикируют на врага с невероятной скоростью.",
+    "base_power": 10000,
+    "base_power": 10000,
+    "base_cost": 50000000000000,
+    "upkeep": 10000000000000,
+    "base_time": 600,
+    "required_building": "griffon_nest"
   }
 ]
