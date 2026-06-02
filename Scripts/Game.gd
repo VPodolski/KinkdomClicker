@@ -13,6 +13,7 @@ var upgrades: UpgradeManager
 var achievements: AchievementManager
 var ascension: AscensionManager
 var war: WarManager
+var expeditions: ExpeditionManager
 
 var currentGoldPerSecond = 0.0
 var currentPrayerIncome = 0.0
@@ -28,6 +29,9 @@ func recalculate_income():
 	if war:
 		upkeep += war.get_total_upkeep() * economy.upkeep_reduction_multiplier
 	var final_income = income - upkeep
+	
+	if expeditions:
+		final_income *= (1.0 + expeditions.total_captives * 0.001) # +0.1% per captive
 
 	currentGoldPerSecond = final_income
 	currentPrayerIncome = buildings.get_total_prayer_income(economy.prayer_multiplier)
@@ -40,6 +44,7 @@ func _ready():
 	ascension = AscensionManager.new()
 	war = WarManager.new(self)
 	war.troops_changed.connect(recalculate_income)
+	expeditions = ExpeditionManager.new(self)
 	recalculate_income()
 
 func get_click_value() -> float:
@@ -90,6 +95,7 @@ func _process(delta):
 	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
 	war.update_training(delta)
+	expeditions.update(delta)
 
 	achievements.check(self)
 

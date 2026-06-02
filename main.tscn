@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://hbt2mawi1kq5"]
+[gd_scene load_steps=5 format=3 uid="uid://hbt2mawi1kq5"]
 
 [ext_resource type="Script" path="res://UI/MainUI.gd" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://cm3y61l8qj7d3" path="res://UI/KingdomVisualizer.tscn" id="2_kvis"]
 [ext_resource type="PackedScene" uid="uid://d3yq8v12wx5a9" path="res://UI/WarVisualizer.tscn" id="3_wvis"]
+[ext_resource type="PackedScene" uid="uid://cprkevk7vrjvn" path="res://UI/ExpeditionMap.tscn" id="4_emap"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -185,10 +186,9 @@ size_flags_vertical = 3
 visible = false
 layout_mode = 2
 
-[node name="Label" type="Label" parent="RootVBox/WarScreen/RightPanel/Походы"]
+[node name="ExpeditionMap" parent="RootVBox/WarScreen/RightPanel/Походы" instance=ExtResource("4_emap")]
 layout_mode = 2
-text = "Скоро здесь будут походы!"
-horizontal_alignment = 1
+size_flags_vertical = 3
 
 [node name="AscensionConfirmDialog" type="ConfirmationDialog" parent="."]
 title = "Подтверждение"
