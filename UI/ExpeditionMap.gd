@@ -2,12 +2,8 @@ extends Control
 class_name ExpeditionMap
 
 @onready var camps_container = $CampsContainer
-@onready var info_panel = $InfoPanel
-@onready var power_label = $InfoPanel/VBoxContainer/PowerLabel
-@onready var status_label = $InfoPanel/VBoxContainer/StatusLabel
-@onready var scout_button = $InfoPanel/VBoxContainer/ScoutButton
-@onready var attack_button = $InfoPanel/VBoxContainer/AttackButton
-@onready var close_button = $InfoPanel/VBoxContainer/CloseButton
+
+var deployment_window: DeploymentWindow
 
 var selected_camp: CampData
 
@@ -16,11 +12,12 @@ func _ready():
 	GameLogic.expeditions.camp_removed.connect(_on_camp_removed)
 	GameLogic.expeditions.camp_updated.connect(_on_camp_updated)
 	
-	scout_button.pressed.connect(_on_scout_pressed)
-	attack_button.pressed.connect(_on_attack_pressed)
-	close_button.pressed.connect(func(): info_panel.hide())
+	deployment_window = preload("res://UI/DeploymentWindow.tscn").instantiate()
+	add_child(deployment_window)
 	
-	info_panel.hide()
+	deployment_window.attack_requested.connect(_on_deployment_attack)
+	deployment_window.scout_requested.connect(_on_deployment_scout)
+	deployment_window.cancelled.connect(func(): selected_camp = null)
 	
 	# Создаем уже существующие лагеря
 	for c in GameLogic.expeditions.camps:
@@ -28,7 +25,8 @@ func _ready():
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		info_panel.hide()
+		if deployment_window:
+			deployment_window.hide()
 		selected_camp = null
 
 func _on_camp_spawned(camp: CampData):
@@ -44,67 +42,26 @@ func _on_camp_removed(camp_id: String):
 		node.queue_free()
 		
 	if selected_camp and selected_camp.id == camp_id:
-		info_panel.hide()
+		deployment_window.hide()
 		selected_camp = null
 
 func _on_camp_updated(camp: CampData):
 	var node = camps_container.get_node_or_null(camp.id)
 	if node:
 		node.update_visuals()
-	if selected_camp == camp:
-		update_info_panel()
+	if selected_camp == camp and deployment_window.visible:
+		deployment_window.setup(camp, GameLogic)
 
 func _on_camp_clicked(camp: CampData):
 	selected_camp = camp
-	update_info_panel()
-	info_panel.show()
+	if camp.status == CampData.Status.IDLE or camp.status == CampData.Status.SCOUTING:
+		deployment_window.setup(camp, GameLogic)
 
-func update_info_panel():
-	if not selected_camp:
-		return
-		
-	power_label.text = "Сила Врага: " + selected_camp.get_display_power()
+func _on_deployment_scout(camp: CampData):
+	GameLogic.expeditions.start_scouting(camp)
 	
-	match selected_camp.status:
-		CampData.Status.IDLE:
-			status_label.text = "Статус: Ожидает"
-			scout_button.disabled = selected_camp.is_scouted
-			attack_button.disabled = false
-		CampData.Status.SCOUTING:
-			status_label.text = "Статус: Разведка (%.1fs)" % selected_camp.timer
-			scout_button.disabled = true
-			attack_button.disabled = true
-		CampData.Status.TRAVELING:
-			status_label.text = "Статус: Войска в пути (%.1fs)" % selected_camp.timer
-			scout_button.disabled = true
-			attack_button.disabled = true
-		CampData.Status.RETURNING:
-			status_label.text = "Статус: Возвращение (%.1fs)" % selected_camp.timer
-			scout_button.disabled = true
-			attack_button.disabled = true
-
-func _on_scout_pressed():
-	if selected_camp:
-		# Например, стоит 100 золота
-		if GameLogic.economy.spend_gold(100):
-			GameLogic.expeditions.start_scouting(selected_camp)
-
-func _on_attack_pressed():
-	if selected_camp:
-		# Здесь мы должны открыть окно настройки отряда (DeploymentUI)
-		# Для простоты пока отправляем всех свободных юнитов:
-		var army = ArmyGroup.new()
-		for t in GameLogic.war.troops:
-			if t.count > 0:
-				army.add_troops(t.id, t.count, t.get_total_power() / t.count if t.count > 0 else 0)
-				t.count = 0 # Забираем их в поход
-		
-		# Снабжение по умолчанию
-		army.morale_multiplier = 1.0
-		army.commander_level = GameLogic.expeditions.commander_level
-		
-		GameLogic.expeditions.start_expedition(selected_camp, army)
-		GameLogic.war.recalculate_power()
-		GameLogic.war.troops_changed.emit()
-		info_panel.hide()
-		selected_camp = null
+func _on_deployment_attack(camp: CampData, army: ArmyGroup):
+	GameLogic.expeditions.start_expedition(camp, army)
+	GameLogic.war.recalculate_power()
+	GameLogic.war.troops_changed.emit()
+	selected_camp = null

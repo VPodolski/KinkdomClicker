@@ -57,3 +57,9 @@ func get_display_power() -> String:
 func improve_intel():
 	min_power_display = lerp(min_power_display, exact_power, 0.5)
 	max_power_display = lerp(max_power_display, exact_power, 0.5)
+
+func get_total_enemy_count() -> int:
+	var total = 0
+	for count in enemy_troops.values():
+		total += count
+	return total
