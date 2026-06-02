@@ -26,6 +26,11 @@ func _ready():
 	for c in GameLogic.expeditions.camps:
 		_on_camp_spawned(c)
 
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		info_panel.hide()
+		selected_camp = null
+
 func _on_camp_spawned(camp: CampData):
 	var node = CampNode.new()
 	node.name = camp.id
@@ -37,8 +42,10 @@ func _on_camp_removed(camp_id: String):
 	var node = camps_container.get_node_or_null(camp_id)
 	if node:
 		node.queue_free()
-		if selected_camp and selected_camp.id == camp_id:
-			info_panel.hide()
+		
+	if selected_camp and selected_camp.id == camp_id:
+		info_panel.hide()
+		selected_camp = null
 
 func _on_camp_updated(camp: CampData):
 	var node = camps_container.get_node_or_null(camp.id)
@@ -97,4 +104,7 @@ func _on_attack_pressed():
 		army.commander_level = GameLogic.expeditions.commander_level
 		
 		GameLogic.expeditions.start_expedition(selected_camp, army)
+		GameLogic.war.recalculate_power()
 		GameLogic.war.troops_changed.emit()
+		info_panel.hide()
+		selected_camp = null

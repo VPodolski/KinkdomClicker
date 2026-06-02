@@ -31,9 +31,11 @@ var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 var floating_text_scene = preload("res://ui/FloatingText.tscn")
 var troop_item_scene = preload("res://UI/TroopItem.tscn")
+var battle_results_scene = preload("res://UI/BattleResultsWindow.tscn")
 
 var ui_update_timer = 0.0
 var notifications_container: VBoxContainer
+var battle_results_window: BattleResultsWindow
 
 func _ready():
 	apply_medieval_theme()
@@ -54,10 +56,14 @@ func _ready():
 	game.war.military_power_changed.connect(update_war_info)
 	game.war.troops_changed.connect(update_troops_ui)
 	game.war.troops_changed.connect(war_visualizer.update_visuals)
+	game.expeditions.expedition_finished.connect(_on_expedition_finished)
 		
 	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
 		ascend_button.pressed.connect(_on_ascend_pressed)
 	buy_all_upgrades_button.pressed.connect(_on_buy_all_upgrades_pressed)
+
+	battle_results_window = battle_results_scene.instantiate()
+	add_child(battle_results_window)
 
 	# первичная инициализация
 	update_gold(game.economy.gold)
@@ -166,6 +172,10 @@ func update_troops_ui():
 					if b and b.count > 0:
 						speed *= (1.0 + b.count * 0.05)
 				child.update_ui(game.economy.gold, speed, game.currentGoldPerSecond, game.economy.upkeep_reduction_multiplier)
+
+func _on_expedition_finished(result_data: Dictionary) -> void:
+	if battle_results_window:
+		battle_results_window.setup(result_data, game)
 
 # =========================
 # 💰 UI ОБНОВЛЕНИЕ

@@ -16,12 +16,19 @@ var exact_power: float = 0.0
 var min_power_display: float = 0.0
 var max_power_display: float = 0.0
 
+var enemy_troops: Dictionary = {} # troop_id -> count
+
 var is_scouted: bool = false
 var is_defeated: bool = false
 
 # Награды
 var gold_reward: float = 0.0
 var captives_reward: int = 0
+var casualties_pct_taken: float = 0.0
+
+# Данные для окна результатов
+var last_combat_losses: Dictionary = {}
+var last_enemy_killed: int = 0
 
 # Текущий отряд игрока, отправленный сюда
 var player_army: ArmyGroup = null
@@ -38,7 +45,7 @@ func _init(_id: String, _pos: Vector2, _power: float, _time: float):
 	distance_time = _time
 	timer = 0.0
 	
-	# Генерация наград
+	# Генерация наград (будут пересчитаны после генерации армии, если точная сила изменится)
 	gold_reward = exact_power * 50.0
 	captives_reward = max(1, int(exact_power / 100.0))
 
@@ -46,3 +53,7 @@ func get_display_power() -> String:
 	if is_scouted:
 		return str(int(exact_power))
 	return "%d - %d" % [int(min_power_display), int(max_power_display)]
+
+func improve_intel():
+	min_power_display = lerp(min_power_display, exact_power, 0.5)
+	max_power_display = lerp(max_power_display, exact_power, 0.5)

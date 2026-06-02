@@ -46,6 +46,9 @@ func _ready():
 	war.troops_changed.connect(recalculate_income)
 	expeditions = ExpeditionManager.new(self)
 	recalculate_income()
+	
+	Engine.time_scale = 1000.0
+	print("Developer Mode: ON by default (Speed x1000)")
 
 func get_click_value() -> float:
 	var achievement_multiplier = achievements.get_income_multiplier()
