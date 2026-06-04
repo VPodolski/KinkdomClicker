@@ -30,6 +30,11 @@
     "income": 300
   },
   {
+    "id": "scout_guild",
+    "name": "Гильдия разведчиков",
+    "base_cost": 10000
+  },
+  {
     "id": "barracks",
     "name": "Казармы",
     "base_cost": 50000

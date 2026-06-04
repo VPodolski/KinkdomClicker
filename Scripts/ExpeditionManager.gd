@@ -62,18 +62,20 @@ func generate_enemy_army(camp: CampData):
 	camp.exact_power = new_power
 	camp.gold_reward = camp.exact_power * 50.0
 	camp.captives_reward = max(1, int(camp.exact_power / 100.0))
-
-func start_scouting(camp: CampData):
-	if camp.status == CampData.Status.IDLE:
-		camp.status = CampData.Status.SCOUTING
-		camp.timer = camp.distance_time * 0.5 # Разведчики идут быстрее
-		camp_updated.emit(camp)
+	
+	camp.enemy_scouts_count = 0
+	if camp.exact_power > 2000.0:
+		camp.enemy_scouts_count = int(camp.exact_power / 1000.0) + randi_range(0, 5)
 
 func start_expedition(camp: CampData, army: ArmyGroup):
-	if camp.status == CampData.Status.IDLE or camp.status == CampData.Status.SCOUTING:
-		camp.status = CampData.Status.TRAVELING
+	if camp.status == CampData.Status.IDLE:
 		camp.player_army = army
-		camp.timer = camp.distance_time
+		if army.is_scouting_mission:
+			camp.status = CampData.Status.SCOUTING
+			camp.timer = camp.distance_time * 0.5
+		else:
+			camp.status = CampData.Status.TRAVELING
+			camp.timer = camp.distance_time
 		camp_updated.emit(camp)
 
 func update(delta: float):
@@ -81,9 +83,7 @@ func update(delta: float):
 		if camp.status == CampData.Status.SCOUTING:
 			camp.timer -= delta
 			if camp.timer <= 0:
-				camp.is_scouted = true
-				camp.status = CampData.Status.IDLE
-				camp_updated.emit(camp)
+				resolve_scouting(camp)
 				
 		elif camp.status == CampData.Status.TRAVELING:
 			camp.timer -= delta
@@ -94,6 +94,46 @@ func update(delta: float):
 			camp.timer -= delta
 			if camp.timer <= 0:
 				finish_return(camp)
+
+func resolve_scouting(camp: CampData):
+	var army = camp.player_army
+	var player_scout_power = 0.0
+	for t_id in army.troops.keys():
+		var count = army.troops[t_id]
+		if t_id == "scout":
+			player_scout_power += count * 5.0
+		else:
+			player_scout_power += count * 0.5
+			
+	var enemy_scout_power = max(1.0, float(camp.enemy_scouts_count) * 5.0)
+	var intel_gained = player_scout_power / (enemy_scout_power * 2.0)
+	
+	var player_troop_losses = {}
+	var kills = int(enemy_scout_power / 10.0 * randf_range(0.5, 1.5))
+	var remaining_kills = kills
+	var new_troops = army.troops.duplicate()
+	for t_id in new_troops.keys():
+		var count = new_troops[t_id]
+		if remaining_kills > 0 and count > 0:
+			var dead = min(count, remaining_kills)
+			new_troops[t_id] -= dead
+			remaining_kills -= dead
+			player_troop_losses[t_id] = {"dead": dead, "fled": 0}
+			
+	var p_kills = int(player_scout_power / 10.0 * randf_range(0.5, 1.5))
+	var e_dead = min(camp.enemy_scouts_count, p_kills)
+	camp.enemy_scouts_count -= e_dead
+	army.troops = new_troops
+	
+	camp.last_combat_losses = player_troop_losses
+	camp.last_enemy_killed = e_dead
+	camp.add_intel(intel_gained)
+	
+	var msg = "Разведка завершена. Добыто %d%% информации." % int(min(intel_gained, 1.0) * 100)
+	camp.status = CampData.Status.RETURNING
+	camp.timer = camp.distance_time * 0.5
+	combat_resolved.emit(camp, true, 0.0, msg)
+	camp_updated.emit(camp)
 
 func resolve_combat(camp: CampData):
 	var army = camp.player_army
@@ -285,8 +325,13 @@ func finish_return(camp: CampData):
 			for c in camp.player_army.troops.values():
 				if c > 0: has_survivors = true
 				
+		var is_scout_mission = false
+		if camp.player_army != null and camp.player_army.is_scouting_mission:
+			is_scout_mission = true
+
 		var result = {
-			"won": false,
+			"won": is_scout_mission,
+			"is_scout_mission": is_scout_mission,
 			"casualties_percent": 0.0,
 			"gold_reward": 0.0,
 			"captives_reward": 0,

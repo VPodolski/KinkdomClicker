@@ -2,7 +2,6 @@ extends CanvasLayer
 class_name DeploymentWindow
 
 signal attack_requested(camp: CampData, army: ArmyGroup)
-signal scout_requested(camp: CampData)
 signal cancelled()
 
 var camp: CampData
@@ -11,7 +10,6 @@ var game: Node
 @onready var enemy_power_label = $PanelContainer/VBox/MainHBox/LeftPanel/EnemyPowerLabel
 @onready var enemy_comp_container = $PanelContainer/VBox/MainHBox/LeftPanel/EnemyScroll/EnemyCompList
 @onready var not_scouted_label = $PanelContainer/VBox/MainHBox/LeftPanel/NotScoutedLabel
-@onready var scout_button = $PanelContainer/VBox/MainHBox/LeftPanel/ScoutButton
 
 @onready var troops_list = $PanelContainer/VBox/MainHBox/RightPanel/TroopsScroll/TroopsList
 
@@ -20,6 +18,7 @@ var game: Node
 @onready var buffs_label = $PanelContainer/VBox/BottomPanel/BuffsLabel
 
 @onready var cancel_button = $PanelContainer/VBox/BottomPanel/ButtonsHBox/CancelButton
+@onready var scout_attack_button = $PanelContainer/VBox/BottomPanel/ButtonsHBox/ScoutAttackButton
 @onready var attack_button = $PanelContainer/VBox/BottomPanel/ButtonsHBox/AttackButton
 
 var selected_troops: Dictionary = {} # troop_id -> int
@@ -30,7 +29,7 @@ func _ready():
 		cancelled.emit()
 	)
 	attack_button.pressed.connect(_on_attack_pressed)
-	scout_button.pressed.connect(_on_scout_pressed)
+	scout_attack_button.pressed.connect(_on_scout_attack_pressed)
 	visible = false
 	
 func setup(_camp: CampData, _game: Node):
@@ -39,13 +38,12 @@ func setup(_camp: CampData, _game: Node):
 	
 	enemy_power_label.text = "Сила Врага: " + camp.get_display_power()
 	
-	if camp.is_scouted:
-		not_scouted_label.hide()
-		scout_button.hide()
-		enemy_comp_container.get_parent().show()
+	for child in enemy_comp_container.get_children():
+		child.queue_free()
 		
-		for child in enemy_comp_container.get_children():
-			child.queue_free()
+	if camp.intel_percent >= 1.0:
+		not_scouted_label.text = "Разведка 100%"
+		enemy_comp_container.get_parent().show()
 		
 		for t_id in camp.enemy_troops.keys():
 			var count = camp.enemy_troops[t_id]
@@ -55,9 +53,7 @@ func setup(_camp: CampData, _game: Node):
 				l.text = "- %s: %d" % [t.name, count]
 				enemy_comp_container.add_child(l)
 	else:
-		not_scouted_label.show()
-		scout_button.show()
-		scout_button.disabled = game.economy.gold < 100
+		not_scouted_label.text = "Разведка: %d%%\nСостав неизвестен." % int(camp.intel_percent * 100)
 		enemy_comp_container.get_parent().hide()
 
 	# Очищаем старые войска
@@ -177,6 +173,7 @@ func _update_analytics():
 	buffs_label.text = buffs_txt
 	
 	attack_button.disabled = player_count <= 0
+	scout_attack_button.disabled = player_count <= 0
 
 func _on_attack_pressed():
 	var army = ArmyGroup.new()
@@ -192,7 +189,17 @@ func _on_attack_pressed():
 	visible = false
 	attack_requested.emit(camp, army)
 
-func _on_scout_pressed():
-	if game.economy.spend_gold(100):
-		visible = false
-		scout_requested.emit(camp)
+func _on_scout_attack_pressed():
+	var army = ArmyGroup.new()
+	for t_id in selected_troops.keys():
+		var count = selected_troops[t_id]
+		if count > 0:
+			var t = game.war.get_troop_by_id(t_id)
+			army.add_troops(t_id, count, t.base_power)
+			t.count -= count
+			
+	army.morale_multiplier = 1.0
+	army.is_scouting_mission = true
+	
+	visible = false
+	attack_requested.emit(camp, army)

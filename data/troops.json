@@ -4,11 +4,20 @@
     "name": "Ополченцы",
     "description": "Слабые, но дешевые воины. Отлично подходят для пушечного мяса.",
     "base_power": 1,
-    "base_power": 1,
     "base_cost": 500,
     "upkeep": 100,
     "base_time": 5,
     "required_building": "barracks"
+  },
+  {
+    "id": "scout",
+    "name": "Разведчики",
+    "description": "Скрытные воины, собирающие информацию о враге. Избегают прямого боя.",
+    "base_power": 3,
+    "base_cost": 2500,
+    "upkeep": 500,
+    "base_time": 10,
+    "required_building": "scout_guild"
   },
   {
     "id": "pikeman",

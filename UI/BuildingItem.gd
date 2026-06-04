@@ -79,9 +79,10 @@ func update_ui(current_gold: float):
 		if building.count > 0:
 			income_str += " (Всего: %s)" % _format_number(actual_prayer * building.count)
 			
-		income_str += "\nРасход: -%s 🪙/сек" % _format_number(actual_upkeep)
-		if building.count > 0:
-			income_str += " (Всего: -%s)" % _format_number(total_upkeep)
+		if building.gold_upkeep > 0:
+			income_str += "\nРасход: -%s 🪙/сек" % _format_number(actual_upkeep)
+			if building.count > 0:
+				income_str += " (Всего: -%s)" % _format_number(total_upkeep)
 
 	var linked_troop = null
 	for t in GameLogic.war.troops:
@@ -93,7 +94,7 @@ func update_ui(current_gold: float):
 		var troop_upkeep_single = linked_troop.upkeep * upkeep_mult
 		var total_troop_upkeep = linked_troop.get_total_upkeep() * upkeep_mult
 		
-		income_str = "Производит: %s\nВ армии: %d\nСодержание: -%s 🪙/сек\n(Войска требуют содержания!)" % [
+		income_str = "Производит: %s\nВ армии: %d\nСодержание войск: -%s 🪙/сек" % [
 			linked_troop.name,
 			linked_troop.count,
 			_format_number(total_troop_upkeep)

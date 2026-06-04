@@ -18,7 +18,8 @@ var max_power_display: float = 0.0
 
 var enemy_troops: Dictionary = {} # troop_id -> count
 
-var is_scouted: bool = false
+var intel_percent: float = 0.0
+var enemy_scouts_count: int = 0
 var is_defeated: bool = false
 
 # Награды
@@ -50,13 +51,17 @@ func _init(_id: String, _pos: Vector2, _power: float, _time: float):
 	captives_reward = max(1, int(exact_power / 100.0))
 
 func get_display_power() -> String:
-	if is_scouted:
+	if intel_percent >= 1.0:
 		return str(int(exact_power))
-	return "%d - %d" % [int(min_power_display), int(max_power_display)]
+	
+	var current_min = lerp(min_power_display, exact_power, intel_percent)
+	var current_max = lerp(max_power_display, exact_power, intel_percent)
+	return "%d - %d" % [int(current_min), int(current_max)]
 
-func improve_intel():
-	min_power_display = lerp(min_power_display, exact_power, 0.5)
-	max_power_display = lerp(max_power_display, exact_power, 0.5)
+func add_intel(amount: float):
+	intel_percent += amount
+	if intel_percent > 1.0:
+		intel_percent = 1.0
 
 func get_total_enemy_count() -> int:
 	var total = 0

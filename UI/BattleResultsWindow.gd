@@ -16,7 +16,13 @@ func _ready():
 	hide()
 
 func setup(data: Dictionary, game: Node):
-	if data.won:
+	var is_scout = data.get("is_scout_mission", false)
+	
+	if is_scout:
+		title_label.text = "Разведка завершена"
+		title_label.add_theme_color_override("font_color", Color("#59A0C5"))
+		rewards_container.hide()
+	elif data.won:
 		title_label.text = "Победа!"
 		title_label.add_theme_color_override("font_color", Color("#59C59A"))
 		rewards_container.show()
@@ -27,8 +33,12 @@ func setup(data: Dictionary, game: Node):
 		
 	intel_label.visible = data.get("gathered_intel", false)
 		
-	power_label.text = "Сила оставшегося врага: " + str(int(data.enemy_power))
-	enemy_killed_label.text = "Врагов убито: " + str(data.get("enemy_killed", 0))
+	if is_scout:
+		power_label.text = "Обнаруженная сила: " + str(int(data.enemy_power))
+		enemy_killed_label.text = "Вражеских шпионов устранено: " + str(data.get("enemy_killed", 0))
+	else:
+		power_label.text = "Сила оставшегося врага: " + str(int(data.enemy_power))
+		enemy_killed_label.text = "Врагов убито: " + str(data.get("enemy_killed", 0))
 	
 	# Очищаем список потерь
 	for child in losses_list.get_children():

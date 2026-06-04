@@ -65,10 +65,6 @@ text = "Состав неизвестен. Проведите разведку."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="ScoutButton" type="Button" parent="PanelContainer/VBox/MainHBox/LeftPanel"]
-layout_mode = 2
-text = "Разведать (100 золота)"
-
 [node name="VSeparator" type="VSeparator" parent="PanelContainer/VBox/MainHBox"]
 layout_mode = 2
 
@@ -125,6 +121,11 @@ theme_override_constants/separation = 20
 custom_minimum_size = Vector2(100, 40)
 layout_mode = 2
 text = "Отмена"
+
+[node name="ScoutAttackButton" type="Button" parent="PanelContainer/VBox/BottomPanel/ButtonsHBox"]
+custom_minimum_size = Vector2(150, 40)
+layout_mode = 2
+text = "В разведку"
 
 [node name="AttackButton" type="Button" parent="PanelContainer/VBox/BottomPanel/ButtonsHBox"]
 custom_minimum_size = Vector2(150, 40)

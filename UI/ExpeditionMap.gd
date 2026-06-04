@@ -16,7 +16,6 @@ func _ready():
 	add_child(deployment_window)
 	
 	deployment_window.attack_requested.connect(_on_deployment_attack)
-	deployment_window.scout_requested.connect(_on_deployment_scout)
 	deployment_window.cancelled.connect(func(): selected_camp = null)
 	
 	# Создаем уже существующие лагеря
@@ -54,12 +53,10 @@ func _on_camp_updated(camp: CampData):
 
 func _on_camp_clicked(camp: CampData):
 	selected_camp = camp
-	if camp.status == CampData.Status.IDLE or camp.status == CampData.Status.SCOUTING:
+	if camp.status == CampData.Status.IDLE:
 		deployment_window.setup(camp, GameLogic)
 
-func _on_deployment_scout(camp: CampData):
-	GameLogic.expeditions.start_scouting(camp)
-	
+
 func _on_deployment_attack(camp: CampData, army: ArmyGroup):
 	GameLogic.expeditions.start_expedition(camp, army)
 	GameLogic.war.recalculate_power()

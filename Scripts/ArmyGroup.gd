@@ -13,11 +13,14 @@ var morale_multiplier: float = 1.0
 # Уровень полководца
 var commander_level: int = 1
 
+var is_scouting_mission: bool = false
+
 func _init():
 	troops = {}
 	base_power = 0.0
 	morale_multiplier = 1.0
 	commander_level = 1
+	is_scouting_mission = false
 
 func add_troops(troop_id: String, amount: int, power_per_unit: float):
 	if not troops.has(troop_id):
