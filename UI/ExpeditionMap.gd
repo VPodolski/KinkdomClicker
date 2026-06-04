@@ -47,7 +47,13 @@ func _on_camp_removed(camp_id: String):
 func _on_camp_updated(camp: CampData):
 	var node = camps_container.get_node_or_null(camp.id)
 	if node:
-		node.update_visuals()
+		if camp.is_defeated:
+			node.queue_free()
+			if selected_camp == camp:
+				deployment_window.hide()
+				selected_camp = null
+		else:
+			node.update_visuals()
 	if selected_camp == camp and deployment_window.visible:
 		deployment_window.setup(camp, GameLogic)
 

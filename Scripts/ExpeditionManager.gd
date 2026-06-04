@@ -318,7 +318,15 @@ func finish_return(camp: CampData):
 		camp_removed.emit(camp.id)
 		
 		# Спавним новый лагерь
-		spawn_camp(Vector2(randf_range(0.1, 0.8), randf_range(0.1, 0.8)), camp.exact_power * 1.2, camp.distance_time * 1.1)
+		var original_power = camp.gold_reward / 50.0
+		
+		var new_pos = Vector2.ZERO
+		for i in range(10):
+			new_pos = Vector2(randf_range(0.2, 0.8), randf_range(0.15, 0.85))
+			if new_pos.distance_to(camp.position) > 0.3:
+				break
+				
+		spawn_camp(new_pos, original_power * 1.2, camp.distance_time * 1.1)
 	else:
 		var has_survivors = false
 		if camp.player_army != null:
@@ -330,7 +338,7 @@ func finish_return(camp: CampData):
 			is_scout_mission = true
 
 		var result = {
-			"won": is_scout_mission,
+			"won": true,
 			"is_scout_mission": is_scout_mission,
 			"casualties_percent": 0.0,
 			"gold_reward": 0.0,
