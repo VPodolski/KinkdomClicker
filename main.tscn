@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cm3y61l8qj7d3" path="res://UI/KingdomVisualizer.tscn" id="2_kvis"]
 [ext_resource type="PackedScene" uid="uid://d3yq8v12wx5a9" path="res://UI/WarVisualizer.tscn" id="3_wvis"]
 [ext_resource type="PackedScene" uid="uid://cprkevk7vrjvn" path="res://UI/ExpeditionMap.tscn" id="4_emap"]
+[ext_resource type="Theme" path="res://UI/main_theme.tres" id="5_theme"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -12,6 +13,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("5_theme")
 script = ExtResource("1_ig7tw")
 
 [node name="RootVBox" type="VBoxContainer" parent="."]

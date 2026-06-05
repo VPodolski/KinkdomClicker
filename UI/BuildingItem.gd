@@ -3,12 +3,12 @@ extends PanelContainer
 var building
 var index
 
-@onready var icon_rect = $HBoxContainer/IconRect
-@onready var name_label = $HBoxContainer/TextVBox/NameLabel
-@onready var info_label = $HBoxContainer/TextVBox/InfoLabel
-@onready var buy1_button = $HBoxContainer/TextVBox/ActionHBox/Buy1Button
-@onready var buy10_button = $HBoxContainer/TextVBox/ActionHBox/Buy10Button
-@onready var buymax_button = $HBoxContainer/TextVBox/ActionHBox/BuyMaxButton
+@onready var icon_rect = $BgIcon
+@onready var name_label: Label = $MarginContainer/HBoxContainer/TextPanel/TextVBox/NameLabel
+@onready var info_label: Label = $MarginContainer/HBoxContainer/TextPanel/TextVBox/InfoLabel
+@onready var buy1_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/Buy1Button
+@onready var buy10_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/Buy10Button
+@onready var buymax_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/BuyMaxButton
 
 var current_gold_cache: float = 0.0
 
@@ -27,6 +27,8 @@ func setup(_building, _index):
 		var path = "res://assets/buildings/%s.jpg" % building.id
 		if ResourceLoader.exists(path):
 			icon_rect.texture = load(path)
+		else:
+			icon_rect.texture = load("res://icon.svg")
 			
 	update_ui(0)
 
@@ -55,6 +57,8 @@ func update_ui(current_gold: float):
 		var path = "res://assets/buildings/%s.jpg" % building.id
 		if ResourceLoader.exists(path):
 			icon_rect.texture = load(path)
+		else:
+			icon_rect.texture = load("res://icon.svg")
 	
 	var max_affordable = building.get_max_affordable(current_gold)
 	if max_affordable == 0:

@@ -1,6 +1,17 @@
-[gd_scene format=3 uid="uid://bnnssnqqewrut"]
+[gd_scene load_steps=3 format=3 uid="uid://bnnssnqqewrut"]
 
-[ext_resource type="Script" uid="uid://b1jx68vnw8apb" path="res://UI/BuildingItem.gd" id="1_6nidc"]
+[ext_resource type="Script" path="res://UI/BuildingItem.gd" id="1_6nidc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0.08, 0.05, 0.03, 0.65)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 
 [node name="BuildingItem" type="PanelContainer"]
 anchors_preset = 1
@@ -9,55 +20,79 @@ anchor_right = 1.0
 offset_left = -76.0
 offset_bottom = 31.0
 grow_horizontal = 0
+clip_children = 2
 script = ExtResource("1_6nidc")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="BgIcon" type="TextureRect" parent="."]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Overlay" type="ColorRect" parent="."]
+visible = false
+layout_mode = 2
+color = Color(0.1, 0.05, 0.0, 0.75)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="IconRect" type="TextureRect" parent="HBoxContainer"]
-custom_minimum_size = Vector2(100, 100)
-layout_mode = 2
-size_flags_vertical = 4
-expand_mode = 1
-stretch_mode = 5
-
-[node name="TextVBox" type="VBoxContainer" parent="HBoxContainer"]
+[node name="TextPanel" type="PanelContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_overlay")
+
+[node name="TextVBox" type="VBoxContainer" parent="MarginContainer/HBoxContainer/TextPanel"]
+layout_mode = 2
 theme_override_constants/separation = 5
 alignment = 1
 
-[node name="NameLabel" type="Label" parent="HBoxContainer/TextVBox"]
+[node name="Spacer" type="Control" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.909804, 0.780392, 0.482353, 1)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.5
+
+[node name="NameLabel" type="Label" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 18
-text = "Название здания"
+text = "Building Name"
 autowrap_mode = 3
 
-[node name="InfoLabel" type="Label" parent="HBoxContainer/TextVBox"]
+[node name="InfoLabel" type="Label" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_colors/font_color = Color(0.95, 0.95, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 14
-text = "Описание здания..."
+text = "Building Description"
 autowrap_mode = 3
 
-[node name="ActionHBox" type="HBoxContainer" parent="HBoxContainer/TextVBox"]
+[node name="ActionHBox" type="HBoxContainer" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Buy1Button" type="Button" parent="HBoxContainer/TextVBox/ActionHBox"]
+[node name="Buy1Button" type="Button" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox"]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 text = "Купить"
 
-[node name="Buy10Button" type="Button" parent="HBoxContainer/TextVBox/ActionHBox"]
+[node name="Buy10Button" type="Button" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox"]
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 text = "x10"
 
-[node name="BuyMaxButton" type="Button" parent="HBoxContainer/TextVBox/ActionHBox" unique_id=99991234]
+[node name="BuyMaxButton" type="Button" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 text = "Макс"

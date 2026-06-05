@@ -5,16 +5,16 @@ signal train_pressed(troop, amount)
 
 var troop: TroopData
 
-@onready var icon_rect: TextureRect = $HBoxContainer/IconRect
-@onready var name_label: Label = $HBoxContainer/MainVBox/VBoxContainer/NameLabel
-@onready var description_label: Label = $HBoxContainer/MainVBox/VBoxContainer/InfoLabel
-@onready var stats_label: Label = $HBoxContainer/MainVBox/VBoxContainer/StatsLabel
-@onready var time_label: Label = $HBoxContainer/MainVBox/VBoxContainer/TimeLabel
-@onready var progress_bar: ProgressBar = $HBoxContainer/MainVBox/VBoxContainer/ProgressBar
+@onready var icon_rect: TextureRect = $BgIcon
+@onready var name_label: Label = $MarginContainer/HBoxContainer/TextPanel/MainVBox/VBoxContainer/NameLabel
+@onready var description_label: Label = $MarginContainer/HBoxContainer/TextPanel/MainVBox/VBoxContainer/InfoLabel
+@onready var stats_label: Label = $MarginContainer/HBoxContainer/TextPanel/MainVBox/VBoxContainer/StatsLabel
+@onready var time_label: Label = $MarginContainer/HBoxContainer/TextPanel/MainVBox/VBoxContainer/TimeLabel
+@onready var progress_bar: ProgressBar = $MarginContainer/HBoxContainer/TextPanel/MainVBox/VBoxContainer/ProgressBar
 
-@onready var buy1_button: Button = $HBoxContainer/MainVBox/ActionHBox/Buy1Button
-@onready var buy10_button: Button = $HBoxContainer/MainVBox/ActionHBox/Buy10Button
-@onready var buymax_button: Button = $HBoxContainer/MainVBox/ActionHBox/BuyMaxButton
+@onready var buy1_button: Button = $MarginContainer/HBoxContainer/TextPanel/MainVBox/ActionHBox/Buy1Button
+@onready var buy10_button: Button = $MarginContainer/HBoxContainer/TextPanel/MainVBox/ActionHBox/Buy10Button
+@onready var buymax_button: Button = $MarginContainer/HBoxContainer/TextPanel/MainVBox/ActionHBox/BuyMaxButton
 
 var current_gold_cache: float = 0.0
 
@@ -31,6 +31,8 @@ func setup(_troop: TroopData) -> void:
 	var path = "res://assets/troops/%s.png" % troop.id
 	if ResourceLoader.exists(path):
 		icon_rect.texture = load(path)
+	else:
+		icon_rect.texture = load("res://icon.svg")
 
 func update_ui(current_gold: float, current_speed: float = 1.0, net_income: float = 0.0, upkeep_mult: float = 1.0) -> void:
 	if troop == null:

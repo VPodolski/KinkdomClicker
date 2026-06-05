@@ -38,7 +38,7 @@ var notifications_container: VBoxContainer
 var battle_results_window: BattleResultsWindow
 
 func _ready():
-	apply_medieval_theme()
+	apply_tabular_fonts()
 	await get_tree().process_frame
 	var tab_idx = achievements_tab.get_index()
 	right_panel.set_tab_hidden(tab_idx, true)
@@ -599,153 +599,22 @@ func _on_rebirth_completed():
 	update_prestige_ui()
 	right_panel.current_tab = 0
 
-func apply_medieval_theme() -> void:
-	var th = Theme.new()
-	
+func apply_tabular_fonts() -> void:
+	if not self.theme:
+		return
 	var font_var = FontVariation.new()
 	font_var.base_font = ThemeDB.fallback_font
 	var tnum_tag = TextServerManager.get_primary_interface().name_to_tag("tnum")
 	font_var.opentype_features = { tnum_tag: 1 }
-	th.set_font("font", "Label", font_var)
-	th.set_font("font", "Button", font_var)
+	self.theme.set_font("font", "Label", font_var)
+	self.theme.set_font("font", "Button", font_var)
 	
-	# Medieval Colors
-	var color_wood_dark = Color("#2C1E16")
-	var color_wood_medium = Color("#4A3320")
-	var color_wood_light = Color("#6B4C31")
-	var color_gold = Color("#C5A059")
-	var color_gold_hover = Color("#E8C77B")
-	var color_gold_dark = Color("#8B6E32")
-	var _color_parchment = Color("#E8DCC4")
-	var color_text_light = Color("#FCEFC7")
-	
-	# PanelContainer / Panel
-	var panel_style = StyleBoxFlat.new()
-	panel_style.bg_color = color_wood_dark
-	panel_style.border_width_left = 3
-	panel_style.border_width_top = 3
-	panel_style.border_width_right = 3
-	panel_style.border_width_bottom = 3
-	panel_style.border_color = color_gold_dark
-	panel_style.corner_radius_top_left = 6
-	panel_style.corner_radius_top_right = 6
-	panel_style.corner_radius_bottom_left = 6
-	panel_style.corner_radius_bottom_right = 6
-	panel_style.shadow_color = Color(0,0,0, 0.6)
-	panel_style.shadow_size = 6
-	panel_style.content_margin_left = 12
-	panel_style.content_margin_right = 12
-	panel_style.content_margin_top = 12
-	panel_style.content_margin_bottom = 12
-	th.set_stylebox("panel", "PanelContainer", panel_style)
-	th.set_stylebox("panel", "Panel", panel_style)
-	
-	# Button Normal
-	var btn_normal = StyleBoxFlat.new()
-	btn_normal.bg_color = color_wood_medium
-	btn_normal.border_width_left = 2
-	btn_normal.border_width_top = 2
-	btn_normal.border_width_right = 2
-	btn_normal.border_width_bottom = 2
-	btn_normal.border_color = color_gold_dark
-	btn_normal.corner_radius_top_left = 4
-	btn_normal.corner_radius_top_right = 4
-	btn_normal.corner_radius_bottom_left = 4
-	btn_normal.corner_radius_bottom_right = 4
-	btn_normal.content_margin_left = 10
-	btn_normal.content_margin_right = 10
-	btn_normal.content_margin_top = 8
-	btn_normal.content_margin_bottom = 8
-	th.set_stylebox("normal", "Button", btn_normal)
-	
-	# Button Hover
-	var btn_hover = btn_normal.duplicate()
-	btn_hover.bg_color = color_wood_light
-	btn_hover.border_color = color_gold_hover
-	th.set_stylebox("hover", "Button", btn_hover)
-	
-	# Button Pressed
-	var btn_pressed = btn_normal.duplicate()
-	btn_pressed.bg_color = color_wood_dark
-	btn_pressed.border_color = color_gold
-	th.set_stylebox("pressed", "Button", btn_pressed)
-	
-	# Button Disabled
-	var btn_disabled = btn_normal.duplicate()
-	btn_disabled.bg_color = Color("#222222")
-	btn_disabled.border_color = Color("#444444")
-	th.set_stylebox("disabled", "Button", btn_disabled)
-	
-	th.set_color("font_color", "Button", color_text_light)
-	th.set_color("font_hover_color", "Button", Color.WHITE)
-	th.set_color("font_pressed_color", "Button", color_text_light)
-	th.set_color("font_disabled_color", "Button", Color.GRAY)
-	
-	# TabContainer
-	var tab_panel = panel_style.duplicate()
-	th.set_stylebox("panel", "TabContainer", tab_panel)
-	
-	var tab_selected = btn_hover.duplicate()
-	tab_selected.corner_radius_bottom_left = 0
-	tab_selected.corner_radius_bottom_right = 0
-	th.set_stylebox("tab_selected", "TabContainer", tab_selected)
-	
-	var tab_unselected = btn_normal.duplicate()
-	tab_unselected.corner_radius_bottom_left = 0
-	tab_unselected.corner_radius_bottom_right = 0
-	tab_unselected.content_margin_top = 6
-	tab_unselected.content_margin_bottom = 6
-	th.set_stylebox("tab_unselected", "TabContainer", tab_unselected)
-	
-	# ScrollBar
-	var scroll = StyleBoxFlat.new()
-	scroll.bg_color = color_wood_dark
-	scroll.corner_radius_top_left = 4
-	scroll.corner_radius_top_right = 4
-	scroll.corner_radius_bottom_left = 4
-	scroll.corner_radius_bottom_right = 4
-	scroll.content_margin_left = 10
-	scroll.content_margin_right = 10
-	scroll.content_margin_top = 10
-	scroll.content_margin_bottom = 10
-	th.set_stylebox("scroll", "VScrollBar", scroll)
-	th.set_stylebox("scroll", "HScrollBar", scroll)
-	
-	var grabber = StyleBoxFlat.new()
-	grabber.bg_color = color_gold_dark
-	grabber.corner_radius_top_left = 4
-	grabber.corner_radius_top_right = 4
-	grabber.corner_radius_bottom_left = 4
-	grabber.corner_radius_bottom_right = 4
-	th.set_stylebox("grabber", "VScrollBar", grabber)
-	th.set_stylebox("grabber_highlight", "VScrollBar", grabber)
-	th.set_stylebox("grabber_pressed", "VScrollBar", grabber)
-	
-	# Progress Bar
-	var prog_bg = StyleBoxFlat.new()
-	prog_bg.bg_color = color_wood_dark
-	prog_bg.border_width_left = 2
-	prog_bg.border_width_top = 2
-	prog_bg.border_width_right = 2
-	prog_bg.border_width_bottom = 2
-	prog_bg.border_color = color_gold_dark
-	th.set_stylebox("background", "ProgressBar", prog_bg)
-	
-	var prog_fg = StyleBoxFlat.new()
-	prog_fg.bg_color = color_gold
-	th.set_stylebox("fill", "ProgressBar", prog_fg)
-	
-	# Labels
-	th.set_color("font_color", "Label", color_text_light)
-	
-	self.theme = th
-	
-	# Global Background (LeftPanel)
+	# Global Background
 	var bg = Panel.new()
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var bg_style = StyleBoxFlat.new()
-	bg_style.bg_color = Color("#1A110B") # very dark wood / stone
+	bg_style.bg_color = Color("#181716") # dark stone
 	bg.add_theme_stylebox_override("panel", bg_style)
 	add_child(bg)
 	move_child(bg, 0)

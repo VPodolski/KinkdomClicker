@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://cx4x0qabcde12"]
+[gd_scene load_steps=3 format=3 uid="uid://cx4x0qabcde12"]
 
 [ext_resource type="Script" path="res://UI/BattleResultsWindow.gd" id="1_battle"]
+[ext_resource type="Theme" path="res://UI/main_theme.tres" id="2_theme"]
 
 [node name="BattleResultsWindow" type="PanelContainer"]
+theme = ExtResource("2_theme")
 custom_minimum_size = Vector2(400, 0)
 anchors_preset = 8
 anchor_left = 0.5
