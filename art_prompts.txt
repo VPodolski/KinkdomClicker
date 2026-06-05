@@ -1,0 +1,18 @@
+=== Основной промпт для генерации зданий и лагерей ===
+
+ENG:
+Cozy pixel art, low detail 16-bit style, warm and nostalgic lighting. A functional [НАЗВАНИЕ ЗДАНИЯ/ЛАГЕРЯ], clear and easily recognizable purpose, clean silhouette. Full frame, borderless, no UI elements, no frames. Warm, inviting color palette.
+
+RU (для понимания):
+Уютный пиксель-арт, низкая детализация в стиле 16-бит, теплое и ностальгическое освещение. Функциональное [НАЗВАНИЕ ЗДАНИЯ/ЛАГЕРЯ], ясное и легко узнаваемое предназначение, чистый силуэт. Полный кадр, без рамок, без элементов интерфейса. Теплая, ламповая цветовая палитра.
+
+=== Примеры для лагерей варваров ===
+
+Варварский дозор (Barbarian Patrol):
+"Cozy pixel art, low detail 16-bit style, warm and nostalgic lighting. A small functional barbarian patrol camp with a lookout tower and a campfire, clear and easily recognizable purpose. Full frame, borderless. Warm, inviting color palette."
+
+Лагерь наемников (Mercenary Camp):
+"Cozy pixel art, low detail 16-bit style, warm and nostalgic lighting. A functional mercenary camp with tents and weapon racks, clear and easily recognizable purpose. Full frame, borderless. Warm, inviting color palette."
+
+Врата Бездны (Abyssal Gates):
+"Cozy pixel art, low detail 16-bit style, warm but slightly eerie lighting. A functional dark portal or abyssal gate surrounded by barbarian spikes, clear and easily recognizable purpose. Full frame, borderless. Warm, nostalgic color palette."
