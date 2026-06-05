@@ -22,17 +22,42 @@ func _init(_game: Node):
 	game = _game
 	spawn_initial_camps()
 
+const BARBARIAN_CAMPAIGN = [
+	{"name": "Варварский дозор", "power": 500.0, "time": 30.0, "is_boss": false},
+	{"name": "Лагерь наемников", "power": 1500.0, "time": 45.0, "is_boss": false},
+	{"name": "Застава у реки", "power": 4000.0, "time": 60.0, "is_boss": false},
+	{"name": "Укрепленный форт", "power": 10000.0, "time": 90.0, "is_boss": false},
+	{"name": "Перевал дикарей", "power": 25000.0, "time": 120.0, "is_boss": false},
+	{"name": "Город изгоев", "power": 60000.0, "time": 150.0, "is_boss": false},
+	{"name": "Осада крепости", "power": 150000.0, "time": 180.0, "is_boss": false},
+	{"name": "Гвардия вождя", "power": 400000.0, "time": 240.0, "is_boss": false},
+	{"name": "Врата Бездны", "power": 1000000.0, "time": 300.0, "is_boss": false},
+	{"name": "Король Варваров", "power": 3000000.0, "time": 600.0, "is_boss": true}
+]
+
+var current_stage_index: int = 0
+
 func spawn_initial_camps():
-	spawn_camp(Vector2(0.2, 0.2), 1500.0, 30.0) # Близкий легкий
-	spawn_camp(Vector2(0.7, 0.3), 5000.0, 60.0) # Средний
-	spawn_camp(Vector2(0.4, 0.8), 15000.0, 120.0) # Дальний сложный
+	# Координаты для красивого пути на карте (зиг-заг снизу вверх)
+	var positions = [
+		Vector2(0.1, 0.80), Vector2(0.3, 0.72),
+		Vector2(0.1, 0.64), Vector2(0.3, 0.56),
+		Vector2(0.1, 0.48), Vector2(0.3, 0.40),
+		Vector2(0.1, 0.32), Vector2(0.3, 0.24),
+		Vector2(0.1, 0.16), Vector2(0.3, 0.08)
+	]
+	
+	for i in range(BARBARIAN_CAMPAIGN.size()):
+		var stage = BARBARIAN_CAMPAIGN[i]
+		var is_boss = stage.get("is_boss", false)
+		var is_unlocked = (i <= current_stage_index)
+		var camp = CampData.new("camp_" + str(i), stage["name"], positions[i], stage["power"], stage["time"], is_boss, is_unlocked)
+		generate_enemy_army(camp)
+		camps.append(camp)
+		camp_spawned.emit(camp)
 
 func spawn_camp(pos: Vector2, power: float, time: float):
-	var camp = CampData.new("camp_" + str(next_camp_id), pos, power, time)
-	next_camp_id += 1
-	generate_enemy_army(camp)
-	camps.append(camp)
-	camp_spawned.emit(camp)
+	pass # Заглушка, больше не используется для случайных лагерей
 
 func generate_enemy_army(camp: CampData):
 	var remaining_power = camp.exact_power
@@ -60,8 +85,12 @@ func generate_enemy_army(camp: CampData):
 		var t = game.war.get_troop_by_id(troop_id)
 		new_power += camp.enemy_troops[troop_id] * t.base_power
 	camp.exact_power = new_power
-	camp.gold_reward = camp.exact_power * 50.0
-	camp.captives_reward = max(1, int(camp.exact_power / 100.0))
+	if camp.is_boss:
+		camp.gold_reward = camp.exact_power * 500.0
+		camp.captives_reward = max(10, int(camp.exact_power / 10.0))
+	else:
+		camp.gold_reward = camp.exact_power * 50.0
+		camp.captives_reward = max(1, int(camp.exact_power / 100.0))
 	
 	camp.enemy_scouts_count = 0
 	if camp.exact_power > 2000.0:
@@ -295,6 +324,8 @@ func finish_return(camp: CampData):
 					t.count += amount
 	
 	if camp.is_defeated:
+		camp.status = CampData.Status.DEFEATED # предотвращает бесконечный цикл
+		camp.player_army = null
 		game.economy.add_gold(camp.gold_reward)
 		total_captives += camp.captives_reward
 		commander_xp += camp.exact_power * 0.1
@@ -314,19 +345,14 @@ func finish_return(camp: CampData):
 		}
 		expedition_finished.emit(result)
 		
-		camps.erase(camp)
-		camp_removed.emit(camp.id)
-		
-		# Спавним новый лагерь
-		var original_power = camp.gold_reward / 50.0
-		
-		var new_pos = Vector2.ZERO
-		for i in range(10):
-			new_pos = Vector2(randf_range(0.2, 0.8), randf_range(0.15, 0.85))
-			if new_pos.distance_to(camp.position) > 0.3:
-				break
-				
-		spawn_camp(new_pos, original_power * 1.2, camp.distance_time * 1.1)
+		# Открываем следующий лагерь
+		if current_stage_index < BARBARIAN_CAMPAIGN.size() - 1:
+			current_stage_index += 1
+			var next_name = BARBARIAN_CAMPAIGN[current_stage_index].name
+			for c in camps:
+				if c.camp_name == next_name and not c.is_unlocked:
+					c.is_unlocked = true
+					camp_updated.emit(c)
 	else:
 		var has_survivors = false
 		if camp.player_army != null:
@@ -338,7 +364,7 @@ func finish_return(camp: CampData):
 			is_scout_mission = true
 
 		var result = {
-			"won": true,
+			"won": false,
 			"is_scout_mission": is_scout_mission,
 			"casualties_percent": 0.0,
 			"gold_reward": 0.0,

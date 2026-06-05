@@ -441,12 +441,7 @@ func update_visibility() -> void:
 			continue
 
 
-		if upgrade.cost <= max_visible_cost:
-			upgrade.has_been_seen = true
-
-		if not upgrade.has_been_seen:
-			child.visible = false
-			continue
+		upgrade.has_been_seen = true
 
 		# Показываем апгрейд.
 		child.visible = true
@@ -463,26 +458,14 @@ func update_visibility() -> void:
 	var first_unseen_found = false
 	for child in buildings_container.get_children():
 		var b = child.building
-		if b.id == "farm" or b.cost <= max_visible_cost:
-			b.has_been_seen = true
-			
-		if b.has_been_seen:
-			b.is_masked = false
-			child.visible = true
-			visible_buildings += 1
-			if b.cost > current_gold:
-				child.modulate.a = 0.5
-			else:
-				child.modulate.a = 1.0
+		b.has_been_seen = true
+		b.is_masked = false
+		child.visible = true
+		visible_buildings += 1
+		if b.cost > current_gold:
+			child.modulate.a = 0.5
 		else:
-			if not first_unseen_found:
-				b.is_masked = true
-				child.visible = true
-				child.modulate.a = 0.5
-				first_unseen_found = true
-				visible_buildings += 1
-			else:
-				child.visible = false
+			child.modulate.a = 1.0
 			
 	var forge_tab = $RootVBox/HBoxContainer/RightPanel/ForgeTab
 	if forge_tab:

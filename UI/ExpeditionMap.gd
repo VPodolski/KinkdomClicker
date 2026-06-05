@@ -1,7 +1,7 @@
 extends Control
 class_name ExpeditionMap
 
-@onready var camps_container = $CampsContainer
+@onready var camps_container = $ScrollContainer/CampsContainer
 
 var deployment_window: DeploymentWindow
 
@@ -34,6 +34,7 @@ func _on_camp_spawned(camp: CampData):
 	node.setup(camp)
 	node.camp_clicked.connect(_on_camp_clicked)
 	camps_container.add_child(node)
+	camps_container.move_child(node, 0)
 
 func _on_camp_removed(camp_id: String):
 	var node = camps_container.get_node_or_null(camp_id)
@@ -47,17 +48,16 @@ func _on_camp_removed(camp_id: String):
 func _on_camp_updated(camp: CampData):
 	var node = camps_container.get_node_or_null(camp.id)
 	if node:
-		if camp.is_defeated:
-			node.queue_free()
-			if selected_camp == camp:
-				deployment_window.hide()
-				selected_camp = null
-		else:
-			node.update_visuals()
+		node.update_visuals()
+		if camp.is_defeated and selected_camp == camp:
+			deployment_window.hide()
+			selected_camp = null
 	if selected_camp == camp and deployment_window.visible:
 		deployment_window.setup(camp, GameLogic)
 
 func _on_camp_clicked(camp: CampData):
+	if not camp.is_unlocked:
+		return
 	selected_camp = camp
 	if camp.status == CampData.Status.IDLE:
 		deployment_window.setup(camp, GameLogic)
