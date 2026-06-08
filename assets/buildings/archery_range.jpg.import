@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg6bfyk8cfy1s"
-path="res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"
+uid="uid://dvw1aq4nkwicn"
+path="res://.godot/imported/archery_range.jpg-31dcf6bac42bd7942b3f2506b50f2341.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buildings/wonders.jpg"
-dest_files=["res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"]
+source_file="res://assets/buildings/archery_range.jpg"
+dest_files=["res://.godot/imported/archery_range.jpg-31dcf6bac42bd7942b3f2506b50f2341.ctex"]
 
 [params]
 

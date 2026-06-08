@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg6bfyk8cfy1s"
-path="res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"
+uid="uid://dprcvoik6so1o"
+path="res://.godot/imported/stables.jpg-37fa4f76da95a1914029db2825fc8717.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buildings/wonders.jpg"
-dest_files=["res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"]
+source_file="res://assets/buildings/stables.jpg"
+dest_files=["res://.godot/imported/stables.jpg-37fa4f76da95a1914029db2825fc8717.ctex"]
 
 [params]
 

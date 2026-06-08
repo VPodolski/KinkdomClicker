@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg6bfyk8cfy1s"
-path="res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"
+uid="uid://mx0iq77x3jcv"
+path="res://.godot/imported/grand_cathedral.jpg-7ec7e6201e7ce236c0e1a267dfa50d71.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/buildings/wonders.jpg"
-dest_files=["res://.godot/imported/wonders.jpg-eca6180996485a23bcc8f9a29dda89a9.ctex"]
+source_file="res://assets/buildings/grand_cathedral.jpg"
+dest_files=["res://.godot/imported/grand_cathedral.jpg-7ec7e6201e7ce236c0e1a267dfa50d71.ctex"]
 
 [params]
 
