@@ -36,7 +36,7 @@ func setup(_camp: CampData):
 		
 	update_visuals()
 
-func _process(delta):
+func _process(_delta):
 	if camp.status == CampData.Status.TRAVELING or camp.status == CampData.Status.RETURNING or camp.status == CampData.Status.SCOUTING:
 		update_visuals()
 

@@ -9,7 +9,6 @@ var selected_camp: CampData
 
 func _ready():
 	GameLogic.expeditions.camp_spawned.connect(_on_camp_spawned)
-	GameLogic.expeditions.camp_removed.connect(_on_camp_removed)
 	GameLogic.expeditions.camp_updated.connect(_on_camp_updated)
 	
 	deployment_window = preload("res://UI/DeploymentWindow.tscn").instantiate()
@@ -35,15 +34,6 @@ func _on_camp_spawned(camp: CampData):
 	node.camp_clicked.connect(_on_camp_clicked)
 	camps_container.add_child(node)
 	camps_container.move_child(node, 0)
-
-func _on_camp_removed(camp_id: String):
-	var node = camps_container.get_node_or_null(camp_id)
-	if node:
-		node.queue_free()
-		
-	if selected_camp and selected_camp.id == camp_id:
-		deployment_window.hide()
-		selected_camp = null
 
 func _on_camp_updated(camp: CampData):
 	var node = camps_container.get_node_or_null(camp.id)

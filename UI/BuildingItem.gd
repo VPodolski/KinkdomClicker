@@ -98,9 +98,10 @@ func update_ui(current_gold: float):
 		var troop_upkeep_single = linked_troop.upkeep * upkeep_mult
 		var total_troop_upkeep = linked_troop.get_total_upkeep() * upkeep_mult
 		
-		income_str = "Производит: %s\nВ армии: %d\nСодержание войск: -%s 🪙/сек" % [
+		income_str = "Производит: %s\nВ армии: %d\nСодержание войск: -%s/ед (-%s всего) 🪙/сек" % [
 			linked_troop.name,
 			linked_troop.count,
+			_format_number(troop_upkeep_single),
 			_format_number(total_troop_upkeep)
 		]
 		

@@ -2,7 +2,6 @@ class_name ExpeditionManager
 extends Node
 
 signal camp_spawned(camp)
-signal camp_removed(camp_id)
 signal camp_updated(camp)
 signal combat_resolved(camp, won, casualties_percent, log_message)
 signal expedition_returned(log_message)
@@ -56,8 +55,6 @@ func spawn_initial_camps():
 		camps.append(camp)
 		camp_spawned.emit(camp)
 
-func spawn_camp(pos: Vector2, power: float, time: float):
-	pass # Заглушка, больше не используется для случайных лагерей
 
 func generate_enemy_army(camp: CampData):
 	var remaining_power = camp.exact_power
