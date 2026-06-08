@@ -31,9 +31,21 @@ func _init_upgrades():
 		print("Failed to open upgrades.json")
 
 func reset():
+	var seen_upgrades = []
+	for u in upgrades:
+		if u.has_been_seen:
+			seen_upgrades.append(u.name)
+	for u in active_upgrades:
+		if u.has_been_seen:
+			seen_upgrades.append(u.name)
+
 	active_upgrades.clear()
 	upgrades.clear()
 	_init_upgrades()
+	
+	for u in upgrades:
+		if u.name in seen_upgrades:
+			u.has_been_seen = true
 
 func apply_upgrade(upgrade):
 	EffectSystem.apply(game, upgrade)

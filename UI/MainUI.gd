@@ -144,6 +144,8 @@ func check_war_mode_unlock():
 	var barracks = game.buildings.get_building_by_name("Казармы")
 	if barracks and barracks.count > 0:
 		mode_toggle_button.visible = true
+	else:
+		mode_toggle_button.visible = false
 
 func update_war_info(power: float):
 	war_info_label.text = "Военная мощь: %s" % game.format_number(power)
@@ -264,15 +266,23 @@ func update_upgrades_ui():
 			remaining_text
 		)
 
+	var available_upgrades_count = 0
+	for u in game.upgrades.upgrades:
+		if not u.is_crafting and not game.upgrades.active_upgrades.has(u):
+			available_upgrades_count += 1
+			
 	var affordable_upgrades = game.get_affordable_upgrades()
 	var forge_tab_idx = right_panel.get_node("ForgeTab").get_index()
 	
+	if available_upgrades_count > 0:
+		right_panel.set_tab_title(forge_tab_idx, "Кузница (%d)" % available_upgrades_count)
+	else:
+		right_panel.set_tab_title(forge_tab_idx, "Кузница")
+		
 	if affordable_upgrades.size() > 0:
-		right_panel.set_tab_title(forge_tab_idx, "Кузница (%d)" % affordable_upgrades.size())
 		buy_all_upgrades_button.text = "Купить всё (%d)" % affordable_upgrades.size()
 		buy_all_upgrades_button.disabled = false
 	else:
-		right_panel.set_tab_title(forge_tab_idx, "Кузница")
 		buy_all_upgrades_button.text = "Купить всё"
 		buy_all_upgrades_button.disabled = true
 		
@@ -424,6 +434,7 @@ func update_visibility() -> void:
 		max_visible_cost = 100.0
 		
 	var visible_upgrades = 0
+	var first_unseen_upgrade_found = false
 	for child in upgrades_container.get_children():
 		var upgrade = child.upgrade
 
@@ -440,12 +451,22 @@ func update_visibility() -> void:
 			visible_upgrades += 1
 			continue
 
-
-		upgrade.has_been_seen = true
-
-		# Показываем апгрейд.
-		child.visible = true
-		visible_upgrades += 1
+		if upgrade.cost > max_visible_cost:
+			if not first_unseen_upgrade_found:
+				child.visible = true
+				if not upgrade.has_been_seen:
+					upgrade.is_masked = true
+				else:
+					upgrade.is_masked = false
+				first_unseen_upgrade_found = true
+				visible_upgrades += 1
+			else:
+				child.visible = false
+		else:
+			upgrade.has_been_seen = true
+			upgrade.is_masked = false
+			child.visible = true
+			visible_upgrades += 1
 
 		# Если пока нельзя купить — делаем полупрозрачным.
 		if upgrade.cost > current_gold:
@@ -473,7 +494,7 @@ func update_visibility() -> void:
 			child.visible = true
 			visible_buildings += 1
 			
-		if b.cost > current_gold:
+		if b.cost > current_gold and b.count == 0:
 			child.modulate.a = 0.5
 		else:
 			child.modulate.a = 1.0
@@ -557,7 +578,7 @@ func update_prestige_ui():
 
 	var current_bonus = (game.economy.prestige_multiplier - 1.0) * 100.0
 	var prayers_sec = game.buildings.get_total_prayer_income(game.economy.prayer_multiplier)
-	prestige_label.text = "Бонус: +%.1f%%  |  🙏/сек: %s" % [current_bonus, game.format_number(prayers_sec)]
+	prestige_label.text = "Бонус: +%s%%  |  🙏/сек: %s" % [game.format_number(current_bonus), game.format_number(prayers_sec)]
 
 	var has_chapel = false
 	var chapel = game.buildings.get_building_by_name("Часовня")
@@ -591,6 +612,12 @@ func _on_rebirth_completed():
 	create_upgrades_ui()
 	update_achievements_ui()
 	update_prestige_ui()
+	
+	kingdom_screen.visible = true
+	war_screen.visible = false
+	mode_toggle_button.text = "⚔️ Война"
+	check_war_mode_unlock()
+	
 	right_panel.current_tab = 0
 
 func apply_tabular_fonts() -> void:

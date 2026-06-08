@@ -37,6 +37,17 @@ func update_ui(
 	if upgrade == null:
 		return
 
+	if upgrade.is_masked:
+		name_label.text = "???"
+		description_label.text = "Секретное улучшение"
+		preview_label.visible = false
+		time_label.visible = false
+		progress_bar.modulate.a = 0.0
+		craft_button.disabled = true
+		craft_button.text = "Создать (???)"
+		modulate.a = 0.65
+		return
+
 	# Название и описание могут изменяться, если ты захочешь динамически
 	# обновлять description, поэтому обновляем каждый раз.
 	name_label.text = upgrade.name

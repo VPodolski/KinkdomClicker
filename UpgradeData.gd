@@ -13,6 +13,7 @@ var source_building: String = ""
 var is_crafting: bool = false
 var progress: float = 0.0
 var has_been_seen: bool = false
+var is_masked: bool = false
 
 
 func _init(
