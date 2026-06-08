@@ -15,23 +15,24 @@ var ascension: AscensionManager
 var war: WarManager
 var expeditions: ExpeditionManager
 
-var currentGoldPerSecond = 0.0
-var currentPrayerIncome = 0.0
+var currentGoldPerSecond: BigNum = BigNum.new(0.0)
+var currentPrayerIncome: BigNum = BigNum.new(0.0)
 
 func recalculate_income():
 	var achievement_multiplier = achievements.get_income_multiplier()
 
 	var income = buildings.get_total_income(economy.global_income_multiplier)
-	income *= achievement_multiplier
-	income *= economy.prestige_multiplier
+	income = income.mul(achievement_multiplier)
+	income = income.mul(economy.prestige_multiplier)
 	
 	var upkeep = buildings.get_total_upkeep(economy.upkeep_reduction_multiplier)
 	if war:
-		upkeep += war.get_total_upkeep() * economy.upkeep_reduction_multiplier
-	var final_income = income - upkeep
+		var war_upkeep = war.get_total_upkeep().mul(economy.upkeep_reduction_multiplier)
+		upkeep = upkeep.add(war_upkeep)
+	var final_income = income.sub(upkeep)
 	
 	if expeditions:
-		final_income *= (1.0 + expeditions.total_captives * 0.001) # +0.1% per captive
+		final_income = final_income.mul(1.0 + expeditions.total_captives * 0.001)
 
 	currentGoldPerSecond = final_income
 	currentPrayerIncome = buildings.get_total_prayer_income(economy.prayer_multiplier)
@@ -50,12 +51,13 @@ func _ready():
 	Engine.time_scale = 1000.0
 	print("Developer Mode: ON by default (Speed x1000)")
 
-func get_click_value() -> float:
+func get_click_value() -> BigNum:
 	var achievement_multiplier = achievements.get_income_multiplier()
 	var income = buildings.get_total_income(economy.global_income_multiplier)
-	income *= achievement_multiplier
-	income *= economy.prestige_multiplier
-	return economy.gold_per_click + income * economy.click_income_ratio
+	income = income.mul(achievement_multiplier)
+	income = income.mul(economy.prestige_multiplier)
+	var click_income = income.mul(economy.click_income_ratio)
+	return economy.gold_per_click.add(click_income)
 
 func on_click():
 	var value = get_click_value()
@@ -89,11 +91,11 @@ func start_upgrade(upgrade: UpgradeData) -> void:
 		upgrades_changed.emit()
 
 func _process(delta):
-	economy.add_gold(currentGoldPerSecond * delta)
-	if economy.gold < 0.0:
-		economy.gold = 0.0
+	economy.add_gold(currentGoldPerSecond.mul(delta))
+	if economy.gold.is_less_than(0.0):
+		economy.gold = BigNum.new(0.0)
 		
-	economy.add_prayers(currentPrayerIncome * delta)
+	economy.add_prayers(currentPrayerIncome.mul(delta))
 
 	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
@@ -121,23 +123,15 @@ func get_forge_speed_multiplier():
 	var forge = buildings.get_building_by_name("Кузница")
 	return 1.0 + economy.forge_speed_multiplier + (forge.count * 0.01)
 
-func format_number(value: float) -> String:
-	if value < 1000.0:
-		return "%.1f" % value
-			
-	var suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]
-	var suffix_index = 0
-	var temp = value
-	
-	while temp >= 1000.0 and suffix_index < suffixes.size() - 1:
-		temp /= 1000.0
-		suffix_index += 1
-		
-	return "%.2f%s" % [temp, suffixes[suffix_index]]
+func format_number(value) -> String:
+	if value is BigNum:
+		return value.format()
+	else:
+		return BigNum.from(value).format()
 
 func perform_rebirth() -> bool:
-	economy.gold = 0.0
-	economy.gold_per_click = 1.0
+	economy.gold = BigNum.new(0.0)
+	economy.gold_per_click = BigNum.new(1.0)
 	economy.click_income_ratio = 0.0
 	economy.global_income_multiplier = 1.0
 	
@@ -162,14 +156,14 @@ func get_affordable_upgrades() -> Array:
 		if not u.is_crafting and not upgrades.active_upgrades.has(u):
 			available.append(u)
 			
-	available.sort_custom(func(a, b): return a.cost < b.cost)
+	available.sort_custom(func(a, b): return a.cost.is_less_than(b.cost))
 	
 	var affordable = []
-	var temp_gold = economy.gold
+	var temp_gold = BigNum.from(economy.gold)
 	for u in available:
-		if temp_gold >= u.cost:
+		if temp_gold.is_greater_equal(u.cost):
 			affordable.append(u)
-			temp_gold -= u.cost
+			temp_gold = temp_gold.sub(u.cost)
 			
 	return affordable
 

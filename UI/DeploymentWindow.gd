@@ -116,17 +116,17 @@ func setup(_camp: CampData, _game: Node):
 	visible = true
 
 func _update_analytics():
-	var total_power = 0.0
+	var total_power = BigNum.new(0.0)
 	var player_count = 0
 	
 	for t_id in selected_troops.keys():
 		var count = selected_troops[t_id]
 		if count > 0:
 			var t = game.war.get_troop_by_id(t_id)
-			total_power += count * t.base_power
+			total_power = total_power.add(t.base_power.mul(float(count)))
 			player_count += count
 			
-	total_power_label.text = "Выбранная мощь: " + str(int(total_power))
+	total_power_label.text = "Выбранная мощь: " + game.format_number(total_power)
 	
 	var enemy_count = camp.get_total_enemy_count()
 	var enemy_power = camp.exact_power
@@ -138,11 +138,11 @@ func _update_analytics():
 		elif player_count >= enemy_count * 5: p_mult = 1.3
 		elif player_count >= enemy_count * 2: p_mult = 1.1
 		
-	var final_p_power = total_power * p_mult
+	var final_p_power = total_power.mul(p_mult)
 	
 	var ratio = 0.0
-	if enemy_power > 0:
-		ratio = final_p_power / enemy_power
+	if enemy_power.is_greater_than(0.0):
+		ratio = final_p_power.div(enemy_power).to_float()
 		
 	if ratio >= 2.0:
 		chance_label.text = "Шанс: Верная победа"

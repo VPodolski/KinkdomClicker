@@ -29,31 +29,31 @@ func get_building_by_id(id: String):
 			return b
 	return null
 
-func get_total_income(global_multiplier):
-	var total = 0.0
+func get_total_income(global_multiplier: float) -> BigNum:
+	var total = BigNum.new(0.0)
 	for b in buildings:
-		total += b.get_income()
-	return total * global_multiplier
+		total = total.add(b.get_income())
+	return total.mul(global_multiplier)
 
-func get_total_prayer_income(prayer_multiplier):
-	var total = 0.0
+func get_total_prayer_income(prayer_multiplier: float) -> BigNum:
+	var total = BigNum.new(0.0)
 	for b in buildings:
-		total += b.get_prayer_income()
-	return total * prayer_multiplier
+		total = total.add(b.get_prayer_income())
+	return total.mul(prayer_multiplier)
 
-func get_total_upkeep(upkeep_reduction_multiplier):
-	var total = 0.0
+func get_total_upkeep(upkeep_reduction_multiplier: float) -> BigNum:
+	var total = BigNum.new(0.0)
 	for b in buildings:
-		total += b.get_total_upkeep()
-	return total * upkeep_reduction_multiplier
+		total = total.add(b.get_total_upkeep())
+	return total.mul(upkeep_reduction_multiplier)
 
-func buy_building(index, economy, net_income, amount = 1):
+func buy_building(index, economy, net_income: BigNum, amount = 1):
 	var b = buildings[index]
 	var total_cost = b.get_cost_for(amount)
 	
-	if b.gold_upkeep > 0.0:
-		var additional_upkeep = b.get_upkeep_for(amount) * economy.upkeep_reduction_multiplier
-		if additional_upkeep >= net_income:
+	if b.gold_upkeep.is_greater_than(0.0):
+		var additional_upkeep = b.get_upkeep_for(amount).mul(economy.upkeep_reduction_multiplier)
+		if net_income != null and additional_upkeep.is_greater_equal(net_income):
 			return false
 	
 	if economy.spend_gold(total_cost):

@@ -7,7 +7,7 @@ static func apply(game: Node, upgrade: UpgradeData) -> void:
 	
 	match upgrade.effect_type:
 		"click_bonus":
-			game.economy.gold_per_click += val
+			game.economy.gold_per_click = game.economy.gold_per_click.add(val)
 		"click_from_income":
 			game.economy.click_income_ratio += val
 		"income_multiplier":
@@ -50,25 +50,23 @@ static func get_text(game: Node, upgrade: UpgradeData) -> String:
 	
 	match upgrade.effect_type:
 		"click_bonus":
-			var b = game.get_click_value() if game.has_method("get_click_value") else game.economy.gold_per_click
-			var a = b + val
-			return "Клик: %s → %s" % [game.format_number(b), game.format_number(a)]
+			return "+%s к силе клика" % game.format_number(val)
 		"click_from_income":
-			var b = game.get_click_value() if game.has_method("get_click_value") else 0.0
-			var total_income = game.buildings.get_total_income(1.0) * total_global_mult
-			var a = b + (total_income * val)
+			var b = game.get_click_value() if game.has_method("get_click_value") else BigNum.new(0.0)
+			var total_income = game.buildings.get_total_income(1.0).mul(total_global_mult)
+			var a = b.add(total_income.mul(val))
 			return "Клик: %s → %s" % [game.format_number(b), game.format_number(a)]
 		"income_multiplier":
 			var b = game.buildings.get_building_by_name(target)
 			if not b:
 				return ""
-			var before = b.get_income_per_unit() * total_global_mult
-			var after = b.income * (b.income_multiplier + b.synergy_bonus + val) * total_global_mult
+			var before = b.get_income_per_unit().mul(total_global_mult)
+			var after = b.income.mul((b.income_multiplier + b.synergy_bonus + val) * total_global_mult)
 			return "%s: %s → %s за шт." % [b.name, game.format_number(before), game.format_number(after)]
 		"global_multiplier":
 			var total_income = game.buildings.get_total_income(1.0)
-			var before = total_income * total_global_mult
-			var after = total_income * (global_mult + val) * ach_mult * pres_mult
+			var before = total_income.mul(total_global_mult)
+			var after = total_income.mul((global_mult + val) * ach_mult * pres_mult)
 			return "Доход: %s/с → %s/с" % [game.format_number(before), game.format_number(after)]
 		"forge_speed":
 			var before = game.get_forge_speed_multiplier()

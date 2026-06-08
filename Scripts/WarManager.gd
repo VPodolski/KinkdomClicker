@@ -8,7 +8,7 @@ signal troop_training_completed(troop)
 var troops: Array[TroopData] = []
 var game: Node
 
-var total_military_power: float = 0.0
+var total_military_power: BigNum = BigNum.new(0.0)
 
 func _init(_game: Node):
 	game = _game
@@ -53,15 +53,15 @@ func reset():
 	troops_changed.emit()
 
 func recalculate_power():
-	total_military_power = 0.0
+	total_military_power = BigNum.new(0.0)
 	for t in troops:
-		total_military_power += t.get_total_power()
+		total_military_power = total_military_power.add(t.get_total_power())
 	military_power_changed.emit(total_military_power)
 
-func get_total_upkeep() -> float:
-	var total = 0.0
+func get_total_upkeep() -> BigNum:
+	var total = BigNum.new(0.0)
 	for t in troops:
-		total += t.get_total_upkeep()
+		total = total.add(t.get_total_upkeep())
 	return total
 
 func get_troop_by_id(id: String):
@@ -73,9 +73,9 @@ func get_troop_by_id(id: String):
 func start_training(troop: TroopData, amount: int):
 	var total_cost = troop.get_cost_for(amount)
 	
-	var additional_upkeep = amount * troop.upkeep * game.economy.upkeep_reduction_multiplier
-	if additional_upkeep > game.currentGoldPerSecond * 0.8:
-		return
+	var additional_upkeep = troop.upkeep.mul(float(amount)).mul(game.economy.upkeep_reduction_multiplier)
+	if additional_upkeep.is_greater_than(game.currentGoldPerSecond.mul(0.8)):
+		return false
 	
 	if game.economy.spend_gold(total_cost):
 		troop.start_training(amount)

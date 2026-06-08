@@ -5,7 +5,7 @@ extends RefCounted
 var troops: Dictionary = {}
 
 # Суммарная базовая сила отряда на момент выхода (до множителей)
-var base_power: float = 0.0
+var base_power: BigNum = BigNum.new(0.0)
 
 # Мораль (Снабжение): от 0.85 (Low) до 1.15 (High)
 var morale_multiplier: float = 1.0
@@ -17,16 +17,16 @@ var is_scouting_mission: bool = false
 
 func _init():
 	troops = {}
-	base_power = 0.0
+	base_power = BigNum.new(0.0)
 	morale_multiplier = 1.0
 	commander_level = 1
 	is_scouting_mission = false
 
-func add_troops(troop_id: String, amount: int, power_per_unit: float):
+func add_troops(troop_id: String, amount: int, power_per_unit: BigNum):
 	if not troops.has(troop_id):
 		troops[troop_id] = 0
 	troops[troop_id] += amount
-	base_power += amount * power_per_unit
+	base_power = base_power.add(power_per_unit.mul(float(amount)))
 
 func get_troop_count(troop_id: String) -> int:
 	return troops.get(troop_id, 0)

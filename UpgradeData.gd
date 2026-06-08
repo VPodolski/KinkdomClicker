@@ -2,7 +2,7 @@ class_name UpgradeData
 
 var name: String
 var description: String
-var cost: float
+var cost: BigNum
 var base_time: float
 
 var effect_type: String
@@ -28,7 +28,7 @@ func _init(
 ):
 	name = _name
 	description = _description
-	cost = _cost
+	cost = BigNum.from(_cost)
 	base_time = _base_time
 	effect_type = _effect_type
 	effect_value = _effect_value

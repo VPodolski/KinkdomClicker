@@ -16,7 +16,7 @@ var troop: TroopData
 @onready var buy10_button: Button = $MarginContainer/HBoxContainer/TextPanel/MainVBox/ActionHBox/Buy10Button
 @onready var buymax_button: Button = $MarginContainer/HBoxContainer/TextPanel/MainVBox/ActionHBox/BuyMaxButton
 
-var current_gold_cache: float = 0.0
+var current_gold_cache = null
 
 func _ready() -> void:
 	buy1_button.pressed.connect(_on_buy_pressed.bind(1))
@@ -34,28 +34,28 @@ func setup(_troop: TroopData) -> void:
 	else:
 		icon_rect.texture = load("res://icon.svg")
 
-func update_ui(current_gold: float, current_speed: float = 1.0, net_income: float = 0.0, upkeep_mult: float = 1.0) -> void:
+func update_ui(current_gold, current_speed: float = 1.0, net_income = null, upkeep_mult: float = 1.0) -> void:
 	if troop == null:
 		return
 		
 	current_gold_cache = current_gold
 
 	stats_label.text = "Сила: %s | Кол-во: %d\nСодержание: -%s 🪙/сек на юнита" % [
-		GameLogic.format_number(troop.base_power * troop.power_multiplier), 
+		GameLogic.format_number(troop.base_power.mul(troop.power_multiplier)), 
 		troop.count,
-		GameLogic.format_number(troop.upkeep * troop.upkeep_multiplier)
+		GameLogic.format_number(troop.upkeep.mul(troop.upkeep_multiplier))
 	]
 	if troop.training_amount > 0:
 		stats_label.text += " (+%d нанимается)" % troop.training_amount
 
-	# Кнопки покупки
-	var can_afford_1 = (1 * troop.upkeep * troop.upkeep_multiplier * upkeep_mult) <= net_income * 0.8
-	var can_afford_10 = (10 * troop.upkeep * troop.upkeep_multiplier * upkeep_mult) <= net_income * 0.8
+	var max_additional_upkeep = net_income.mul(0.8) if net_income != null else BigNum.new(0.0)
+	var can_afford_1 = troop.upkeep.mul(troop.upkeep_multiplier * upkeep_mult).is_less_equal(max_additional_upkeep)
+	var can_afford_10 = troop.upkeep.mul(10.0 * troop.upkeep_multiplier * upkeep_mult).is_less_equal(max_additional_upkeep)
 	
-	buy1_button.disabled = current_gold < troop.get_cost_for(1) or not can_afford_1
-	buy10_button.disabled = current_gold < troop.get_cost_for(10) or not can_afford_10
+	buy1_button.disabled = current_gold.is_less_than(troop.get_cost_for(1)) or not can_afford_1
+	buy10_button.disabled = current_gold.is_less_than(troop.get_cost_for(10)) or not can_afford_10
 	
-	var actual_max = troop.get_max_affordable(current_gold, net_income, upkeep_mult)
+	var actual_max = troop.get_max_affordable(current_gold, net_income, upkeep_mult) if net_income != null else 0
 	if actual_max > 0:
 		buymax_button.text = "Макс (%d)" % actual_max
 		buymax_button.disabled = false
@@ -79,18 +79,13 @@ func update_ui(current_gold: float, current_speed: float = 1.0, net_income: floa
 		time_label.visible = true
 		time_label.text = "Время найма: %.1f сек" % duration
 
-	# Стоимость на кнопках
 	buy1_button.text = "Нанять (%s)" % GameLogic.format_number(troop.get_cost_for(1))
 	
-	# Скрытие кнопок если уже тренируется?
-	# Нет, по ТЗ можно добавлять в очередь: "Если мы уже тренировались, просто добавляем количество в очередь".
-	# Но чтобы не усложнять очередь таймеров, давайте заблокируем найм пока идет текущий.
 	if troop.is_training:
 		buy1_button.disabled = true
 		buy10_button.disabled = true
 		buymax_button.disabled = true
 		
-	# Приглушаем цвет
 	modulate.a = 1.0 if (not buy1_button.disabled or troop.is_training) else 0.65
 
 func _on_buy_pressed(amount: int) -> void:

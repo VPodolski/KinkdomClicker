@@ -29,7 +29,7 @@ func setup(_upgrade: UpgradeData, _index: int = -1) -> void:
 
 
 func update_ui(
-	_current_gold: float,
+	_current_gold,
 	is_unlocked: bool,
 	preview_text: String,
 	remaining_text: String
@@ -48,16 +48,12 @@ func update_ui(
 		modulate.a = 0.65
 		return
 
-	# Название и описание могут изменяться, если ты захочешь динамически
-	# обновлять description, поэтому обновляем каждый раз.
 	name_label.text = upgrade.name
 	description_label.text = upgrade.description
 
-	# Предпросмотр эффекта
 	preview_label.text = preview_text
 	preview_label.visible = preview_text != ""
 
-	# Если апгрейд крафтится
 	if upgrade.is_crafting:
 		craft_button.disabled = true
 		craft_button.text = "Создаётся..."
@@ -71,16 +67,13 @@ func update_ui(
 	else:
 		progress_bar.modulate.a = 0.0
 
-		# Показываем длительность крафта
 		time_label.visible = true
 		var speed = GameLogic.get_forge_speed_multiplier()
 		time_label.text = "Время: %.1f сек" % (upgrade.base_time / speed)
 
-		# Кнопка покупки
 		craft_button.disabled = not is_unlocked
 		craft_button.text = "Создать (%s)" % _format_number(upgrade.cost)
 
-	# Визуально приглушаем недоступные улучшения
 	modulate.a = 1.0 if is_unlocked or upgrade.is_crafting else 0.65
 
 
@@ -89,5 +82,5 @@ func _on_craft_button_pressed() -> void:
 		craft_pressed.emit(upgrade)
 
 
-func _format_number(value: float) -> String:
+func _format_number(value) -> String:
 	return GameLogic.format_number(value)

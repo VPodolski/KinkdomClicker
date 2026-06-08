@@ -34,10 +34,10 @@ func setup(data: Dictionary, game: Node):
 	intel_label.visible = data.get("gathered_intel", false)
 		
 	if is_scout:
-		power_label.text = "Обнаруженная сила: " + str(int(data.enemy_power))
+		power_label.text = "Обнаруженная сила: " + game.format_number(data.enemy_power)
 		enemy_killed_label.text = "Вражеских шпионов устранено: " + str(data.get("enemy_killed", 0))
 	else:
-		power_label.text = "Сила оставшегося врага: " + str(int(data.enemy_power))
+		power_label.text = "Сила оставшегося врага: " + game.format_number(data.enemy_power)
 		enemy_killed_label.text = "Врагов убито: " + str(data.get("enemy_killed", 0))
 	
 	# Очищаем список потерь

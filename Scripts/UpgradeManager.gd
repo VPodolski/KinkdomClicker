@@ -24,7 +24,7 @@ func _init_upgrades():
 					u["name"], u["description"], float(u["cost"]), float(u["base_time"]),
 					u["effect_type"], float(u["effect_value"]), target, source_building
 				))
-			upgrades.sort_custom(func(a, b): return a.cost < b.cost)
+			upgrades.sort_custom(func(a, b): return a.cost.is_less_than(b.cost))
 		else:
 			print("Error parsing upgrades.json: ", json.get_error_message())
 	else:

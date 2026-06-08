@@ -2,13 +2,13 @@ class_name BuildingData
 
 var id: String
 var name: String
-var base_cost: float
-var cost: float
+var base_cost: BigNum
+var cost: BigNum
 
 # Базовый доход одного здания
-var income: float
-var prayer_income: float
-var gold_upkeep: float
+var income: BigNum
+var prayer_income: BigNum
+var gold_upkeep: BigNum
 
 # Количество купленных зданий
 var count: int = 0
@@ -24,11 +24,11 @@ var is_masked: bool = false
 func _init(_id: String, _name: String, _base_cost: float, _income: float, _prayer_income: float = 0.0, _gold_upkeep: float = 0.0):
 	id = _id
 	name = _name
-	base_cost = _base_cost
-	cost = _base_cost
-	income = _income
-	prayer_income = _prayer_income
-	gold_upkeep = _gold_upkeep
+	base_cost = BigNum.from(_base_cost)
+	cost = BigNum.from(_base_cost)
+	income = BigNum.from(_income)
+	prayer_income = BigNum.from(_prayer_income)
+	gold_upkeep = BigNum.from(_gold_upkeep)
 
 
 func buy() -> void:
@@ -36,66 +36,92 @@ func buy() -> void:
 
 func buy_multiple(amount: int) -> void:
 	count += amount
-	cost = int(base_cost * cost_multiplier * pow(1.2, count))
+	cost = _calc_cost(count)
 
-func get_cost_for(amount: int) -> float:
-	var total = 0.0
-	for i in range(amount):
-		total += int(base_cost * cost_multiplier * pow(1.2, count + i))
-	return total
+func _calc_cost(at_count: int) -> BigNum:
+	var multiplier = BigNum.from(1.2).pow_num(float(at_count)).mul(cost_multiplier)
+	return base_cost.mul(multiplier)
 
-func get_max_affordable(current_gold: float, net_income: float = INF, upkeep_mult: float = 1.0) -> int:
-	var affordable = 0
-	var total_cost = 0.0
-	var total_upkeep = 0.0
-	while true:
-		var next_cost = int(base_cost * cost_multiplier * pow(1.2, count + affordable))
-		var next_upkeep = gold_upkeep * pow(1.2, count + affordable) * upkeep_mult
+func get_cost_for(amount: int) -> BigNum:
+	if amount <= 0: return BigNum.new(0.0)
+	var start_pow = BigNum.from(1.2).pow_num(float(count))
+	var amount_pow = BigNum.from(1.2).pow_num(float(amount))
+	var sum_factor = amount_pow.sub(1.0).mul(5.0)
+	return base_cost.mul(cost_multiplier).mul(start_pow).mul(sum_factor)
+
+func get_max_affordable(current_gold: BigNum, net_income, upkeep_mult: float = 1.0) -> int:
+	var c_base = base_cost.mul(cost_multiplier).mul(BigNum.from(1.2).pow_num(float(count))).mul(5.0)
+	var max_gold = 0
+	if c_base.is_greater_than(0.0):
+		var factor = current_gold.div(c_base).add(1.0)
+		if factor.is_greater_than(0.0):
+			max_gold = int(floor(factor.log10() / (log(1.2) / log(10.0))))
+			
+	if max_gold < 0: max_gold = 0
+	
+	var max_upkeep = max_gold
+	if gold_upkeep.is_greater_than(0.0) and net_income != null and net_income.is_greater_than(0.0):
+		var u_base = gold_upkeep.mul(upkeep_mult).mul(BigNum.from(1.2).pow_num(float(count))).mul(5.0)
+		if u_base.is_greater_than(0.0):
+			var factor = net_income.div(u_base).add(1.0)
+			if factor.is_greater_than(0.0):
+				max_upkeep = int(floor(factor.log10() / (log(1.2) / log(10.0))))
+			else:
+				max_upkeep = 0
+				
+	if max_upkeep < 0: max_upkeep = 0
+	
+	var affordable = min(max_gold, max_upkeep)
+	
+	var step = 100
+	while affordable > 0 and step > 0:
+		var c = get_cost_for(affordable)
+		var valid = true
+		if c.is_greater_than(current_gold):
+			valid = false
+		elif gold_upkeep.is_greater_than(0.0) and net_income != null:
+			var u = get_upkeep_for(affordable).mul(upkeep_mult)
+			if u.is_greater_equal(net_income):
+				valid = false
+		if valid:
+			break
+		affordable -= 1
+		step -= 1
 		
-		if total_cost + next_cost > current_gold:
-			break
-			
-		if gold_upkeep > 0.0 and (total_upkeep + next_upkeep) >= net_income:
-			break
-			
-		total_cost += next_cost
-		total_upkeep += next_upkeep
-		affordable += 1
-		if affordable > 10000: # Safe guard
-			break
 	return affordable
 
 
 # Доход одного здания с учётом всех бонусов
-func get_income_per_unit() -> float:
-	return income * (income_multiplier + synergy_bonus)
+func get_income_per_unit() -> BigNum:
+	return income.mul(income_multiplier + synergy_bonus)
 
 
 # Общий доход всех купленных зданий
-func get_income() -> float:
-	return get_income_per_unit() * count
+func get_income() -> BigNum:
+	return get_income_per_unit().mul(count)
 
 # Доход молитв с одного здания
-func get_prayer_income_per_unit() -> float:
+func get_prayer_income_per_unit() -> BigNum:
 	return prayer_income
 
 # Общий доход молитв
-func get_prayer_income() -> float:
-	return get_prayer_income_per_unit() * count
+func get_prayer_income() -> BigNum:
+	return get_prayer_income_per_unit().mul(count)
 
 # Стоимость обслуживания одного (следующего) здания
-func get_upkeep_per_unit() -> float:
-	return gold_upkeep * pow(1.2, count)
+func get_upkeep_per_unit() -> BigNum:
+	return gold_upkeep.mul(BigNum.from(1.2).pow_num(float(count)))
 
-func get_upkeep_for(amount: int) -> float:
-	var total = 0.0
-	for i in range(amount):
-		total += gold_upkeep * pow(1.2, count + i)
-	return total
+func get_upkeep_for(amount: int) -> BigNum:
+	if amount <= 0: return BigNum.new(0.0)
+	var start_pow = BigNum.from(1.2).pow_num(float(count))
+	var amount_pow = BigNum.from(1.2).pow_num(float(amount))
+	var sum_factor = amount_pow.sub(1.0).mul(5.0)
+	return gold_upkeep.mul(start_pow).mul(sum_factor)
 
 # Общая стоимость обслуживания
-func get_total_upkeep() -> float:
-	var total = 0.0
-	for i in range(count):
-		total += gold_upkeep * pow(1.2, i)
-	return total
+func get_total_upkeep() -> BigNum:
+	if count <= 0: return BigNum.new(0.0)
+	var amount_pow = BigNum.from(1.2).pow_num(float(count))
+	var sum_factor = amount_pow.sub(1.0).mul(5.0)
+	return gold_upkeep.mul(sum_factor)

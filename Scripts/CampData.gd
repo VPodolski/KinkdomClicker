@@ -15,9 +15,9 @@ var distance_time: float = 60.0
 var timer: float = 0.0
 
 # Сила врага
-var exact_power: float = 0.0
-var min_power_display: float = 0.0
-var max_power_display: float = 0.0
+var exact_power: BigNum
+var min_power_display: BigNum
+var max_power_display: BigNum
 
 var enemy_troops: Dictionary = {} # troop_id -> count
 
@@ -26,7 +26,7 @@ var enemy_scouts_count: int = 0
 var is_defeated: bool = false
 
 # Награды
-var gold_reward: float = 0.0
+var gold_reward: BigNum
 var captives_reward: int = 0
 var casualties_pct_taken: float = 0.0
 
@@ -41,32 +41,34 @@ func _init(_id: String, _name: String, _pos: Vector2, _power: float, _time: floa
 	id = _id
 	camp_name = _name
 	position = _pos
-	exact_power = _power
+	exact_power = BigNum.from(_power)
 	is_boss = _is_boss
 	is_unlocked = _is_unlocked
 	
 	# Разброс +- 30% для неразведанной силы
-	min_power_display = max(1.0, exact_power * 0.7)
-	max_power_display = exact_power * 1.3
+	min_power_display = exact_power.mul(0.7).max(BigNum.from(1.0))
+	max_power_display = exact_power.mul(1.3)
 	
 	distance_time = _time
 	timer = 0.0
 	
-	# Генерация наград (будут пересчитаны после генерации армии, если точная сила изменится)
+	# Генерация наград
 	if is_boss:
-		gold_reward = exact_power * 500.0 # x10 gold for boss
-		captives_reward = max(10, int(exact_power / 10.0))
+		gold_reward = exact_power.mul(500.0) # x10 gold for boss
+		captives_reward = max(10, int(_power / 10.0))
 	else:
-		gold_reward = exact_power * 50.0
-		captives_reward = max(1, int(exact_power / 100.0))
+		gold_reward = exact_power.mul(50.0)
+		captives_reward = max(1, int(_power / 100.0))
 
 func get_display_power() -> String:
 	if intel_percent >= 1.0:
-		return str(int(exact_power))
+		return exact_power.format()
 	
-	var current_min = lerp(min_power_display, exact_power, intel_percent)
-	var current_max = lerp(max_power_display, exact_power, intel_percent)
-	return "%d - %d" % [int(current_min), int(current_max)]
+	# lerp for BigNum is tricky, we can just mix them manually
+	# min_p * (1-intel) + exact_p * intel
+	var current_min = min_power_display.mul(1.0 - intel_percent).add(exact_power.mul(intel_percent))
+	var current_max = max_power_display.mul(1.0 - intel_percent).add(exact_power.mul(intel_percent))
+	return "%s - %s" % [current_min.format(), current_max.format()]
 
 func add_intel(amount: float):
 	intel_percent += amount

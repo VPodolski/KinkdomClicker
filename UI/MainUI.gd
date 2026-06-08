@@ -94,11 +94,12 @@ func _process(delta):
 	ui_update_timer += delta
 	
 	if ui_update_timer >= 0.05: # 20 раз в секунду
-			update_gold(game.economy.gold)
-			update_upgrades_ui()
-			update_buildings_ui()
-			update_visibility()
-			update_prestige_ui()
+		ui_update_timer = 0.0
+		update_gold(game.economy.gold)
+		update_upgrades_ui()
+		update_buildings_ui()
+		update_visibility()
+		update_prestige_ui()
 
 # =========================
 # 🖱️ INPUT
@@ -147,7 +148,7 @@ func check_war_mode_unlock():
 	else:
 		mode_toggle_button.visible = false
 
-func update_war_info(power: float):
+func update_war_info(power):
 	war_info_label.text = "Военная мощь: %s" % game.format_number(power)
 
 func create_troops_ui():
@@ -187,8 +188,8 @@ func update_gold(value):
 	var text = "🪙 Золото: " + game.format_number(value) + " (+" + game.format_number(game.currentGoldPerSecond) + " 🪙/сек)"
 	
 	var chapel = game.buildings.get_building_by_name("Часовня")
-	if game.economy.lifetime_prayers > 0 or (chapel and chapel.count > 0):
-		text += "   |   🙏 Молитвы: " + game.format_number(floor(game.economy.prayers))
+	if game.economy.lifetime_prayers.is_greater_than(0) or (chapel and chapel.count > 0):
+		text += "   |   🙏 Молитвы: " + game.format_number(game.economy.prayers)
 	
 	gold_label.text = text
 	update_troops_ui()
@@ -244,7 +245,7 @@ func update_upgrades_ui():
 		var current_gold = game.economy.gold
 
 		# Доступен ли апгрейд для покупки
-		var is_unlocked = current_gold >= upgrade.cost and not upgrade.is_crafting
+		var is_unlocked = current_gold.is_greater_equal(upgrade.cost) and not upgrade.is_crafting
 
 		# Текст предпросмотра эффекта
 		var preview_text = ""
@@ -429,9 +430,9 @@ func update_achievements_tab_visibility() -> void:
 
 func update_visibility() -> void:
 	var current_gold = game.economy.gold
-	var max_visible_cost = current_gold * 1.5
-	if current_gold < 1.0:
-		max_visible_cost = 100.0
+	var max_visible_cost = current_gold.mul(1.5)
+	if current_gold.is_less_than(1.0):
+		max_visible_cost = BigNum.new(100.0, 0)
 		
 	var visible_upgrades = 0
 	var first_unseen_upgrade_found = false
@@ -451,7 +452,7 @@ func update_visibility() -> void:
 			visible_upgrades += 1
 			continue
 
-		if upgrade.cost > max_visible_cost:
+		if upgrade.cost.is_greater_than(max_visible_cost):
 			if not first_unseen_upgrade_found:
 				child.visible = true
 				if not upgrade.has_been_seen:
@@ -469,7 +470,7 @@ func update_visibility() -> void:
 			visible_upgrades += 1
 
 		# Если пока нельзя купить — делаем полупрозрачным.
-		if upgrade.cost > current_gold:
+		if upgrade.cost.is_greater_than(current_gold):
 			child.modulate.a = 0.5
 		else:
 			child.modulate.a = 1.0
@@ -480,7 +481,7 @@ func update_visibility() -> void:
 	for child in buildings_container.get_children():
 		var b = child.building
 		
-		if b.cost > max_visible_cost and not b.has_been_seen:
+		if b.cost.is_greater_than(max_visible_cost) and not b.has_been_seen:
 			if not first_unseen_found:
 				b.is_masked = true
 				child.visible = true
@@ -494,7 +495,7 @@ func update_visibility() -> void:
 			child.visible = true
 			visible_buildings += 1
 			
-		if b.cost > current_gold and b.count == 0:
+		if b.cost.is_greater_than(current_gold) and b.count == 0:
 			child.modulate.a = 0.5
 		else:
 			child.modulate.a = 1.0
@@ -517,19 +518,19 @@ func sort_upgrade_items():
 	var items = upgrades_container.get_children()
 	
 	items.sort_custom(func(a, b):
-		var a_can = a.upgrade.cost <= game.economy.gold
-		var b_can = b.upgrade.cost <= game.economy.gold
+		var a_can = a.upgrade.cost.is_less_equal(game.economy.gold)
+		var b_can = b.upgrade.cost.is_less_equal(game.economy.gold)
 		
 		if a_can != b_can:
 			return a_can
 		
-		return a.upgrade.cost < b.upgrade.cost
+		return a.upgrade.cost.is_less_than(b.upgrade.cost)
 	)
 	
 	for i in range(items.size()):
 		upgrades_container.move_child(items[i], i)
 
-func spawn_floating_text(amount: float) -> void:
+func spawn_floating_text(amount) -> void:
 	var text = floating_text_scene.instantiate()
 
 	text.text = "+" + game.format_number(amount)
@@ -585,7 +586,7 @@ func update_prestige_ui():
 	if chapel and chapel.count > 0:
 		has_chapel = true
 		
-	var can_ascend = has_chapel or game.economy.lifetime_prayers > 0
+	var can_ascend = has_chapel or game.economy.lifetime_prayers.is_greater_than(0.0)
 	ascension_tab.visible = can_ascend
 
 	if can_ascend:

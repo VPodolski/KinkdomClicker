@@ -57,7 +57,7 @@ func spawn_initial_camps():
 
 
 func generate_enemy_army(camp: CampData):
-	var remaining_power = camp.exact_power
+	var remaining_power = camp.exact_power.to_float()
 	var available_troops = game.war.troops.duplicate()
 	available_troops.shuffle()
 	
@@ -66,32 +66,32 @@ func generate_enemy_army(camp: CampData):
 		if remaining_power <= 0:
 			break
 		var power_for_this = randf_range(0.2, 0.8) * remaining_power
-		var count = int(power_for_this / t.base_power)
+		var count = int(power_for_this / t.base_power.to_float())
 		if count > 0:
 			camp.enemy_troops[t.id] = count
-			remaining_power -= count * t.base_power
+			remaining_power -= count * t.base_power.to_float()
 			
 	if remaining_power > 0:
 		var militia = game.war.get_troop_by_id("militia")
 		if militia:
-			var count = max(1, int(remaining_power / militia.base_power))
+			var count = max(1, int(remaining_power / militia.base_power.to_float()))
 			camp.enemy_troops["militia"] = camp.enemy_troops.get("militia", 0) + count
 			
 	var new_power = 0.0
 	for troop_id in camp.enemy_troops.keys():
 		var t = game.war.get_troop_by_id(troop_id)
-		new_power += camp.enemy_troops[troop_id] * t.base_power
-	camp.exact_power = new_power
+		new_power += camp.enemy_troops[troop_id] * t.base_power.to_float()
+	camp.exact_power = BigNum.from(new_power)
 	if camp.is_boss:
-		camp.gold_reward = camp.exact_power * 500.0
-		camp.captives_reward = max(10, int(camp.exact_power / 10.0))
+		camp.gold_reward = camp.exact_power.mul(500.0)
+		camp.captives_reward = max(10, int(camp.exact_power.to_float() / 10.0))
 	else:
-		camp.gold_reward = camp.exact_power * 50.0
-		camp.captives_reward = max(1, int(camp.exact_power / 100.0))
+		camp.gold_reward = camp.exact_power.mul(50.0)
+		camp.captives_reward = max(1, int(camp.exact_power.to_float() / 100.0))
 	
 	camp.enemy_scouts_count = 0
-	if camp.exact_power > 2000.0:
-		camp.enemy_scouts_count = int(camp.exact_power / 1000.0) + randi_range(0, 5)
+	if camp.exact_power.is_greater_than(2000.0):
+		camp.enemy_scouts_count = int(camp.exact_power.to_float() / 1000.0) + randi_range(0, 5)
 
 func start_expedition(camp: CampData, army: ArmyGroup):
 	if camp.status == CampData.Status.IDLE:
@@ -180,7 +180,7 @@ func resolve_combat(camp: CampData):
 			var count = player_dict[t_id]
 			p_count += count
 			var t = game.war.get_troop_by_id(t_id)
-			p_power += count * t.base_power
+			p_power += count * t.base_power.to_float()
 			
 		var e_count = 0
 		var e_power = 0.0
@@ -188,7 +188,7 @@ func resolve_combat(camp: CampData):
 			var count = enemy_dict[t_id]
 			e_count += count
 			var t = game.war.get_troop_by_id(t_id)
-			e_power += count * t.base_power
+			e_power += count * t.base_power.to_float()
 			
 		if p_count == 0: player_alive = false
 		if e_count == 0: enemy_alive = false
@@ -260,8 +260,8 @@ func resolve_combat(camp: CampData):
 	var new_enemy_power = 0.0
 	for t_id in camp.enemy_troops.keys():
 		var t = game.war.get_troop_by_id(t_id)
-		new_enemy_power += camp.enemy_troops[t_id] * t.base_power
-	camp.exact_power = new_enemy_power
+		new_enemy_power += camp.enemy_troops[t_id] * t.base_power.to_float()
+	camp.exact_power = BigNum.from(new_enemy_power)
 	
 	var msg = ""
 	
@@ -304,7 +304,7 @@ func _distribute_damage(army_dict: Dictionary, total_damage: float):
 	for t_id in active_types:
 		var count = army_dict[t_id]
 		var t = game.war.get_troop_by_id(t_id)
-		var kills = int(damage_per_type / t.base_power)
+		var kills = int(damage_per_type / t.base_power.to_float())
 		army_dict[t_id] = max(0, count - kills)
 
 func finish_return(camp: CampData):
@@ -325,7 +325,7 @@ func finish_return(camp: CampData):
 		camp.player_army = null
 		game.economy.add_gold(camp.gold_reward)
 		total_captives += camp.captives_reward
-		commander_xp += camp.exact_power * 0.1
+		commander_xp += camp.exact_power.to_float() * 0.1
 		check_commander_level()
 		
 		msg += "Добыто %s золота и %d пленников." % [game.format_number(camp.gold_reward), camp.captives_reward]

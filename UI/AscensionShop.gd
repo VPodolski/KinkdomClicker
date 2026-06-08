@@ -47,7 +47,7 @@ func update_ui():
 			btn.disabled = true
 		else:
 			btn.text = "Купить (" + game.format_number(cost) + " 🙏)"
-			btn.disabled = game.economy.prayers < cost
+			btn.disabled = game.economy.prayers.is_less_than(cost)
 			btn.pressed.connect(func():
 				game.ascension.buy_skill(skill_id, game.economy)
 				update_ui()
