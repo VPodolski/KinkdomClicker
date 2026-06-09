@@ -27,33 +27,40 @@ grow_vertical = 2
 [node name="TopPanel" type="PanelContainer" parent="RootVBox"]
 layout_mode = 2
 
-[node name="TopHBox" type="HBoxContainer" parent="RootVBox/TopPanel"]
+[node name="TopVBox" type="VBoxContainer" parent="RootVBox/TopPanel"]
+layout_mode = 2
+
+[node name="TopHBox" type="HBoxContainer" parent="RootVBox/TopPanel/TopVBox"]
 layout_mode = 2
 alignment = 1
 
-[node name="GoldLabel" type="Label" parent="RootVBox/TopPanel/TopHBox"]
+[node name="GoldLabel" type="Label" parent="RootVBox/TopPanel/TopVBox/TopHBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 20
 text = "💰 Золото: 0 (+0/сек)"
 vertical_alignment = 1
 
-[node name="AscensionPanel" type="HBoxContainer" parent="RootVBox/TopPanel/TopHBox"]
+[node name="AscensionPanel" type="HBoxContainer" parent="RootVBox/TopPanel/TopVBox/TopHBox"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 15
 
-[node name="PrestigeLabel" type="Label" parent="RootVBox/TopPanel/TopHBox/AscensionPanel"]
+[node name="PrestigeLabel" type="Label" parent="RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Бонус: +0% | Молитв/сек: 0"
 vertical_alignment = 1
 
-[node name="AscendButton" type="Button" parent="RootVBox/TopPanel/TopHBox/AscensionPanel"]
+[node name="AscendButton" type="Button" parent="RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel"]
 layout_mode = 2
 text = "Возвыситься"
 
-[node name="ModeToggleButton" type="Button" parent="RootVBox/TopPanel/TopHBox"]
+[node name="NavHBox" type="HBoxContainer" parent="RootVBox/TopPanel/TopVBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="ModeToggleButton" type="Button" parent="RootVBox/TopPanel/TopVBox/NavHBox"]
 visible = false
 layout_mode = 2
 text = "⚔️ Война"

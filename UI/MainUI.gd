@@ -3,10 +3,9 @@ extends Control
 @onready var game = GameLogic  # если добавишь Game в AutoLoad
 
 # UI элементы
-@onready var gold_label = $RootVBox/TopPanel/TopHBox/GoldLabel
+@onready var gold_label = $RootVBox/TopPanel/TopVBox/TopHBox/GoldLabel
 
 @onready var right_panel = $RootVBox/HBoxContainer/RightPanel
-@onready var buildings_container = $RootVBox/HBoxContainer/RightPanel/BuildingTab/Buildings/BuildingsContainer
 @onready var upgrades_container = $RootVBox/HBoxContainer/RightPanel/ForgeTab/Upgrades/UpgradesContainer
 @onready var buy_all_upgrades_button = $RootVBox/HBoxContainer/RightPanel/ForgeTab/BuyAllUpgradesButton
 
@@ -14,13 +13,19 @@ extends Control
 @onready var multiplier_label = $RootVBox/HBoxContainer/RightPanel/AchievementsTab/MultiplierLabel
 @onready var achievements_container = $RootVBox/HBoxContainer/RightPanel/AchievementsTab/ScrollContainer/AchievementsContainer
 
-@onready var ascension_tab = $RootVBox/TopPanel/TopHBox/AscensionPanel
-@onready var prestige_label = $RootVBox/TopPanel/TopHBox/AscensionPanel/PrestigeLabel
-@onready var ascend_button = $RootVBox/TopPanel/TopHBox/AscensionPanel/AscendButton
+var building_containers = {}
+var popup_forge: Control
+var popup_ach: Control
+var forge_btn: Button
+var ach_btn: Button
+
+@onready var ascension_tab = $RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel
+@onready var prestige_label = $RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel/PrestigeLabel
+@onready var ascend_button = $RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel/AscendButton
 
 @onready var confirm_dialog = $AscensionConfirmDialog
 
-@onready var mode_toggle_button = $RootVBox/TopPanel/TopHBox/ModeToggleButton
+@onready var mode_toggle_button = $RootVBox/TopPanel/TopVBox/NavHBox/ModeToggleButton
 @onready var kingdom_screen = $RootVBox/HBoxContainer
 @onready var war_screen = $RootVBox/WarScreen
 @onready var troops_container = $RootVBox/WarScreen/RightPanel/Обучение/ScrollContainer/TroopsContainer
@@ -42,8 +47,6 @@ var battle_results_window: BattleResultsWindow
 func _ready():
 	apply_tabular_fonts()
 	await get_tree().process_frame
-	var tab_idx = achievements_tab.get_index()
-	right_panel.set_tab_hidden(tab_idx, true)
 	
 	# подписки на события
 	game.gold_changed.connect(update_gold)
@@ -89,10 +92,6 @@ func _ready():
 	notifications_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	notifications_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(notifications_container)
-
-	right_panel.set_tab_title(0, "Постройки")
-	right_panel.set_tab_title(1, "Кузница")
-	right_panel.set_tab_title(2, "Достижения")
 
 func _process(delta):
 	ui_update_timer += delta
@@ -227,23 +226,121 @@ func update_gold(value):
 # 🏗️ BUILDINGS UI
 # =========================
 
+func _create_popup(content: Control, title: String, header_actions: Array = []) -> Control:
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.7)
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.hide()
+	
+	var center = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.add_child(center)
+	
+	var popup = PanelContainer.new()
+	popup.custom_minimum_size = Vector2(700, 600)
+	center.add_child(popup)
+	
+	var vbox = VBoxContainer.new()
+	var header = HBoxContainer.new()
+	var label = Label.new()
+	label.text = title
+	label.add_theme_font_size_override("font_size", 24)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	
+	var close_btn = Button.new()
+	close_btn.text = "Закрыть"
+	close_btn.pressed.connect(func(): overlay.hide())
+	
+	header.add_child(label)
+	
+	for action in header_actions:
+		var p = action.get_parent()
+		if p: p.remove_child(action)
+		header.add_child(action)
+		
+	header.add_child(close_btn)
+	vbox.add_child(header)
+	vbox.add_child(HSeparator.new())
+	
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_child(content)
+	
+	popup.add_child(vbox)
+	add_child(overlay)
+	return overlay
+
 func create_buildings_ui():
-	for child in buildings_container.get_children():
-		child.queue_free()
+	if building_containers.is_empty():
+		var building_tab = right_panel.get_node("BuildingTab")
+		var military_tab = building_tab.duplicate()
+		military_tab.name = "MilitaryTab"
+		right_panel.add_child(military_tab)
+		var religion_tab = building_tab.duplicate()
+		religion_tab.name = "ReligionTab"
+		right_panel.add_child(religion_tab)
+		
+		building_containers["general"] = building_tab.get_node("Buildings/BuildingsContainer")
+		building_containers["military"] = military_tab.get_node("Buildings/BuildingsContainer")
+		building_containers["religion"] = religion_tab.get_node("Buildings/BuildingsContainer")
+		
+		# Reparent Forge and Ach
+		var forge_tab = right_panel.get_node("ForgeTab")
+		var ach_tab = right_panel.get_node("AchievementsTab")
+		right_panel.remove_child(forge_tab)
+		right_panel.remove_child(ach_tab)
+		forge_tab.show() 
+		ach_tab.show()
+		
+		var f_title = forge_tab.get_node_or_null("ForgeTitle")
+		if f_title: f_title.queue_free()
+		var f_queue = forge_tab.get_node_or_null("Queue")
+		if f_queue: f_queue.queue_free()
+		
+		popup_forge = _create_popup(forge_tab, "Кузница", [buy_all_upgrades_button])
+		popup_ach = _create_popup(ach_tab, "Достижения")
+		
+		var nav_hbox = $RootVBox/TopPanel/TopVBox/NavHBox
+		forge_btn = Button.new()
+		forge_btn.text = "🔨 Кузница"
+		forge_btn.pressed.connect(func(): popup_forge.show())
+		nav_hbox.add_child(forge_btn)
+		
+		ach_btn = Button.new()
+		ach_btn.text = "🏆 Достижения"
+		ach_btn.pressed.connect(func(): popup_ach.show())
+		nav_hbox.add_child(ach_btn)
+		
+		right_panel.set_tab_title(0, "Общие")
+		right_panel.set_tab_title(1, "Военные")
+		right_panel.set_tab_title(2, "Религия")
+
+	for cat in building_containers:
+		for child in building_containers[cat].get_children():
+			child.queue_free()
 	
 	for i in range(game.buildings.buildings.size()):
 		var b = game.buildings.buildings[i]
 		
+		var cat = "military"
+		if b.prayer_income.is_greater_than(0):
+			cat = "religion"
+		elif b.income.is_greater_than(0) or b.id == "forge":
+			cat = "general"
+			
 		var item = building_item_scene.instantiate()
-		buildings_container.add_child(item)
+		building_containers[cat].add_child(item)
 		
 		item.setup(b, i)
 		item.buy_pressed.connect(_on_building_pressed)
 
 
 func update_buildings_ui():
-	for child in buildings_container.get_children():
-		child.update_ui(game.economy.gold)
+	if building_containers.is_empty(): return
+	for cat in building_containers:
+		for child in building_containers[cat].get_children():
+			child.update_ui(game.economy.gold)
 	check_war_mode_unlock()
 
 
@@ -301,12 +398,12 @@ func update_upgrades_ui():
 			available_upgrades_count += 1
 			
 	var affordable_upgrades = game.get_affordable_upgrades()
-	var forge_tab_idx = right_panel.get_node("ForgeTab").get_index()
 	
-	if available_upgrades_count > 0:
-		right_panel.set_tab_title(forge_tab_idx, "Кузница (%d)" % available_upgrades_count)
-	else:
-		right_panel.set_tab_title(forge_tab_idx, "Кузница")
+	if forge_btn:
+		if available_upgrades_count > 0:
+			forge_btn.text = "🔨 Кузница (%d)" % available_upgrades_count
+		else:
+			forge_btn.text = "🔨 Кузница"
 		
 	if affordable_upgrades.size() > 0:
 		buy_all_upgrades_button.text = "Купить всё (%d)" % affordable_upgrades.size()
@@ -504,39 +601,61 @@ func update_visibility() -> void:
 			child.modulate.a = 1.0
 			
 
-	var visible_buildings = 0
 	var first_unseen_found = false
-	for child in buildings_container.get_children():
-		var b = child.building
+	
+	var cat_info = {
+		"general": {"visible_count": 0, "new_count": 0, "base_name": "Общие"},
+		"military": {"visible_count": 0, "new_count": 0, "base_name": "Военные"},
+		"religion": {"visible_count": 0, "new_count": 0, "base_name": "Религия"}
+	}
+
+	for cat in building_containers:
+		var tab_node = building_containers[cat].get_parent().get_parent()
+		cat_info[cat]["tab_index"] = tab_node.get_index()
 		
-		if b.cost.is_greater_than(max_visible_cost) and not b.has_been_seen:
-			if not first_unseen_found:
-				b.is_masked = true
-				child.visible = true
-				first_unseen_found = true
-				visible_buildings += 1
+		for child in building_containers[cat].get_children():
+			var b = child.building
+			
+			if b.cost.is_greater_than(max_visible_cost) and not b.has_been_seen:
+				if not first_unseen_found:
+					b.is_masked = true
+					child.visible = true
+					first_unseen_found = true
+					cat_info[cat].visible_count += 1
+				else:
+					child.visible = false
 			else:
-				child.visible = false
+				b.has_been_seen = true
+				b.is_masked = false
+				child.visible = true
+				cat_info[cat].visible_count += 1
+				if b.count == 0:
+					cat_info[cat].new_count += 1
+				
+			if b.cost.is_greater_than(current_gold) and b.count == 0:
+				child.modulate.a = 0.5
+			else:
+				child.modulate.a = 1.0
+
+	var active_tab = right_panel.current_tab
+	for cat in cat_info:
+		var info = cat_info[cat]
+		if info.visible_count == 0:
+			right_panel.set_tab_hidden(info.tab_index, true)
 		else:
-			b.has_been_seen = true
-			b.is_masked = false
-			child.visible = true
-			visible_buildings += 1
+			right_panel.set_tab_hidden(info.tab_index, false)
 			
-		if b.cost.is_greater_than(current_gold) and b.count == 0:
-			child.modulate.a = 0.5
-		else:
-			child.modulate.a = 1.0
+			var tab_name = info.base_name
+			if info.new_count > 0 and active_tab != info.tab_index:
+				tab_name += " *"
+			right_panel.set_tab_title(info.tab_index, tab_name)
 			
-	var forge_tab = $RootVBox/HBoxContainer/RightPanel/ForgeTab
-	if forge_tab:
+	if forge_btn:
 		var forge = game.buildings.get_building_by_name("Кузница")
 		var has_forge = forge != null and forge.count > 0
-		right_panel.set_tab_hidden(forge_tab.get_index(), not has_forge or visible_upgrades == 0)
+		forge_btn.visible = has_forge or visible_upgrades == 0
 
-	var building_tab = $RootVBox/HBoxContainer/RightPanel/BuildingTab
-	if building_tab:
-		right_panel.set_tab_hidden(building_tab.get_index(), visible_buildings == 0)
+
 
 # =========================
 # 🔽 SORT
