@@ -83,11 +83,11 @@ func generate_enemy_army(camp: CampData):
 		new_power += camp.enemy_troops[troop_id] * t.base_power.to_float()
 	camp.exact_power = BigNum.from(new_power)
 	if camp.is_boss:
-		camp.gold_reward = camp.exact_power.mul(500.0)
-		camp.captives_reward = max(10, int(camp.exact_power.to_float() / 10.0))
+		camp.gold_reward = camp.exact_power.mul(25000.0)
+		camp.captives_reward = max(500, int(camp.exact_power.to_float() / 0.2))
 	else:
-		camp.gold_reward = camp.exact_power.mul(50.0)
-		camp.captives_reward = max(1, int(camp.exact_power.to_float() / 100.0))
+		camp.gold_reward = camp.exact_power.mul(2500.0)
+		camp.captives_reward = max(50, int(camp.exact_power.to_float() / 2.0))
 	
 	camp.enemy_scouts_count = 0
 	if camp.exact_power.is_greater_than(2000.0):
