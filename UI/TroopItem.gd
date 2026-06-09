@@ -21,7 +21,7 @@ var current_gold_cache = null
 func _ready() -> void:
 	buy1_button.pressed.connect(_on_buy_pressed.bind(1))
 	buy10_button.pressed.connect(_on_buy_pressed.bind(10))
-	buymax_button.pressed.connect(func(): _on_buy_pressed(troop.get_max_affordable(current_gold_cache, GameLogic.currentGoldPerSecond, GameLogic.economy.upkeep_reduction_multiplier)))
+	buymax_button.pressed.connect(func(): _on_buy_pressed(troop.get_max_affordable(current_gold_cache, GameLogic.currentBaseNetIncome, GameLogic.economy.upkeep_reduction_multiplier)))
 
 func setup(_troop: TroopData) -> void:
 	troop = _troop

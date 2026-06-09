@@ -16,6 +16,7 @@ var war: WarManager
 var expeditions: ExpeditionManager
 
 var currentGoldPerSecond: BigNum = BigNum.new(0.0)
+var currentBaseNetIncome: BigNum = BigNum.new(0.0)
 var currentPrayerIncome: BigNum = BigNum.new(0.0)
 
 func recalculate_income():
@@ -30,9 +31,12 @@ func recalculate_income():
 		var war_upkeep = war.get_total_upkeep().mul(economy.upkeep_reduction_multiplier)
 		upkeep = upkeep.add(war_upkeep)
 	var final_income = income.sub(upkeep)
+	currentBaseNetIncome = final_income
 	
-	if expeditions:
-		final_income = final_income.mul(1.0 + expeditions.total_captives * 0.001)
+	var captive_skill = ascension.get_skill_level("captives_bonus")
+	if expeditions and captive_skill > 0:
+		var bonus_per_captive = captive_skill * 0.001
+		final_income = final_income.mul(1.0 + expeditions.total_captives * bonus_per_captive)
 
 	currentGoldPerSecond = final_income
 	currentPrayerIncome = buildings.get_total_prayer_income(economy.prayer_multiplier)
@@ -57,7 +61,12 @@ func get_click_value() -> BigNum:
 	income = income.mul(achievement_multiplier)
 	income = income.mul(economy.prestige_multiplier)
 	var click_income = income.mul(economy.click_income_ratio)
-	return economy.gold_per_click.add(click_income)
+	var final_click = economy.gold_per_click.add(click_income)
+	
+	if Engine.time_scale > 1.0:
+		final_click = final_click.mul(Engine.time_scale)
+		
+	return final_click
 
 func on_click():
 	var value = get_click_value()
@@ -66,7 +75,7 @@ func on_click():
 	emit_signal("gold_changed", economy.gold)
 
 func buy_building(index, amount = 1):
-	if buildings.buy_building(index, economy, currentGoldPerSecond, amount):
+	if buildings.buy_building(index, economy, currentBaseNetIncome, amount):
 		buildings.update_synergies(upgrades.active_upgrades)
 		
 		achievements.check(self)
@@ -140,7 +149,7 @@ func perform_rebirth() -> bool:
 	
 	buildings.reset()
 	upgrades.reset()
-	war.reset()
+	war.reset(ascension.has_skill("keep_commanders"))
 	
 	recalculate_income()
 	

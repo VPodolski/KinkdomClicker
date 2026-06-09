@@ -14,6 +14,7 @@ var morale_multiplier: float = 1.0
 var commander_level: int = 1
 
 var is_scouting_mission: bool = false
+var included_commanders: Array = []
 
 func _init():
 	troops = {}
@@ -21,6 +22,7 @@ func _init():
 	morale_multiplier = 1.0
 	commander_level = 1
 	is_scouting_mission = false
+	included_commanders = []
 
 func add_troops(troop_id: String, amount: int, power_per_unit: BigNum):
 	if not troops.has(troop_id):

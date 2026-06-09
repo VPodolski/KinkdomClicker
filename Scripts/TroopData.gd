@@ -9,6 +9,8 @@ var upkeep: BigNum
 var base_time: float
 var required_building: String
 
+var commander: CommanderData
+
 # Нанятое количество и прогресс текущего найма
 var count: int = 0
 var is_training: bool = false
@@ -65,9 +67,10 @@ func get_max_affordable(current_gold: BigNum, net_income: BigNum, upkeep_mult: f
 	var affordable = min(max_gold, max_upkeep)
 	
 	var step = 100
+	var valid = false
 	while affordable > 0 and step > 0:
 		var c = get_cost_for(affordable)
-		var valid = true
+		valid = true
 		if c.is_greater_than(current_gold):
 			valid = false
 		elif current_upkeep_cost.is_greater_than(0.0):
@@ -79,11 +82,17 @@ func get_max_affordable(current_gold: BigNum, net_income: BigNum, upkeep_mult: f
 		affordable -= 1
 		step -= 1
 		
+	if not valid:
+		affordable = 0
+		
 	return affordable
 
 # Общая сила этого типа войск
 func get_total_power() -> BigNum:
-	return base_power.mul(power_multiplier * float(count))
+	var power = base_power.mul(power_multiplier * float(count))
+	if commander != null and commander.is_unlocked:
+		power = power.mul(commander.get_power_multiplier())
+	return power
 
 # Общее содержание этого типа войск
 func get_total_upkeep() -> BigNum:

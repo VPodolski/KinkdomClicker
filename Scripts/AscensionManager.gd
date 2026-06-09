@@ -4,25 +4,37 @@ extends RefCounted
 var unlocked_skills: Array = []
 
 var skills = {
-	"buy_all": { "name": "Купить все улучшения", "cost": 10 },
-	"buy_max": { "name": "Покупка Макс. зданий", "cost": 50 },
-	"gold_multiplier": { "name": "Множитель золота x2", "cost": 100, "repeatable": true, "cost_mult": 2.0 },
-	"forge_speed": { "name": "Скорость кузницы x2", "cost": 75, "repeatable": true, "cost_mult": 1.5 },
-	"upkeep_reduction": { "name": "Снижение расхода 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 10 },
-	"troop_power": { "name": "Сила войск +50%", "cost": 100, "repeatable": true, "cost_mult": 1.5 },
-	"troop_cost": { "name": "Удешевление найма войск 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"troop_speed": { "name": "Скорость найма +50%", "cost": 75, "repeatable": true, "cost_mult": 1.5 },
-	"upkeep_militia": { "name": "Содержание (Ополченцы) -10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_pikeman": { "name": "Содержание (Копейщики) -10%", "cost": 75, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_swordsman": { "name": "Содержание (Мечники) -10%", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_archer": { "name": "Содержание (Лучники) -10%", "cost": 150, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_cavalry": { "name": "Содержание (Конница) -10%", "cost": 200, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_knight": { "name": "Содержание (Рыцари) -10%", "cost": 250, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_paladin": { "name": "Содержание (Паладины) -10%", "cost": 300, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 },
-	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5 }
+	"buy_all": { "name": "Купить все улучшения", "cost": 10, "category": "general" },
+	"buy_max": { "name": "Покупка Макс. зданий", "cost": 50, "category": "general" },
+	"gold_multiplier": { "name": "Множитель золота x2", "cost": 100, "repeatable": true, "cost_mult": 2.0, "category": "general" },
+	"forge_speed": { "name": "Скорость кузницы x2", "cost": 75, "repeatable": true, "cost_mult": 1.5, "category": "general" },
+	"upkeep_reduction": { "name": "Снижение расхода 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 10, "category": "general" },
+	
+	"keep_commanders": { "name": "Полководцы остаются", "cost": 100, "category": "commanders" },
+	"commander_xp": { "name": "Опыт полководцев +20%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 10, "category": "commanders", "requires": "keep_commanders" },
+	"commander_power": { "name": "Сила полководцев +10%", "cost": 75, "repeatable": true, "cost_mult": 1.5, "max_levels": 10, "category": "commanders", "requires": "keep_commanders" },
+	"commander_regen": { "name": "Скорость лечения полководцев +20%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "commanders", "requires": "keep_commanders" },
+	"captives_bonus": { "name": "Бонус от пленников (+0.1%)", "cost": 50, "repeatable": true, "cost_mult": 1.5, "category": "commanders", "requires": "keep_commanders" },
+
+	"troop_power": { "name": "Сила войск +50%", "cost": 100, "repeatable": true, "cost_mult": 1.5, "category": "troops" },
+	"troop_cost": { "name": "Удешевление найма войск 10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops" },
+	"troop_speed": { "name": "Скорость найма +50%", "cost": 75, "repeatable": true, "cost_mult": 1.5, "category": "troops" },
+	"upkeep_militia": { "name": "Содержание (Ополченцы) -10%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_pikeman": { "name": "Содержание (Копейщики) -10%", "cost": 75, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_swordsman": { "name": "Содержание (Мечники) -10%", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_archer": { "name": "Содержание (Лучники) -10%", "cost": 150, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_cavalry": { "name": "Содержание (Конница) -10%", "cost": 200, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_knight": { "name": "Содержание (Рыцари) -10%", "cost": 250, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_paladin": { "name": "Содержание (Паладины) -10%", "cost": 300, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" }
 }
 
 var skill_levels = {
+	"keep_commanders": 0,
+	"commander_xp": 0,
+	"commander_power": 0,
+	"commander_regen": 0,
+	"captives_bonus": 0,
 	"gold_multiplier": 0,
 	"forge_speed": 0,
 	"upkeep_reduction": 0,

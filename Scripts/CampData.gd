@@ -1,7 +1,7 @@
 class_name CampData
 extends RefCounted
 
-enum Status { IDLE, SCOUTING, TRAVELING, FIGHTING, RETURNING, DEFEATED }
+enum Status { IDLE, SCOUTING, TRAVELING, FIGHTING, RETURNING, DEFEATED, WAITING_RETURN }
 
 var id: String
 var camp_name: String = ""
@@ -30,8 +30,13 @@ var gold_reward: BigNum
 var captives_reward: int = 0
 var casualties_pct_taken: float = 0.0
 
+var pending_gold_reward: BigNum
+var pending_captives_reward: int = 0
+var pending_commander_xp: float = 0.0
+
 # Данные для окна результатов
 var last_combat_losses: Dictionary = {}
+var last_commander_losses: Dictionary = {}
 var last_enemy_killed: int = 0
 
 # Текущий отряд игрока, отправленный сюда

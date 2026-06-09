@@ -17,7 +17,7 @@ signal buy_pressed(index, amount)
 func _ready():
 	buy1_button.pressed.connect(_on_buy_pressed.bind(1))
 	buy10_button.pressed.connect(_on_buy_pressed.bind(10))
-	buymax_button.pressed.connect(func(): _on_buy_pressed(building.get_max_affordable(current_gold_cache, GameLogic.currentGoldPerSecond, GameLogic.economy.upkeep_reduction_multiplier)))
+	buymax_button.pressed.connect(func(): _on_buy_pressed(building.get_max_affordable(current_gold_cache, GameLogic.currentBaseNetIncome, GameLogic.economy.upkeep_reduction_multiplier)))
 
 func setup(_building, _index):
 	building = _building
@@ -107,7 +107,7 @@ func update_ui(current_gold):
 		_format_number(building.cost)
 	]
 	
-	var net_income = GameLogic.currentGoldPerSecond
+	var net_income = GameLogic.currentBaseNetIncome
 	var can_afford_upkeep_1 = true
 	var can_afford_upkeep_10 = true
 	

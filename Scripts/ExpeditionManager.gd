@@ -156,8 +156,23 @@ func resolve_scouting(camp: CampData):
 	camp.add_intel(intel_gained)
 	
 	var msg = "Разведка завершена. Добыто %d%% информации." % int(min(intel_gained, 1.0) * 100)
-	camp.status = CampData.Status.RETURNING
-	camp.timer = camp.distance_time * 0.5
+	camp.status = CampData.Status.WAITING_RETURN
+	
+	var result = {
+		"camp_id": camp.id,
+		"won": false,
+		"is_scout_mission": true,
+		"casualties_percent": 0.0,
+		"gold_reward": BigNum.from(0.0),
+		"captives_reward": 0,
+		"enemy_power": camp.exact_power,
+		"player_losses": camp.last_combat_losses,
+		"commander_losses": {},
+		"enemy_killed": camp.last_enemy_killed,
+		"gathered_intel": true
+	}
+	expedition_finished.emit(result)
+	
 	combat_resolved.emit(camp, true, 0.0, msg)
 	camp_updated.emit(camp)
 
@@ -180,7 +195,12 @@ func resolve_combat(camp: CampData):
 			var count = player_dict[t_id]
 			p_count += count
 			var t = game.war.get_troop_by_id(t_id)
-			p_power += count * t.base_power.to_float()
+			var portion = t.base_power.to_float() * t.power_multiplier * count
+			if t.commander and t.commander.is_unlocked and (t_id in army.included_commanders):
+				portion *= t.commander.get_power_multiplier()
+				if randf() < t.commander.get_luck_chance():
+					portion *= 2.0 # Critical hit
+			p_power += portion
 			
 		var e_count = 0
 		var e_power = 0.0
@@ -226,6 +246,7 @@ func resolve_combat(camp: CampData):
 
 	var won = player_alive
 	var player_troop_losses = {}
+	var commander_losses = {}
 	var enemy_killed_total = 0
 	
 	# Подсчитываем потери игрока и сбежавших
@@ -236,15 +257,21 @@ func resolve_combat(camp: CampData):
 		var fled = 0
 		var dead = 0
 		
+		var t = game.war.get_troop_by_id(t_id)
+		
 		if lost > 0:
 			fled = int(lost * randf_range(0.03, 0.05)) # 3-5% сбежали
 			dead = lost - fled
+			if t and t.commander and t.commander.is_unlocked and (t_id in army.included_commanders):
+				var loss_percent = float(lost) / float(initial)
+				var dmg = t.commander.get_max_hp() * loss_percent
+				t.commander.take_damage(dmg)
+				commander_losses[t_id] = {"damage": dmg, "died": not t.commander.is_unlocked}
 			
 		player_troop_losses[t_id] = {"dead": dead, "fled": fled}
 		
 		# Сбежавшие возвращаются в замок мгновенно
 		if fled > 0:
-			var t = game.war.get_troop_by_id(t_id)
 			if t: t.count += fled
 			
 		army.troops[t_id] = survived # В отряде остаются только выжившие
@@ -265,11 +292,44 @@ func resolve_combat(camp: CampData):
 	
 	var msg = ""
 	
+	camp.last_combat_losses = player_troop_losses
+	camp.last_commander_losses = commander_losses
+	camp.last_enemy_killed = enemy_killed_total
+	
 	if won:
 		msg = "Победа! Враг разбит."
 		camp.is_defeated = true
-		camp.status = CampData.Status.RETURNING
-		camp.timer = camp.distance_time
+		camp.status = CampData.Status.WAITING_RETURN
+		
+		var loot_mult = 1.0
+		if army != null:
+			for troop_id in army.troops.keys():
+				var t = game.war.get_troop_by_id(troop_id)
+				if t and t.commander and t.commander.is_unlocked and (troop_id in army.included_commanders):
+					loot_mult += t.commander.get_loot_multiplier() - 1.0
+					
+		camp.pending_gold_reward = camp.gold_reward.mul(loot_mult)
+		
+		if game.ascension.get_skill_level("captives_bonus") > 0:
+			camp.pending_captives_reward = int(camp.captives_reward * loot_mult)
+		else:
+			camp.pending_captives_reward = 0
+		var xp_mult = 1.0 + (game.ascension.get_skill_level("commander_xp") * 0.2)
+		camp.pending_commander_xp = camp.exact_power.to_float() * 0.1 * xp_mult
+		
+		var result = {
+			"camp_id": camp.id,
+			"won": true,
+			"casualties_percent": 0.0,
+			"gold_reward": camp.pending_gold_reward,
+			"captives_reward": camp.pending_captives_reward,
+			"enemy_power": camp.exact_power,
+			"player_losses": camp.last_combat_losses,
+			"commander_losses": camp.last_commander_losses,
+			"enemy_killed": camp.last_enemy_killed,
+			"gathered_intel": false
+		}
+		expedition_finished.emit(result)
 	else:
 		msg = "Поражение. Ваши войска были разбиты."
 		var has_survivors = false
@@ -277,18 +337,27 @@ func resolve_combat(camp: CampData):
 			if c > 0: has_survivors = true
 			
 		if has_survivors:
-			camp.status = CampData.Status.RETURNING
-			camp.timer = camp.distance_time
 			camp.improve_intel()
 			msg += " Выжившие отступают и докладывают о численности врага."
 		else:
-			camp.status = CampData.Status.RETURNING
-			camp.timer = camp.distance_time
 			msg += " Никто не вернулся живым..."
 			
-	camp.last_combat_losses = player_troop_losses
-	camp.last_enemy_killed = enemy_killed_total
-	
+		camp.status = CampData.Status.WAITING_RETURN
+		var result = {
+			"camp_id": camp.id,
+			"won": false,
+			"is_scout_mission": false,
+			"casualties_percent": 0.0,
+			"gold_reward": BigNum.from(0.0),
+			"captives_reward": 0,
+			"enemy_power": camp.exact_power,
+			"player_losses": camp.last_combat_losses,
+			"commander_losses": camp.last_commander_losses,
+			"enemy_killed": camp.last_enemy_killed,
+			"gathered_intel": has_survivors
+		}
+		expedition_finished.emit(result)
+		
 	combat_resolved.emit(camp, won, 0.0, msg)
 	camp_updated.emit(camp)
 
@@ -307,10 +376,21 @@ func _distribute_damage(army_dict: Dictionary, total_damage: float):
 		var kills = int(damage_per_type / t.base_power.to_float())
 		army_dict[t_id] = max(0, count - kills)
 
+func start_return(camp_id: String):
+	for camp in camps:
+		if camp.id == camp_id:
+			if camp.status == CampData.Status.WAITING_RETURN:
+				camp.status = CampData.Status.RETURNING
+				if camp.player_army and camp.player_army.is_scouting_mission:
+					camp.timer = camp.distance_time * 0.5
+				else:
+					camp.timer = camp.distance_time
+				camp_updated.emit(camp)
+			return
+
 func finish_return(camp: CampData):
-	# Возвращаем войска в пул (WarManager)
 	var army = camp.player_army
-	var msg = "Поход завершен. "
+	var msg = "Поход завершен."
 	
 	if army != null:
 		for troop_id in army.troops.keys():
@@ -319,30 +399,22 @@ func finish_return(camp: CampData):
 				var t = game.war.get_troop_by_id(troop_id)
 				if t:
 					t.count += amount
+		
+		for t_id in army.included_commanders:
+			var t = game.war.get_troop_by_id(t_id)
+			if t and t.commander:
+				t.commander.is_on_expedition = false
+
+	camp.player_army = null
 	
 	if camp.is_defeated:
-		camp.status = CampData.Status.DEFEATED # предотвращает бесконечный цикл
-		camp.player_army = null
-		game.economy.add_gold(camp.gold_reward)
-		total_captives += camp.captives_reward
-		commander_xp += camp.exact_power.to_float() * 0.1
+		camp.status = CampData.Status.DEFEATED
+		
+		game.economy.add_gold(camp.pending_gold_reward)
+		total_captives += camp.pending_captives_reward
+		commander_xp += camp.pending_commander_xp
 		check_commander_level()
 		
-		msg += "Добыто %s золота и %d пленников." % [game.format_number(camp.gold_reward), camp.captives_reward]
-		
-		var result = {
-			"won": true,
-			"casualties_percent": 0.0,
-			"gold_reward": camp.gold_reward,
-			"captives_reward": camp.captives_reward,
-			"enemy_power": camp.exact_power,
-			"player_losses": camp.last_combat_losses,
-			"enemy_killed": camp.last_enemy_killed,
-			"gathered_intel": false
-		}
-		expedition_finished.emit(result)
-		
-		# Открываем следующий лагерь
 		if current_stage_index < BARBARIAN_CAMPAIGN.size() - 1:
 			current_stage_index += 1
 			var next_name = BARBARIAN_CAMPAIGN[current_stage_index].name
@@ -351,32 +423,10 @@ func finish_return(camp: CampData):
 					c.is_unlocked = true
 					camp_updated.emit(c)
 	else:
-		var has_survivors = false
-		if camp.player_army != null:
-			for c in camp.player_army.troops.values():
-				if c > 0: has_survivors = true
-				
-		var is_scout_mission = false
-		if camp.player_army != null and camp.player_army.is_scouting_mission:
-			is_scout_mission = true
-
-		var result = {
-			"won": false,
-			"is_scout_mission": is_scout_mission,
-			"casualties_percent": 0.0,
-			"gold_reward": 0.0,
-			"captives_reward": 0,
-			"enemy_power": camp.exact_power,
-			"player_losses": camp.last_combat_losses,
-			"enemy_killed": camp.last_enemy_killed,
-			"gathered_intel": has_survivors
-		}
-		expedition_finished.emit(result)
-		
-		camp.player_army = null
 		camp.status = CampData.Status.IDLE
-		camp_updated.emit(camp)
-	
+		camp.timer = 0.0
+
+	camp_updated.emit(camp)	
 	expedition_returned.emit(msg)
 	game.war.recalculate_power()
 	game.war.troops_changed.emit()

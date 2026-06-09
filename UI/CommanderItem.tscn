@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3 uid="uid://commander_item_1"]
+
+[ext_resource type="Script" path="res://UI/CommanderItem.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0.1, 0.05, 0.1, 0.65)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[node name="CommanderItem" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HeaderHBox" type="HBoxContainer" parent="MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="MarginContainer/VBox/HeaderHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.3, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Полководец"
+
+[node name="TrainButton" type="Button" parent="MarginContainer/VBox/HeaderHBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Обучить"
+
+[node name="StatsLabel" type="Label" parent="MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "HP: 0/0"
+autowrap_mode = 3
+
+[node name="ProgressBar" type="ProgressBar" parent="MarginContainer/VBox"]
+layout_mode = 2
+max_value = 1.0
+

@@ -22,12 +22,16 @@ func _init_troops():
 		var error = json.parse(json_string)
 		if error == OK:
 			var data = json.data
+			var commander_index = 1
 			for t in data:
-				troops.append(TroopData.new(
+				var new_troop = TroopData.new(
 					t["id"], t["name"], t.get("description", ""),
 					float(t["base_power"]), float(t["base_cost"]), float(t.get("upkeep", 0.0)), float(t["base_time"]),
 					t.get("required_building", "")
-				))
+				)
+				new_troop.commander = CommanderData.new(new_troop.id, float(commander_index) * 600.0)
+				troops.append(new_troop)
+				commander_index += 1
 		else:
 			print("Error parsing troops.json: ", json.get_error_message())
 	else:
@@ -42,12 +46,14 @@ func update_troops_multipliers():
 		t.speed_multiplier = game.economy.troop_speed_multiplier
 		t.upkeep_multiplier = game.economy.get_troop_upkeep_multiplier(t.id)
 
-func reset():
+func reset(keep_commanders: bool = false):
 	for t in troops:
 		t.count = 0
 		t.is_training = false
 		t.training_progress = 0.0
 		t.training_amount = 0
+		if t.commander != null and not keep_commanders:
+			t.commander.reset()
 	update_troops_multipliers()
 	recalculate_power()
 	troops_changed.emit()
@@ -86,20 +92,33 @@ func start_training(troop: TroopData, amount: int):
 func update_training(delta: float):
 	var changed = false
 	for troop in troops:
+		var speed = troop.speed_multiplier
+		if troop.required_building != "":
+			var b = game.buildings.get_building_by_id(troop.required_building)
+			if b and b.count > 0:
+				# +5% скорости за каждое здание
+				speed *= (1.0 + b.count * 0.05)
+				
 		if troop.is_training:
 			# Время обучения.
-			var speed = troop.speed_multiplier
-			if troop.required_building != "":
-				var b = game.buildings.get_building_by_id(troop.required_building)
-				if b and b.count > 0:
-					# +5% скорости за каждое здание
-					speed *= (1.0 + b.count * 0.05)
 			troop.training_progress += delta * speed
 			
 			if troop.training_progress >= troop.base_time:
 				troop.finish_training()
 				troop_training_completed.emit(troop)
 				changed = true
+				
+		if troop.commander != null:
+			if troop.commander.is_training:
+				var comm_speed = speed * troop.commander.get_speed_multiplier()
+				troop.commander.training_progress += delta * comm_speed
+				if troop.commander.training_progress >= troop.commander.base_time:
+					troop.commander.finish_training()
+					changed = true
+			elif troop.commander.is_unlocked and troop.commander.current_hp < troop.commander.get_max_hp():
+				var comm_speed = speed * troop.commander.get_speed_multiplier()
+				troop.commander.heal(delta, comm_speed)
+				# changed = true # Don't trigger full UI refresh every frame for passive healing, handle via specific signals if needed or just let periodic UI updates catch it.
 	
 	if changed:
 		recalculate_power()

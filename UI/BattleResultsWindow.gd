@@ -11,11 +11,17 @@ class_name BattleResultsWindow
 @onready var ok_button = $VBoxContainer/OkButton
 @onready var rewards_container = $VBoxContainer/RewardsContainer
 
+var current_camp_id: String = ""
+var game_ref: Node = null
+
 func _ready():
 	ok_button.pressed.connect(_on_ok_pressed)
 	hide()
 
 func setup(data: Dictionary, game: Node):
+	current_camp_id = data.get("camp_id", "")
+	game_ref = game
+	
 	var is_scout = data.get("is_scout_mission", false)
 	
 	if is_scout:
@@ -45,6 +51,7 @@ func setup(data: Dictionary, game: Node):
 		child.queue_free()
 		
 	var losses = data.get("player_losses", {})
+	var commander_losses = data.get("commander_losses", {})
 	var total_dead = 0
 	var total_troops = 0
 	for t_id in losses.keys():
@@ -59,7 +66,21 @@ func setup(data: Dictionary, game: Node):
 			total_dead += info.dead
 			total_troops += 1
 			
-	if total_dead == 0 and total_troops > 0:
+	for t_id in commander_losses.keys():
+		var info = commander_losses[t_id]
+		if info.damage > 0 or info.died:
+			var t = game.war.get_troop_by_id(t_id)
+			var row = Label.new()
+			if info.died:
+				row.text = "Полководец (%s) ПОГИБ!" % t.name
+				row.add_theme_color_override("font_color", Color("#FF0000"))
+			else:
+				row.text = "Полководец (%s) потерял HP: -%d" % [t.name, int(info.damage)]
+				row.add_theme_color_override("font_color", Color("#C55959"))
+			losses_list.add_child(row)
+			total_troops += 1
+			
+	if total_dead == 0 and commander_losses.size() == 0 and total_troops > 0:
 		var row = Label.new()
 		row.text = "Без потерь!"
 		row.add_theme_color_override("font_color", Color("#59C59A"))
@@ -76,3 +97,5 @@ func setup(data: Dictionary, game: Node):
 
 func _on_ok_pressed():
 	hide()
+	if game_ref and current_camp_id != "":
+		game_ref.expeditions.start_return(current_camp_id)

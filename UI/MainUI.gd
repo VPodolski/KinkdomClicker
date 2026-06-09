@@ -26,11 +26,13 @@ extends Control
 @onready var troops_container = $RootVBox/WarScreen/RightPanel/Обучение/ScrollContainer/TroopsContainer
 @onready var war_info_label = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarInfo
 @onready var war_visualizer = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarVisualizer
+@onready var commanders_container = $"RootVBox/WarScreen/RightPanel/Полководцы/ScrollContainer/CommandersContainer"
 
 var building_item_scene = preload("res://ui/BuildingItem.tscn")
 var upgrade_item_scene = preload("res://ui/UpgradeItem.tscn")
 var floating_text_scene = preload("res://ui/FloatingText.tscn")
 var troop_item_scene = preload("res://UI/TroopItem.tscn")
+var commander_item_scene = preload("res://UI/CommanderItem.tscn")
 var battle_results_scene = preload("res://UI/BattleResultsWindow.tscn")
 
 var ui_update_timer = 0.0
@@ -55,6 +57,7 @@ func _ready():
 	mode_toggle_button.pressed.connect(_on_mode_toggle_pressed)
 	game.war.military_power_changed.connect(update_war_info)
 	game.war.troops_changed.connect(update_troops_ui)
+	game.war.troops_changed.connect(update_commanders_ui)
 	game.war.troops_changed.connect(war_visualizer.update_visuals)
 	game.expeditions.expedition_finished.connect(_on_expedition_finished)
 		
@@ -72,6 +75,7 @@ func _ready():
 	update_achievements_ui()
 	update_prestige_ui()
 	create_troops_ui()
+	create_commanders_ui()
 	check_war_mode_unlock()
 	right_panel.current_tab = 0
 
@@ -98,6 +102,7 @@ func _process(delta):
 		update_gold(game.economy.gold)
 		update_upgrades_ui()
 		update_buildings_ui()
+		update_commanders_ui()
 		update_visibility()
 		update_prestige_ui()
 
@@ -163,6 +168,29 @@ func create_troops_ui():
 	update_troops_ui()
 	war_visualizer.update_visuals()
 
+func create_commanders_ui():
+	for child in commanders_container.get_children():
+		child.queue_free()
+		
+	for troop in game.war.troops:
+		var item = commander_item_scene.instantiate()
+		commanders_container.add_child(item)
+		item.setup(troop)
+	update_commanders_ui()
+
+func update_commanders_ui():
+	for child in commanders_container.get_children():
+		if child is CommanderItem:
+			var is_unlocked = game.war.is_troop_unlocked(child.troop)
+			child.visible = is_unlocked
+			if is_unlocked:
+				var speed = child.troop.speed_multiplier
+				if child.troop.required_building != "":
+					var b = game.buildings.get_building_by_id(child.troop.required_building)
+					if b and b.count > 0:
+						speed *= (1.0 + b.count * 0.05)
+				child.update_ui(speed)
+
 func update_troops_ui():
 	for child in troops_container.get_children():
 		if child is TroopItem:
@@ -174,7 +202,7 @@ func update_troops_ui():
 					var b = game.buildings.get_building_by_id(child.troop.required_building)
 					if b and b.count > 0:
 						speed *= (1.0 + b.count * 0.05)
-				child.update_ui(game.economy.gold, speed, game.currentGoldPerSecond, game.economy.upkeep_reduction_multiplier)
+				child.update_ui(game.economy.gold, speed, game.currentBaseNetIncome, game.economy.upkeep_reduction_multiplier)
 
 func _on_expedition_finished(result_data: Dictionary) -> void:
 	if battle_results_window:

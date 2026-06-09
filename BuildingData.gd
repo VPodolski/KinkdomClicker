@@ -74,9 +74,10 @@ func get_max_affordable(current_gold: BigNum, net_income, upkeep_mult: float = 1
 	var affordable = min(max_gold, max_upkeep)
 	
 	var step = 100
+	var valid = false
 	while affordable > 0 and step > 0:
 		var c = get_cost_for(affordable)
-		var valid = true
+		valid = true
 		if c.is_greater_than(current_gold):
 			valid = false
 		elif gold_upkeep.is_greater_than(0.0) and net_income != null:
@@ -87,6 +88,9 @@ func get_max_affordable(current_gold: BigNum, net_income, upkeep_mult: float = 1
 			break
 		affordable -= 1
 		step -= 1
+		
+	if not valid:
+		affordable = 0
 		
 	return affordable
 
