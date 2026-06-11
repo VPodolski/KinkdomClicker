@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cx4x0qabcde14"]
+
+[ext_resource type="Script" path="res://UI/ArtifactItem.gd" id="1_art"]
+
+[node name="ArtifactItem" type="Button"]
+custom_minimum_size = Vector2(80, 80)
+text = "Арт Ур.1"
+script = ExtResource("1_art")

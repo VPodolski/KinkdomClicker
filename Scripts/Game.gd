@@ -14,6 +14,8 @@ var achievements: AchievementManager
 var ascension: AscensionManager
 var war: WarManager
 var expeditions: ExpeditionManager
+var archeology: ArcheologyManager
+	
 
 var currentGoldPerSecond: BigNum = BigNum.new(0.0)
 var currentBaseNetIncome: BigNum = BigNum.new(0.0)
@@ -25,10 +27,19 @@ func recalculate_income():
 	var income = buildings.get_total_income(economy.global_income_multiplier)
 	income = income.mul(achievement_multiplier)
 	income = income.mul(economy.prestige_multiplier)
+	if archeology:
+		var arch_mult = archeology.get_kingdom_gold_multiplier()
+		income = income.mul(arch_mult)
+	
 	
 	var upkeep = buildings.get_total_upkeep(economy.upkeep_reduction_multiplier)
+	if archeology:
+		var arch_upkeep_mult = archeology.get_kingdom_army_upkeep_multiplier()
+		upkeep = upkeep.mul(arch_upkeep_mult)
 	if war:
 		var war_upkeep = war.get_total_upkeep().mul(economy.upkeep_reduction_multiplier)
+		if archeology:
+			war_upkeep = war_upkeep.mul(archeology.get_kingdom_army_upkeep_multiplier())
 		upkeep = upkeep.add(war_upkeep)
 	var final_income = income.sub(upkeep)
 	currentBaseNetIncome = final_income
@@ -40,6 +51,13 @@ func recalculate_income():
 
 	currentGoldPerSecond = final_income
 	currentPrayerIncome = buildings.get_total_prayer_income(economy.prayer_multiplier)
+	
+	var building_cost_mult = 1.0
+	if archeology:
+		building_cost_mult = archeology.get_kingdom_building_cost_multiplier()
+	for b in buildings.buildings:
+		b.cost_multiplier = building_cost_mult
+		b.cost = b._calc_cost(b.count)
 func _ready():
 	economy = Economy.new()
 	buildings = BuildingManager.new()
@@ -50,6 +68,7 @@ func _ready():
 	war = WarManager.new(self)
 	war.troops_changed.connect(recalculate_income)
 	expeditions = ExpeditionManager.new(self)
+	archeology = ArcheologyManager.new(self)
 	recalculate_income()
 	
 	Engine.time_scale = 1000.0
@@ -60,6 +79,8 @@ func get_click_value() -> BigNum:
 	var income = buildings.get_total_income(economy.global_income_multiplier)
 	income = income.mul(achievement_multiplier)
 	income = income.mul(economy.prestige_multiplier)
+	if archeology:
+		income = income.mul(archeology.get_kingdom_gold_multiplier())
 	var click_income = income.mul(economy.click_income_ratio)
 	var final_click = economy.gold_per_click.add(click_income)
 	
@@ -110,6 +131,7 @@ func _process(delta):
 	upgrades.update_crafting(delta, speed)
 	war.update_training(delta)
 	expeditions.update(delta)
+	archeology.update(delta)
 
 	achievements.check(self)
 
@@ -150,6 +172,7 @@ func perform_rebirth() -> bool:
 	buildings.reset()
 	upgrades.reset()
 	war.reset(ascension.has_skill("keep_commanders"))
+	archeology.reset()
 	
 	recalculate_income()
 	

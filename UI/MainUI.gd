@@ -25,9 +25,14 @@ var ach_btn: Button
 
 @onready var confirm_dialog = $AscensionConfirmDialog
 
-@onready var mode_toggle_button = $RootVBox/TopPanel/TopVBox/NavHBox/ModeToggleButton
+@onready var kingdom_btn = $RootVBox/TopPanel/TopVBox/NavHBox/KingdomBtn
+@onready var war_btn = $RootVBox/TopPanel/TopVBox/NavHBox/WarBtn
+@onready var archeology_btn = $RootVBox/TopPanel/TopVBox/NavHBox/ArcheologyBtn
+
 @onready var kingdom_screen = $RootVBox/HBoxContainer
 @onready var war_screen = $RootVBox/WarScreen
+@onready var archeology_screen = $RootVBox/ArcheologyScreen
+
 @onready var troops_container = $RootVBox/WarScreen/RightPanel/Обучение/ScrollContainer/TroopsContainer
 @onready var war_info_label = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarInfo
 @onready var war_visualizer = $RootVBox/WarScreen/LeftPanel/Panel/VBoxContainer/WarVisualizer
@@ -39,10 +44,14 @@ var floating_text_scene = preload("res://ui/FloatingText.tscn")
 var troop_item_scene = preload("res://UI/TroopItem.tscn")
 var commander_item_scene = preload("res://UI/CommanderItem.tscn")
 var battle_results_scene = preload("res://UI/BattleResultsWindow.tscn")
+var exp_result_scene = preload("res://UI/ExpeditionResultWindow.tscn")
+var artifact_item_scene = preload("res://UI/ArtifactItem.tscn")
+var kingdom_artifact_slot_scene = preload("res://UI/KingdomArtifactSlot.tscn")
 
 var ui_update_timer = 0.0
 var notifications_container: VBoxContainer
 var battle_results_window: BattleResultsWindow
+var exp_result_window: ExpeditionResultWindow
 
 func _ready():
 	apply_tabular_fonts()
@@ -57,12 +66,22 @@ func _ready():
 	if game.has_signal("upgrade_completed"):
 		game.upgrade_completed.connect(_on_upgrade_completed)
 		
-	mode_toggle_button.pressed.connect(_on_mode_toggle_pressed)
+	kingdom_btn.pressed.connect(func(): _on_mode_selected(0))
+	war_btn.pressed.connect(func(): _on_mode_selected(1))
+	archeology_btn.pressed.connect(func(): _on_mode_selected(2))
+	
 	game.war.military_power_changed.connect(update_war_info)
 	game.war.troops_changed.connect(update_troops_ui)
 	game.war.troops_changed.connect(update_commanders_ui)
 	game.war.troops_changed.connect(war_visualizer.update_visuals)
 	game.expeditions.expedition_finished.connect(_on_expedition_finished)
+	
+	game.archeology.archeologists_changed.connect(update_archeology_ui)
+	game.archeology.artifacts_changed.connect(update_artifacts_ui)
+	game.archeology.expedition_updated.connect(_on_arch_expedition_updated)
+	game.archeology.expedition_completed.connect(_on_arch_expedition_completed)
+	
+	_setup_archeology_ui()
 		
 	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
 		ascend_button.pressed.connect(_on_ascend_pressed)
@@ -70,6 +89,9 @@ func _ready():
 
 	battle_results_window = battle_results_scene.instantiate()
 	add_child(battle_results_window)
+	
+	exp_result_window = exp_result_scene.instantiate()
+	add_child(exp_result_window)
 
 	# первичная инициализация
 	update_gold(game.economy.gold)
@@ -77,9 +99,10 @@ func _ready():
 	create_upgrades_ui()
 	update_achievements_ui()
 	update_prestige_ui()
+	check_modes_unlock()
 	create_troops_ui()
 	create_commanders_ui()
-	check_war_mode_unlock()
+	check_modes_unlock()
 	right_panel.current_tab = 0
 
 	notifications_container = VBoxContainer.new()
@@ -98,6 +121,7 @@ func _process(delta):
 	
 	if ui_update_timer >= 0.05: # 20 раз в секунду
 		ui_update_timer = 0.0
+		check_modes_unlock()
 		update_gold(game.economy.gold)
 		update_upgrades_ui()
 		update_buildings_ui()
@@ -135,22 +159,25 @@ func _on_upgrade_completed(upgrade) -> void:
 # ⚔️ ВОЙНА UI
 # =========================
 
-func _on_mode_toggle_pressed():
-	if kingdom_screen.visible:
-		kingdom_screen.visible = false
-		war_screen.visible = true
-		mode_toggle_button.text = "🏰 Королевство"
-	else:
-		kingdom_screen.visible = true
-		war_screen.visible = false
-		mode_toggle_button.text = "⚔️ Война"
+func _on_mode_selected(index):
+	kingdom_screen.visible = (index == 0)
+	war_screen.visible = (index == 1)
+	archeology_screen.visible = (index == 2)
+	
+	# Visual feedback
+	kingdom_btn.modulate = Color(1.5, 1.5, 0.5) if index == 0 else Color(1, 1, 1)
+	war_btn.modulate = Color(1.5, 1.5, 0.5) if index == 1 else Color(1, 1, 1)
+	archeology_btn.modulate = Color(1.5, 1.5, 0.5) if index == 2 else Color(1, 1, 1)
 
-func check_war_mode_unlock():
+func check_modes_unlock():
 	var barracks = game.buildings.get_building_by_name("Казармы")
-	if barracks and barracks.count > 0:
-		mode_toggle_button.visible = true
-	else:
-		mode_toggle_button.visible = false
+	var arch_guild = game.buildings.get_building_by_name("Гильдия археологов")
+	
+	var has_war = barracks and barracks.count > 0
+	var has_arch = arch_guild and arch_guild.count > 0
+	
+	war_btn.visible = has_war
+	archeology_btn.visible = has_arch
 
 func update_war_info(power):
 	war_info_label.text = "Военная мощь: %s" % game.format_number(power)
@@ -175,6 +202,7 @@ func create_commanders_ui():
 		var item = commander_item_scene.instantiate()
 		commanders_container.add_child(item)
 		item.setup(troop)
+		item.equip_requested.connect(_on_commander_equip_requested)
 	update_commanders_ui()
 
 func update_commanders_ui():
@@ -280,10 +308,14 @@ func create_buildings_ui():
 		var religion_tab = building_tab.duplicate()
 		religion_tab.name = "ReligionTab"
 		right_panel.add_child(religion_tab)
+		var arch_tab = building_tab.duplicate()
+		arch_tab.name = "ArcheologyTab"
+		right_panel.add_child(arch_tab)
 		
 		building_containers["general"] = building_tab.get_node("Buildings/BuildingsContainer")
 		building_containers["military"] = military_tab.get_node("Buildings/BuildingsContainer")
 		building_containers["religion"] = religion_tab.get_node("Buildings/BuildingsContainer")
+		building_containers["archeology"] = arch_tab.get_node("Buildings/BuildingsContainer")
 		
 		# Reparent Forge and Ach
 		var forge_tab = right_panel.get_node("ForgeTab")
@@ -315,6 +347,7 @@ func create_buildings_ui():
 		right_panel.set_tab_title(0, "Общие")
 		right_panel.set_tab_title(1, "Военные")
 		right_panel.set_tab_title(2, "Религия")
+		right_panel.set_tab_title(3, "Археология")
 
 	for cat in building_containers:
 		for child in building_containers[cat].get_children():
@@ -324,7 +357,9 @@ func create_buildings_ui():
 		var b = game.buildings.buildings[i]
 		
 		var cat = "military"
-		if b.prayer_income.is_greater_than(0):
+		if b.id == "archeology_guild":
+			cat = "archeology"
+		elif b.prayer_income.is_greater_than(0):
 			cat = "religion"
 		elif b.income.is_greater_than(0) or b.id == "forge":
 			cat = "general"
@@ -341,7 +376,7 @@ func update_buildings_ui():
 	for cat in building_containers:
 		for child in building_containers[cat].get_children():
 			child.update_ui(game.economy.gold)
-	check_war_mode_unlock()
+	check_modes_unlock()
 
 
 # =========================
@@ -606,7 +641,8 @@ func update_visibility() -> void:
 	var cat_info = {
 		"general": {"visible_count": 0, "new_count": 0, "base_name": "Общие"},
 		"military": {"visible_count": 0, "new_count": 0, "base_name": "Военные"},
-		"religion": {"visible_count": 0, "new_count": 0, "base_name": "Религия"}
+		"religion": {"visible_count": 0, "new_count": 0, "base_name": "Религия"},
+		"archeology": {"visible_count": 0, "new_count": 0, "base_name": "Археология"}
 	}
 
 	for cat in building_containers:
@@ -763,8 +799,9 @@ func _on_rebirth_completed():
 	
 	kingdom_screen.visible = true
 	war_screen.visible = false
-	mode_toggle_button.text = "⚔️ Война"
-	check_war_mode_unlock()
+	archeology_screen.visible = false
+	_on_mode_selected(0)
+	check_modes_unlock()
 	
 	right_panel.current_tab = 0
 
@@ -797,3 +834,130 @@ func _toggle_fullscreen():
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+
+# =========================
+# 🏺 ARCHEOLOGY UI
+# =========================
+
+func _setup_archeology_ui():
+	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
+	left_panel.get_node("TrainButton").pressed.connect(func(): game.archeology.start_training(1))
+	left_panel.get_node("Train10Button").pressed.connect(func(): game.archeology.start_training(10))
+	left_panel.get_node("TrainMaxButton").pressed.connect(func(): game.archeology.start_training(game.archeology.get_max_archeologists()))
+	
+	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
+	var slider = mid_panel.get_node("TimeSlider")
+	var arch_slider = mid_panel.get_node("ArchSlider")
+	var diff_opt = mid_panel.get_node("DiffOption")
+	
+	slider.value_changed.connect(func(val): mid_panel.get_node("TimeLabel").text = "Время: %d мин" % val)
+	arch_slider.value_changed.connect(func(val): mid_panel.get_node("ArchLabel").text = "🏺 Археологов: %d" % val)
+	mid_panel.get_node("StartButton").pressed.connect(func():
+		var duration = int(slider.value)
+		var arch_count = int(arch_slider.value)
+		var diff = diff_opt.get_item_text(diff_opt.selected)
+		var diff_map = {"Легкая": "easy", "Средняя": "medium", "Тяжелая": "hard", "Невозможная": "impossible", "Легендарная": "legendary"}
+		if diff_map.has(diff): diff = diff_map[diff]
+		game.archeology.start_expedition(arch_count, duration, diff)
+	)
+	
+func update_archeology_ui():
+	var am = game.archeology
+	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
+	var max_arch = am.get_max_archeologists()
+	var current_total = am.archeologists_count + am.archeologists_training
+	left_panel.get_node("TrainInfo").text = "🏺 Археологи: %d / %d (Обучается: %d)" % [am.archeologists_count, max_arch, am.archeologists_training]
+	
+	var can_train = current_total < max_arch and max_arch > 0
+	left_panel.get_node("TrainButton").visible = can_train
+	left_panel.get_node("Train10Button").visible = can_train
+	left_panel.get_node("TrainMaxButton").visible = can_train
+	
+	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
+	var diff_opt = mid_panel.get_node("DiffOption")
+	var unlocked = am.get_unlocked_difficulties()
+	
+	var diff_names = {"easy": "Легкая", "medium": "Средняя", "hard": "Тяжелая", "impossible": "Невозможная", "legendary": "Легендарная"}
+	if diff_opt.item_count != unlocked.size():
+		diff_opt.clear()
+		for d in unlocked:
+			diff_opt.add_item(diff_names.get(d, d))
+	
+	var arch_slider = mid_panel.get_node("ArchSlider")
+	arch_slider.max_value = max(1, am.archeologists_count)
+	
+	var time_slider = mid_panel.get_node("TimeSlider")
+	time_slider.max_value = am.get_max_duration_minutes()
+	
+	var exp_label = archeology_screen.get_node("MiddlePanel/ExpeditionsLabel")
+	exp_label.text = "Активные экспедиции: %d / %d" % [am.active_expeditions.size(), am.get_max_expeditions()]
+	
+	var exp_list = archeology_screen.get_node("MiddlePanel/ExpeditionsList")
+	for c in exp_list.get_children(): c.queue_free()
+	
+	for exp in am.active_expeditions:
+		var lbl = Label.new()
+		var rem_min = int(exp.remaining_duration / 60)
+		var rem_sec = int(exp.remaining_duration) % 60
+		lbl.text = "[%s] 🏺 Археологов: %d | Ост: %02d:%02d" % [diff_names.get(exp.difficulty, exp.difficulty), exp.current_archeologists, rem_min, rem_sec]
+		exp_list.add_child(lbl)
+	
+func update_artifacts_ui():
+	var am = game.archeology
+	var inv_grid = archeology_screen.get_node("RightPanel/InventoryPanel/VBox/ScrollContainer/InventoryGrid")
+	for c in inv_grid.get_children(): c.queue_free()
+	
+	for i in range(am.inventory_artifacts.size()):
+		var lvl = am.inventory_artifacts[i]
+		var item = artifact_item_scene.instantiate()
+		inv_grid.add_child(item)
+		item.setup(lvl, i, self)
+		if selected_inventory_index == i:
+			item.modulate = Color(1.5, 1.5, 0.5)
+	
+	var king_list = archeology_screen.get_node("RightPanel/KingdomArtifactPanel/VBox/KingdomArtifactsList")
+	for c in king_list.get_children(): c.queue_free()
+	
+	var max_kingdom_artifacts = am.get_max_kingdom_artifacts()
+	for i in range(max_kingdom_artifacts):
+		var slot = kingdom_artifact_slot_scene.instantiate()
+		king_list.add_child(slot)
+		var lvl = 0
+		if i < am.kingdom_artifacts.size():
+			lvl = am.kingdom_artifacts[i]
+		slot.setup(i, self, lvl)
+	
+var selected_inventory_index = -1
+func _on_inventory_artifact_clicked(index):
+	if selected_inventory_index == index:
+		game.archeology.equip_kingdom_artifact(index)
+		selected_inventory_index = -1
+	elif selected_inventory_index != -1:
+		if game.archeology.merge_artifacts(selected_inventory_index, index):
+			selected_inventory_index = -1
+		else:
+			selected_inventory_index = index
+	else:
+		selected_inventory_index = index
+	update_artifacts_ui()
+	
+func _on_arch_expedition_updated(exp_id):
+	update_archeology_ui()
+
+func _on_arch_expedition_completed(result):
+	if exp_result_window:
+		exp_result_window.setup(result, game)
+
+func _on_commander_equip_requested(troop_id):
+	var am = game.archeology
+	var troop = game.war.get_troop_by_id(troop_id)
+	if not troop or not troop.commander: return
+	
+	if troop.commander.equipped_artifact_level > 0:
+		am.unequip_commander_artifact(troop_id)
+	elif selected_inventory_index != -1:
+		am.equip_commander_artifact(troop_id, selected_inventory_index)
+		selected_inventory_index = -1
+	
+	update_artifacts_ui()
+	update_commanders_ui()

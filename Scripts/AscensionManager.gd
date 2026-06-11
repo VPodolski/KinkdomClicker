@@ -26,7 +26,17 @@ var skills = {
 	"upkeep_cavalry": { "name": "Содержание (Конница) -10%", "cost": 200, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
 	"upkeep_knight": { "name": "Содержание (Рыцари) -10%", "cost": 250, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
 	"upkeep_paladin": { "name": "Содержание (Паладины) -10%", "cost": 300, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
-	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" }
+	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction" },
+
+	"arch_commander_artifact": { "name": "Полководцы носят артефакт", "cost": 50, "category": "archeology" },
+	"arch_max_expeditions": { "name": "Макс. экспедиций +1", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "archeology" },
+	"arch_max_artifacts": { "name": "Макс. артефактов королевства +1", "cost": 200, "repeatable": true, "cost_mult": 2.0, "max_levels": 3, "category": "archeology" },
+	"arch_guild_capacity": { "name": "Вместимость гильдии +25", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 4, "category": "archeology" },
+	"arch_danger_reduction": { "name": "Опасность экспедиций -1%", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "archeology" },
+	"arch_gold_capacity": { "name": "Добыча золота археологом +5%", "cost": 50, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "archeology" },
+	"arch_find_chance": { "name": "Шанс артефакта +0.01%", "cost": 150, "repeatable": true, "cost_mult": 2.0, "max_levels": 5, "category": "archeology" },
+	"arch_unlock_difficulty": { "name": "Новая сложность экспедиций", "cost": 200, "repeatable": true, "cost_mult": 2.0, "max_levels": 3, "category": "archeology" },
+	"arch_max_duration": { "name": "Длительность экспедиций +1 час", "cost": 100, "repeatable": true, "cost_mult": 1.2, "max_levels": 11, "category": "archeology" }
 }
 
 var skill_levels = {
@@ -48,7 +58,16 @@ var skill_levels = {
 	"upkeep_cavalry": 0,
 	"upkeep_knight": 0,
 	"upkeep_paladin": 0,
-	"upkeep_griffon_rider": 0
+	"upkeep_griffon_rider": 0,
+	"arch_commander_artifact": 0,
+	"arch_max_expeditions": 0,
+	"arch_max_artifacts": 0,
+	"arch_guild_capacity": 0,
+	"arch_danger_reduction": 0,
+	"arch_gold_capacity": 0,
+	"arch_find_chance": 0,
+	"arch_unlock_difficulty": 0,
+	"arch_max_duration": 0
 }
 
 func has_skill(skill_id: String) -> bool:

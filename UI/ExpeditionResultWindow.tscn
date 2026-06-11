@@ -1,0 +1,72 @@
+[gd_scene load_steps=3 format=3 uid="uid://cx4x0qabcde13"]
+
+[ext_resource type="Script" path="res://UI/ExpeditionResultWindow.gd" id="1_exp"]
+[ext_resource type="Theme" path="res://UI/main_theme.tres" id="2_theme"]
+
+[node name="ExpeditionResultWindow" type="PanelContainer"]
+theme = ExtResource("2_theme")
+custom_minimum_size = Vector2(400, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -250.0
+offset_right = 200.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_exp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Результаты Экспедиции"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.9, 0.5, 1)
+text = "Успех!"
+horizontal_alignment = 1
+
+[node name="LossesTitle" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Погибло археологов: 0"
+horizontal_alignment = 1
+
+[node name="RewardsContainer" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="RewardsTitle" type="Label" parent="VBoxContainer/RewardsContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.854902, 0.690196, 0.403922, 1)
+text = "Добыча:"
+horizontal_alignment = 1
+
+[node name="GoldLabel" type="Label" parent="VBoxContainer/RewardsContainer"]
+layout_mode = 2
+text = "🪙 Золото: +0"
+
+[node name="ArtifactsTitle" type="Label" parent="VBoxContainer/RewardsContainer"]
+layout_mode = 2
+text = "🏺 Найденные артефакты:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/RewardsContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ArtifactsList" type="VBoxContainer" parent="VBoxContainer/RewardsContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OkButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 10
+text = "ОК"

@@ -41,10 +41,18 @@ func _init_troops():
 	
 func update_troops_multipliers():
 	for t in troops:
-		t.power_multiplier = game.economy.troop_power_multiplier
+		var art_power = 1.0
+		var art_upkeep = 1.0
+		if t.commander and t.commander.equipped_artifact_level > 0:
+			var lvl = t.commander.equipped_artifact_level
+			art_power += 0.02 * pow(3, lvl - 1)
+			art_upkeep -= 0.02 * pow(3, lvl - 1)
+			art_upkeep = max(0.0, art_upkeep)
+			
+		t.power_multiplier = game.economy.troop_power_multiplier * art_power
 		t.cost_multiplier = game.economy.troop_cost_multiplier
 		t.speed_multiplier = game.economy.troop_speed_multiplier
-		t.upkeep_multiplier = game.economy.get_troop_upkeep_multiplier(t.id)
+		t.upkeep_multiplier = game.economy.get_troop_upkeep_multiplier(t.id) * art_upkeep
 
 func reset(keep_commanders: bool = false):
 	for t in troops:

@@ -22,10 +22,11 @@ func update_ui():
 	var cat_labels = {
 		"general": "Общие улучшения",
 		"troops": "Улучшения Армии",
-		"commanders": "Улучшения Полководцев"
+		"commanders": "Улучшения Полководцев",
+		"archeology": "Улучшения Археологии"
 	}
 	
-	for cat_id in ["general", "troops", "commanders"]:
+	for cat_id in ["general", "troops", "commanders", "archeology"]:
 		var title = Label.new()
 		title.text = "=== " + cat_labels[cat_id] + " ==="
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -4,6 +4,10 @@ class_name CommanderItem
 var troop: TroopData
 var commander: CommanderData
 
+signal equip_requested(troop_id)
+
+var equip_button: Button
+
 @onready var name_label = $MarginContainer/VBox/HeaderHBox/NameLabel
 @onready var train_button = $MarginContainer/VBox/HeaderHBox/TrainButton
 @onready var stats_label = $MarginContainer/VBox/StatsLabel
@@ -11,6 +15,10 @@ var commander: CommanderData
 
 func _ready():
 	train_button.pressed.connect(_on_train_pressed)
+	equip_button = Button.new()
+	$MarginContainer/VBox/HeaderHBox.add_child(equip_button)
+	equip_button.pressed.connect(func(): equip_requested.emit(troop.id))
+	equip_button.visible = false
 
 func setup(_troop: TroopData):
 	troop = _troop
@@ -60,6 +68,15 @@ func update_ui(current_speed: float):
 			var m = int(remaining_time / 60.0)
 			var s = int(remaining_time) % 60
 			stats_label.text += "\nЛечение: +%.1f HP/сек | Здоров будет через: %02d:%02d" % [heal_rate, m, s]
+			
+	if commander and commander.is_unlocked and GameLogic.ascension.has_skill("arch_commander_artifact"):
+		equip_button.visible = true
+		if commander.equipped_artifact_level > 0:
+			equip_button.text = "Снять Арт Ур.%d" % commander.equipped_artifact_level
+		else:
+			equip_button.text = "Экипировать Арт"
+	else:
+		equip_button.visible = false
 
 func _on_train_pressed():
 	if commander and not commander.is_unlocked and not commander.is_training:

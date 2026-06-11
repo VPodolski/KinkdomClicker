@@ -21,7 +21,7 @@ func _init():
 		print("Failed to open achievements.json")
 
 
-func check(game: Game) -> void:
+func check(game: Node) -> void:
 	_unlock_if("first_click", game.economy.gold.is_greater_than(0))
 	_unlock_if("100_gold", game.economy.gold.is_greater_equal(100))
 	_unlock_if("10k_gold", game.economy.gold.is_greater_equal(10_000))

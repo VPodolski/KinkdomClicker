@@ -16,6 +16,7 @@ var luck_level: int = 0
 var loot_level: int = 0
 var power_level: int = 0
 var speed_level: int = 0
+var equipped_artifact_level: int = 0
 
 var max_luck_level: int = 7
 
@@ -108,3 +109,4 @@ func reset():
 	loot_level = 0
 	power_level = 0
 	speed_level = 0
+	equipped_artifact_level = 0

@@ -60,10 +60,19 @@ text = "Возвыситься"
 layout_mode = 2
 alignment = 1
 
-[node name="ModeToggleButton" type="Button" parent="RootVBox/TopPanel/TopVBox/NavHBox"]
+[node name="KingdomBtn" type="Button" parent="RootVBox/TopPanel/TopVBox/NavHBox"]
+layout_mode = 2
+text = "🏰 Королевство"
+
+[node name="WarBtn" type="Button" parent="RootVBox/TopPanel/TopVBox/NavHBox"]
 visible = false
 layout_mode = 2
 text = "⚔️ Война"
+
+[node name="ArcheologyBtn" type="Button" parent="RootVBox/TopPanel/TopVBox/NavHBox"]
+visible = false
+layout_mode = 2
+text = "🏺 Археология"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="RootVBox"]
 layout_mode = 2
@@ -211,6 +220,137 @@ layout_mode = 2
 [node name="ExpeditionMap" parent="RootVBox/WarScreen/RightPanel/Походы" instance=ExtResource("4_emap")]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="ArcheologyScreen" type="HBoxContainer" parent="RootVBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="VBoxContainer" parent="RootVBox/ArcheologyScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TrainingPanel" type="PanelContainer" parent="RootVBox/ArcheologyScreen/LeftPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
+layout_mode = 2
+text = "Обучение 🏺 археологов"
+horizontal_alignment = 1
+
+[node name="TrainInfo" type="Label" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
+layout_mode = 2
+text = "🏺 Археологи: 0 / 0"
+
+[node name="TrainButton" type="Button" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
+layout_mode = 2
+text = "Нанять 1 (10000 🪙)"
+
+[node name="Train10Button" type="Button" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
+layout_mode = 2
+text = "Нанять 10"
+
+[node name="TrainMaxButton" type="Button" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
+layout_mode = 2
+text = "Нанять макс."
+
+[node name="MiddlePanel" type="VBoxContainer" parent="RootVBox/ArcheologyScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.5
+
+[node name="ExpeditionsLabel" type="Label" parent="RootVBox/ArcheologyScreen/MiddlePanel"]
+layout_mode = 2
+text = "Активные экспедиции: 0 / 1"
+horizontal_alignment = 1
+
+[node name="ExpeditionsList" type="VBoxContainer" parent="RootVBox/ArcheologyScreen/MiddlePanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StartExpeditionPanel" type="PanelContainer" parent="RootVBox/ArcheologyScreen/MiddlePanel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+text = "Отправить экспедицию"
+
+[node name="DiffOption" type="OptionButton" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+
+[node name="TimeSlider" type="HSlider" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+min_value = 5.0
+max_value = 60.0
+step = 5.0
+value = 5.0
+
+[node name="TimeLabel" type="Label" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+text = "Время: 5 мин"
+
+[node name="ArchSlider" type="HSlider" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+min_value = 1.0
+max_value = 100.0
+value = 1.0
+
+[node name="ArchLabel" type="Label" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+text = "🏺 Археологов: 1"
+
+[node name="StartButton" type="Button" parent="RootVBox/ArcheologyScreen/MiddlePanel/StartExpeditionPanel/VBox"]
+layout_mode = 2
+text = "Отправить"
+
+[node name="RightPanel" type="VBoxContainer" parent="RootVBox/ArcheologyScreen"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="KingdomArtifactPanel" type="PanelContainer" parent="RootVBox/ArcheologyScreen/RightPanel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ArcheologyScreen/RightPanel/KingdomArtifactPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RootVBox/ArcheologyScreen/RightPanel/KingdomArtifactPanel/VBox"]
+layout_mode = 2
+text = "Артефакты королевства"
+horizontal_alignment = 1
+
+[node name="KingdomArtifactsList" type="HBoxContainer" parent="RootVBox/ArcheologyScreen/RightPanel/KingdomArtifactPanel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="InventoryPanel" type="PanelContainer" parent="RootVBox/ArcheologyScreen/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="RootVBox/ArcheologyScreen/RightPanel/InventoryPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="RootVBox/ArcheologyScreen/RightPanel/InventoryPanel/VBox"]
+layout_mode = 2
+text = "Хранилище Древностей"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RootVBox/ArcheologyScreen/RightPanel/InventoryPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="InventoryGrid" type="GridContainer" parent="RootVBox/ArcheologyScreen/RightPanel/InventoryPanel/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 4
 
 [node name="AscensionConfirmDialog" type="ConfirmationDialog" parent="."]
 title = "Подтверждение"
