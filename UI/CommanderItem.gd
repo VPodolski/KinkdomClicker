@@ -6,7 +6,8 @@ var commander: CommanderData
 
 signal equip_requested(troop_id)
 
-var equip_button: Button
+@onready var artifact_slot = $MarginContainer/VBox/HeaderHBox/ArtifactSlot
+@onready var artifact_level_label = $MarginContainer/VBox/HeaderHBox/ArtifactSlot/LevelLabel
 
 @onready var name_label = $MarginContainer/VBox/HeaderHBox/NameLabel
 @onready var train_button = $MarginContainer/VBox/HeaderHBox/TrainButton
@@ -15,17 +16,15 @@ var equip_button: Button
 
 func _ready():
 	train_button.pressed.connect(_on_train_pressed)
-	equip_button = Button.new()
-	$MarginContainer/VBox/HeaderHBox.add_child(equip_button)
-	equip_button.pressed.connect(func(): equip_requested.emit(troop.id))
-	equip_button.visible = false
+	artifact_slot.pressed.connect(func(): equip_requested.emit(troop.id))
+	artifact_slot.visible = false
 
 func setup(_troop: TroopData):
 	troop = _troop
 	commander = troop.commander
 	name_label.text = "Полководец: " + troop.name
 
-func update_ui(current_speed: float):
+func update_ui(current_speed: float, has_arch_skill: bool = false):
 	if commander == null: return
 	
 	if commander.is_training:
@@ -58,6 +57,11 @@ func update_ui(current_speed: float):
 			int((commander.get_power_multiplier() - 1.0) * 100),
 			int((commander.get_speed_multiplier() - 1.0) * 100)
 		]
+		if commander.equipped_artifact_level > 0:
+			var lvl = commander.equipped_artifact_level
+			var art_pow = int((0.02 * pow(3, lvl - 1)) * 100)
+			var art_upk = int((0.02 * pow(3, lvl - 1)) * 100)
+			stats_label.text += "\n[Арт] Сила армии: +%d%% | Содержание: -%d%%" % [art_pow, art_upk]
 		
 		if commander.current_hp < commander.get_max_hp():
 			var comm_speed = current_speed * commander.get_speed_multiplier()
@@ -69,14 +73,15 @@ func update_ui(current_speed: float):
 			var s = int(remaining_time) % 60
 			stats_label.text += "\nЛечение: +%.1f HP/сек | Здоров будет через: %02d:%02d" % [heal_rate, m, s]
 			
-	if commander and commander.is_unlocked and GameLogic.ascension.has_skill("arch_commander_artifact"):
-		equip_button.visible = true
+	if commander.is_unlocked and has_arch_skill:
+		artifact_slot.visible = true
+		artifact_slot.modulate = Color(1, 1, 1, 1)
 		if commander.equipped_artifact_level > 0:
-			equip_button.text = "Снять Арт Ур.%d" % commander.equipped_artifact_level
+			artifact_level_label.text = "Ур." + str(commander.equipped_artifact_level)
 		else:
-			equip_button.text = "Экипировать Арт"
+			artifact_level_label.text = ""
 	else:
-		equip_button.visible = false
+		artifact_slot.visible = false
 
 func _on_train_pressed():
 	if commander and not commander.is_unlocked and not commander.is_training:

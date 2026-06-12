@@ -98,6 +98,11 @@ func start_expedition(archeologists: int, duration_minutes: int, difficulty: Str
 	var actual_max_danger = max(0.02, data.max_danger - danger_reduction)
 	var total_danger_percent = randf_range(actual_min_danger, actual_max_danger)
 	
+	var safe_danger = min(0.999, total_danger_percent)
+	var survival_chance_total = 1.0 - safe_danger
+	var survival_chance_per_min = pow(survival_chance_total, 1.0 / float(duration_minutes))
+	var death_chance_per_min = min(1.0, (1.0 - survival_chance_per_min) * 5.0)
+	
 	archeologists_count -= archeologists
 	
 	var exp_dict = {
@@ -109,6 +114,7 @@ func start_expedition(archeologists: int, duration_minutes: int, difficulty: Str
 		"remaining_duration": duration_minutes * 60.0,
 		"minute_timer": 0.0,
 		"total_danger_percent": total_danger_percent,
+		"death_chance_per_min": death_chance_per_min,
 		"gold_per_alive": data.gold,
 		"loot_gold": BigNum.new(0.0),
 		"loot_artifacts": []
@@ -160,11 +166,18 @@ func update(delta: float):
 func process_expedition_minute(exp_dict: Dictionary):
 	if exp_dict.current_archeologists <= 0: return
 	
-	var duration_minutes = exp_dict.total_duration / 60.0
-	var dead_this_min = int(round((exp_dict.initial_archeologists * exp_dict.total_danger_percent) / duration_minutes))
-	# Ensure at least 0
-	dead_this_min = max(0, dead_this_min)
+	if not exp_dict.has("death_chance_per_min"):
+		var dur_m = exp_dict.total_duration / 60.0
+		var surv = max(0.001, 1.0 - exp_dict.total_danger_percent)
+		exp_dict["death_chance_per_min"] = min(1.0, (1.0 - pow(surv, 1.0 / dur_m)) * 5.0)
+		
+	var expected_deaths = float(exp_dict.current_archeologists) * float(exp_dict.death_chance_per_min)
+	var dead_this_min = int(floor(expected_deaths))
+	var fraction = expected_deaths - float(dead_this_min)
 	
+	if randf() < fraction:
+		dead_this_min += 1
+		
 	exp_dict.current_archeologists -= dead_this_min
 	if exp_dict.current_archeologists < 0:
 		exp_dict.current_archeologists = 0
@@ -202,6 +215,7 @@ func finish_expedition(exp_dict: Dictionary, success: bool):
 		game.economy.add_gold(exp_dict.loot_gold)
 		for level in exp_dict.loot_artifacts:
 			inventory_artifacts.append(level)
+		inventory_artifacts.sort_custom(func(a, b): return a > b)
 		artifacts_changed.emit()
 		archeologists_changed.emit()
 	
@@ -232,6 +246,7 @@ func merge_artifacts(index1: int, index2: int) -> bool:
 			inventory_artifacts.remove_at(index1)
 			
 		inventory_artifacts.append(lvl1 + 1)
+		inventory_artifacts.sort_custom(func(a, b): return a > b)
 		artifacts_changed.emit()
 		game.recalculate_income()
 		return true
@@ -254,6 +269,7 @@ func unequip_kingdom_artifact(kingdom_index: int) -> bool:
 	var lvl = kingdom_artifacts[kingdom_index]
 	kingdom_artifacts.remove_at(kingdom_index)
 	inventory_artifacts.append(lvl)
+	inventory_artifacts.sort_custom(func(a, b): return a > b)
 	artifacts_changed.emit()
 	game.recalculate_income()
 	return true
@@ -273,6 +289,7 @@ func equip_commander_artifact(commander_id: String, inventory_index: int) -> boo
 		
 	inventory_artifacts.remove_at(inventory_index)
 	troop.commander.equipped_artifact_level = lvl
+	inventory_artifacts.sort_custom(func(a, b): return a > b)
 	artifacts_changed.emit()
 	game.war.update_troops_multipliers()
 	game.war.recalculate_power()
@@ -285,6 +302,7 @@ func unequip_commander_artifact(commander_id: String) -> bool:
 	var lvl = troop.commander.equipped_artifact_level
 	troop.commander.equipped_artifact_level = 0
 	inventory_artifacts.append(lvl)
+	inventory_artifacts.sort_custom(func(a, b): return a > b)
 	artifacts_changed.emit()
 	game.war.update_troops_multipliers()
 	game.war.recalculate_power()

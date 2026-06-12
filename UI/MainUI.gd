@@ -61,6 +61,7 @@ func _ready():
 	game.gold_changed.connect(update_gold)
 	game.buildings_changed.connect(update_buildings_ui)
 	game.buildings_changed.connect(update_troops_ui)
+	game.buildings_changed.connect(update_archeology_ui)
 	game.upgrades_changed.connect(update_upgrades_ui)
 	game.achievement_unlocked.connect(_on_achievement_unlocked)
 	if game.has_signal("upgrade_completed"):
@@ -173,11 +174,14 @@ func check_modes_unlock():
 	var barracks = game.buildings.get_building_by_name("Казармы")
 	var arch_guild = game.buildings.get_building_by_name("Гильдия археологов")
 	
-	var has_war = barracks and barracks.count > 0
-	var has_arch = arch_guild and arch_guild.count > 0
+	var has_war = false
+	if barracks and barracks.count > 0: has_war = true
 	
-	war_btn.visible = has_war
-	archeology_btn.visible = has_arch
+	var has_arch = false
+	if arch_guild and arch_guild.count > 0: has_arch = true
+	
+	if war_btn: war_btn.visible = has_war
+	if archeology_btn: archeology_btn.visible = has_arch
 
 func update_war_info(power):
 	war_info_label.text = "Военная мощь: %s" % game.format_number(power)
@@ -216,7 +220,8 @@ func update_commanders_ui():
 					var b = game.buildings.get_building_by_id(child.troop.required_building)
 					if b and b.count > 0:
 						speed *= (1.0 + b.count * 0.05)
-				child.update_ui(speed)
+				var has_arch_skill = game.ascension.has_skill("arch_commander_artifact")
+				child.update_ui(speed, has_arch_skill)
 
 func update_troops_ui():
 	for child in troops_container.get_children():
@@ -782,6 +787,13 @@ func update_prestige_ui():
 var ascension_shop = null
 
 func _on_ascend_pressed():
+	if battle_results_window: battle_results_window.hide()
+	if exp_result_window: exp_result_window.hide()
+	
+	var exp_map = get_node_or_null("RootVBox/WarScreen/RightPanel/Походы/ExpeditionMap")
+	if exp_map and exp_map.deployment_window:
+		exp_map.deployment_window.hide()
+		
 	confirm_dialog.popup_centered()
 
 func _on_ascension_confirmed():
@@ -840,15 +852,19 @@ func _toggle_fullscreen():
 # =========================
 
 func _setup_archeology_ui():
-	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
-	left_panel.get_node("TrainButton").pressed.connect(func(): game.archeology.start_training(1))
-	left_panel.get_node("Train10Button").pressed.connect(func(): game.archeology.start_training(10))
-	left_panel.get_node("TrainMaxButton").pressed.connect(func(): game.archeology.start_training(game.archeology.get_max_archeologists()))
+	var diff_opt = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox/DiffOption")
+	
+	var arch_slider = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox/ArchSlider")
+	arch_slider.value_changed.connect(func(v):
+		arch_slider.set_meta("user_interacted", true)
+	)
+	
+	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/TrainButton").pressed.connect(func(): game.archeology.start_training(1))
+	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/Train10Button").pressed.connect(func(): game.archeology.start_training(10))
+	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/TrainMaxButton").pressed.connect(func(): game.archeology.start_training(game.archeology.get_max_archeologists()))
 	
 	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
 	var slider = mid_panel.get_node("TimeSlider")
-	var arch_slider = mid_panel.get_node("ArchSlider")
-	var diff_opt = mid_panel.get_node("DiffOption")
 	
 	slider.value_changed.connect(func(val): mid_panel.get_node("TimeLabel").text = "Время: %d мин" % val)
 	arch_slider.value_changed.connect(func(val): mid_panel.get_node("ArchLabel").text = "🏺 Археологов: %d" % val)
@@ -866,12 +882,26 @@ func update_archeology_ui():
 	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
 	var max_arch = am.get_max_archeologists()
 	var current_total = am.archeologists_count + am.archeologists_training
+	var b_name = game.buildings.get_building_by_name("Гильдия археологов")
+	var b_id = game.buildings.get_building_by_id("archeology_guild")
+	var cn = b_name.count if b_name else -1
+	var ci = b_id.count if b_id else -1
+	var cap = 50 + (game.ascension.get_skill_level("arch_guild_capacity") * 25)
+	
 	left_panel.get_node("TrainInfo").text = "🏺 Археологи: %d / %d (Обучается: %d)" % [am.archeologists_count, max_arch, am.archeologists_training]
 	
 	var can_train = current_total < max_arch and max_arch > 0
-	left_panel.get_node("TrainButton").visible = can_train
-	left_panel.get_node("Train10Button").visible = can_train
-	left_panel.get_node("TrainMaxButton").visible = can_train
+	var train_btn = left_panel.get_node("TrainButton")
+	var train10_btn = left_panel.get_node("Train10Button")
+	var trainmax_btn = left_panel.get_node("TrainMaxButton")
+	
+	train_btn.visible = true
+	train10_btn.visible = true
+	trainmax_btn.visible = true
+	
+	train_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost))
+	train10_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost * 10))
+	trainmax_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost))
 	
 	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
 	var diff_opt = mid_panel.get_node("DiffOption")
@@ -884,10 +914,18 @@ func update_archeology_ui():
 			diff_opt.add_item(diff_names.get(d, d))
 	
 	var arch_slider = mid_panel.get_node("ArchSlider")
-	arch_slider.max_value = max(1, am.archeologists_count)
+	arch_slider.min_value = 0 if am.archeologists_count == 0 else 1
+	arch_slider.max_value = max(arch_slider.min_value, am.archeologists_count)
+	
+	# Default to max value if user hasn't touched it, or if it was at previous max
+	if not arch_slider.has_meta("user_interacted") or arch_slider.value > arch_slider.max_value:
+		arch_slider.value = arch_slider.max_value
 	
 	var time_slider = mid_panel.get_node("TimeSlider")
 	time_slider.max_value = am.get_max_duration_minutes()
+	
+	var start_btn = mid_panel.get_node("StartButton")
+	start_btn.disabled = am.archeologists_count <= 0 or am.active_expeditions.size() >= am.get_max_expeditions()
 	
 	var exp_label = archeology_screen.get_node("MiddlePanel/ExpeditionsLabel")
 	exp_label.text = "Активные экспедиции: %d / %d" % [am.active_expeditions.size(), am.get_max_expeditions()]
@@ -914,6 +952,16 @@ func update_artifacts_ui():
 		item.setup(lvl, i, self)
 		if selected_inventory_index == i:
 			item.modulate = Color(1.5, 1.5, 0.5)
+			
+	var equipped_idx_start = am.inventory_artifacts.size()
+	var curr_idx = equipped_idx_start
+	for troop in game.war.troops:
+		if troop.commander and troop.commander.equipped_artifact_level > 0:
+			var lvl = troop.commander.equipped_artifact_level
+			var item = artifact_item_scene.instantiate()
+			inv_grid.add_child(item)
+			item.setup(lvl, curr_idx, self, troop.name)
+			curr_idx += 1
 	
 	var king_list = archeology_screen.get_node("RightPanel/KingdomArtifactPanel/VBox/KingdomArtifactsList")
 	for c in king_list.get_children(): c.queue_free()
@@ -929,6 +977,10 @@ func update_artifacts_ui():
 	
 var selected_inventory_index = -1
 func _on_inventory_artifact_clicked(index):
+	# Игнорируем клики по надетым артефактам
+	if index >= game.archeology.inventory_artifacts.size():
+		return
+		
 	if selected_inventory_index == index:
 		game.archeology.equip_kingdom_artifact(index)
 		selected_inventory_index = -1
@@ -948,16 +1000,62 @@ func _on_arch_expedition_completed(result):
 	if exp_result_window:
 		exp_result_window.setup(result, game)
 
+var current_commander_for_artifact: String = ""
+var artifact_popup_overlay: Control = null
+
 func _on_commander_equip_requested(troop_id):
-	var am = game.archeology
 	var troop = game.war.get_troop_by_id(troop_id)
 	if not troop or not troop.commander: return
 	
-	if troop.commander.equipped_artifact_level > 0:
-		am.unequip_commander_artifact(troop_id)
-	elif selected_inventory_index != -1:
-		am.equip_commander_artifact(troop_id, selected_inventory_index)
-		selected_inventory_index = -1
+	current_commander_for_artifact = troop_id
 	
-	update_artifacts_ui()
-	update_commanders_ui()
+	if artifact_popup_overlay != null and is_instance_valid(artifact_popup_overlay):
+		artifact_popup_overlay.queue_free()
+		
+	var content = VBoxContainer.new()
+	content.add_theme_constant_override("separation", 10)
+	
+	if troop.commander.equipped_artifact_level > 0:
+		var unequip_btn = Button.new()
+		unequip_btn.text = "Снять артефакт (Ур. %d)" % troop.commander.equipped_artifact_level
+		unequip_btn.pressed.connect(func():
+			game.archeology.unequip_commander_artifact(current_commander_for_artifact)
+			update_artifacts_ui()
+			update_commanders_ui()
+			artifact_popup_overlay.hide()
+			artifact_popup_overlay.queue_free()
+		)
+		content.add_child(unequip_btn)
+		content.add_child(HSeparator.new())
+	
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 400)
+	content.add_child(scroll)
+	
+	var grid = GridContainer.new()
+	grid.columns = 5
+	scroll.add_child(grid)
+	
+	var inv = game.archeology.inventory_artifacts
+	if inv.size() == 0:
+		var no_art = Label.new()
+		no_art.text = "Нет доступных артефактов в инвентаре."
+		grid.add_child(no_art)
+	else:
+		for i in range(inv.size()):
+			var lvl = inv[i]
+			var btn = Button.new()
+			btn.custom_minimum_size = Vector2(80, 80)
+			btn.text = "Арт Ур." + str(lvl)
+			var index = i
+			btn.pressed.connect(func():
+				game.archeology.equip_commander_artifact(current_commander_for_artifact, index)
+				update_artifacts_ui()
+				update_commanders_ui()
+				artifact_popup_overlay.hide()
+				artifact_popup_overlay.queue_free()
+			)
+			grid.add_child(btn)
+			
+	artifact_popup_overlay = _create_popup(content, "Выберите артефакт")
+	artifact_popup_overlay.show()

@@ -4,14 +4,23 @@ class_name ArtifactItem
 var artifact_level: int
 var inventory_index: int
 var main_ui: Node
+var equipped_by: String = ""
 
-func setup(level: int, index: int, ui: Node):
+func setup(level: int, index: int, ui: Node, _equipped_by: String = ""):
 	artifact_level = level
 	inventory_index = index
 	main_ui = ui
-	text = "Арт Ур.%d" % level
+	equipped_by = _equipped_by
+	
+	if equipped_by != "":
+		text = "Арт Ур.%d (Надет: %s)" % [level, equipped_by]
+	else:
+		text = "Арт Ур.%d" % level
 	
 func _get_drag_data(at_position: Vector2):
+	if equipped_by != "":
+		return {}
+
 	var data = {
 		"type": "artifact",
 		"inventory_index": inventory_index,

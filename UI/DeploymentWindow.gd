@@ -218,6 +218,14 @@ func _update_analytics():
 					if c_power > 0: parts.append("Сила +%d%%" % c_power)
 					if c_crit > 0: parts.append("Крит %d%%" % c_crit)
 					if c_loot > 0: parts.append("Добыча +%d%%" % c_loot)
+					
+					if comm.equipped_artifact_level > 0:
+						var lvl = comm.equipped_artifact_level
+						var art_pow = int((0.02 * pow(3, lvl - 1)) * 100)
+						var art_upk = int((0.02 * pow(3, lvl - 1)) * 100)
+						parts.append("Арт. Сила +%d%%" % art_pow)
+						parts.append("Арт. Содерж. -%d%%" % art_upk)
+						
 					if parts.is_empty():
 						parts.append("Без бонусов")
 					label.text = "  ↳ " + ", ".join(parts)

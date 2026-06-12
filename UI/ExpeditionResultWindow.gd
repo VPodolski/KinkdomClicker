@@ -39,7 +39,17 @@ func setup(result: Dictionary, game: Node):
 			l.text = "Артефактов не найдено"
 			artifacts_list.add_child(l)
 		else:
+			var counts = {}
 			for level in result.artifacts:
+				counts[level] = counts.get(level, 0) + 1
+				
+			var levels = counts.keys()
+			levels.sort_custom(func(a, b): return a > b)
+			
+			for level in levels:
 				var l = Label.new()
-				l.text = "🏺 Артефакт (Ур. %d)" % level
+				if counts[level] > 1:
+					l.text = "🏺 Артефакт (Ур. %d) x%d" % [level, counts[level]]
+				else:
+					l.text = "🏺 Артефакт (Ур. %d)" % level
 				artifacts_list.add_child(l)
