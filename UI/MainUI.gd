@@ -94,6 +94,12 @@ func _ready():
 	exp_result_window = exp_result_scene.instantiate()
 	add_child(exp_result_window)
 
+	var war_tabs = war_screen.get_node("RightPanel")
+	if war_tabs is TabContainer:
+		war_tabs.tab_changed.connect(func(_tab): reset_all_scrolls())
+		
+	right_panel.tab_changed.connect(func(_tab): reset_all_scrolls())
+
 	# первичная инициализация
 	update_gold(game.economy.gold)
 	create_buildings_ui()
@@ -160,15 +166,33 @@ func _on_upgrade_completed(upgrade) -> void:
 # ⚔️ ВОЙНА UI
 # =========================
 
+func reset_all_scrolls():
+	var scrolls = [
+		upgrades_container.get_parent(),
+		achievements_container.get_parent(),
+		troops_container.get_parent(),
+		commanders_container.get_parent(),
+		archeology_screen.get_node_or_null("RightPanel/InventoryPanel/VBox/ScrollContainer")
+	]
+	for cat in building_containers.values():
+		scrolls.append(cat.get_parent())
+	for s in scrolls:
+		if s and s is ScrollContainer:
+			s.scroll_vertical = 0
+
 func _on_mode_selected(index):
 	kingdom_screen.visible = (index == 0)
 	war_screen.visible = (index == 1)
 	archeology_screen.visible = (index == 2)
 	
-	# Visual feedback
-	kingdom_btn.modulate = Color(1.5, 1.5, 0.5) if index == 0 else Color(1, 1, 1)
-	war_btn.modulate = Color(1.5, 1.5, 0.5) if index == 1 else Color(1, 1, 1)
-	archeology_btn.modulate = Color(1.5, 1.5, 0.5) if index == 2 else Color(1, 1, 1)
+	kingdom_btn.modulate = Color(1.5, 1.5, 1.5) if index == 0 else Color(1, 1, 1)
+	war_btn.modulate = Color(1.5, 1.5, 1.5) if index == 1 else Color(1, 1, 1)
+	archeology_btn.modulate = Color(1.5, 1.5, 1.5) if index == 2 else Color(1, 1, 1)
+	
+	if index == 1:
+		war_visualizer.update_visuals()
+		
+	reset_all_scrolls()
 
 func check_modes_unlock():
 	var barracks = game.buildings.get_building_by_name("Казармы")
@@ -657,10 +681,10 @@ func update_visibility() -> void:
 		for child in building_containers[cat].get_children():
 			var b = child.building
 			
-			if b.cost.is_greater_than(max_visible_cost) and not b.has_been_seen:
+			if b.cost.is_greater_than(max_visible_cost):
 				if not first_unseen_found:
-					b.is_masked = true
 					child.visible = true
+					b.is_masked = not b.has_been_seen
 					first_unseen_found = true
 					cat_info[cat].visible_count += 1
 				else:
