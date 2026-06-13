@@ -55,7 +55,6 @@ var exp_result_window: ExpeditionResultWindow
 
 func _ready():
 	apply_tabular_fonts()
-	await get_tree().process_frame
 	
 	# подписки на события
 	game.gold_changed.connect(update_gold)
