@@ -521,23 +521,24 @@ func update_achievements_ui() -> void:
 
 func show_achievement_notification(achievement) -> void:
 	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(200, 0)
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color("#2C1E16")
 	style.corner_radius_top_left = 8
 	style.corner_radius_top_right = 8
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
-	style.border_width_bottom = 3
-	style.border_width_top = 3
-	style.border_width_left = 3
-	style.border_width_right = 3
+	style.border_width_bottom = 2
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
 	style.border_color = Color("#C5A059")
 	style.shadow_color = Color(0,0,0, 0.7)
-	style.shadow_size = 8
-	style.content_margin_left = 15
-	style.content_margin_right = 15
-	style.content_margin_top = 15
-	style.content_margin_bottom = 15
+	style.shadow_size = 4
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
@@ -546,43 +547,48 @@ func show_achievement_notification(achievement) -> void:
 	panel.add_child(vbox)
 	
 	var title = Label.new()
-	title.text = "🏆 Достижение разблокировано!"
+	title.text = "🏆 " + achievement.title
 	title.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
+	title.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(title)
 	
 	var desc = Label.new()
-	desc.text = achievement.title + "\n" + achievement.description
+	desc.text = achievement.description
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(desc)
 	
 	notifications_container.add_child(panel)
 	
 	panel.modulate.a = 0.0
 	var tween = create_tween()
-	tween.tween_property(panel, "modulate:a", 1.0, 0.5)
-	tween.tween_interval(4.0)
-	tween.tween_property(panel, "modulate:a", 0.0, 0.5)
+	var ts = Engine.time_scale
+	if ts <= 0.0: ts = 1.0
+	tween.tween_property(panel, "modulate:a", 1.0, 0.5 * ts)
+	tween.tween_interval(4.0 * ts)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.5 * ts)
 	tween.tween_callback(panel.queue_free)
 		
 func show_upgrade_notification(upgrade) -> void:
 	var panel = PanelContainer.new()
+	panel.custom_minimum_size = Vector2(200, 0)
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color("#1E2C28")
 	style.corner_radius_top_left = 8
 	style.corner_radius_top_right = 8
 	style.corner_radius_bottom_left = 8
 	style.corner_radius_bottom_right = 8
-	style.border_width_bottom = 3
-	style.border_width_top = 3
-	style.border_width_left = 3
-	style.border_width_right = 3
+	style.border_width_bottom = 2
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
 	style.border_color = Color("#59C59A")
 	style.shadow_color = Color(0,0,0, 0.7)
-	style.shadow_size = 8
-	style.content_margin_left = 15
-	style.content_margin_right = 15
-	style.content_margin_top = 15
-	style.content_margin_bottom = 15
+	style.shadow_size = 4
+	style.content_margin_left = 8
+	style.content_margin_right = 8
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	
@@ -591,22 +597,26 @@ func show_upgrade_notification(upgrade) -> void:
 	panel.add_child(vbox)
 	
 	var title = Label.new()
-	title.text = "🔨 Улучшение готово!"
+	title.text = "🔨 Улучшение: " + upgrade.name
 	title.add_theme_color_override("font_color", Color(0.4, 1.0, 0.8))
+	title.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(title)
 	
 	var desc = Label.new()
-	desc.text = upgrade.name + "\n" + upgrade.description
+	desc.text = upgrade.description
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.add_theme_font_size_override("font_size", 10)
 	vbox.add_child(desc)
 	
 	notifications_container.add_child(panel)
 	
 	panel.modulate.a = 0.0
 	var tween = create_tween()
-	tween.tween_property(panel, "modulate:a", 1.0, 0.5)
-	tween.tween_interval(4.0)
-	tween.tween_property(panel, "modulate:a", 0.0, 0.5)
+	var ts = Engine.time_scale
+	if ts <= 0.0: ts = 1.0
+	tween.tween_property(panel, "modulate:a", 1.0, 0.5 * ts)
+	tween.tween_interval(4.0 * ts)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.5 * ts)
 	tween.tween_callback(panel.queue_free)
 
 func update_achievements_tab_visibility() -> void:

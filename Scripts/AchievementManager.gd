@@ -91,11 +91,11 @@ func check(game: Node) -> void:
 		_unlock_if("art_lvl_10", has_lvl_10)
 
 	# 7. Ascension
-	var prayers = game.ascension.prayers
+	var prayers = game.economy.lifetime_prayers
 	for t in [100, 1000, 10000, 100000]:
-		_unlock_if("prayers_%d" % t, prayers >= t)
+		_unlock_if("prayers_%d" % t, prayers.is_greater_equal(t))
 	
-	if game.ascension.ascension_count > 0:
+	if game.economy.times_ascended > 0:
 		_unlock_if("first_ascension", true)
 
 

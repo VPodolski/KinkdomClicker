@@ -458,6 +458,11 @@ func finish_return(camp: CampData):
 					c.is_unlocked = true
 					camp_updated.emit(c)
 		else:
+			for c in camps:
+				if c != camp and c.player_army != null:
+					c.status = CampData.Status.WAITING_RETURN
+					finish_return(c)
+					
 			map_tier += 1
 			current_stage_index = 0
 			camps.clear()
