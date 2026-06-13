@@ -7,7 +7,6 @@ var index
 @onready var name_label: Label = $MarginContainer/HBoxContainer/TextPanel/TextVBox/NameLabel
 @onready var info_label: Label = $MarginContainer/HBoxContainer/TextPanel/TextVBox/InfoLabel
 @onready var buy1_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/Buy1Button
-@onready var buy10_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/Buy10Button
 @onready var buymax_button: Button = $MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox/BuyMaxButton
 
 var current_gold_cache = null
@@ -16,7 +15,6 @@ signal buy_pressed(index, amount)
 
 func _ready():
 	buy1_button.pressed.connect(_on_buy_pressed.bind(1))
-	buy10_button.pressed.connect(_on_buy_pressed.bind(10))
 	buymax_button.pressed.connect(func(): _on_buy_pressed(building.get_max_affordable(current_gold_cache, GameLogic.currentBaseNetIncome, GameLogic.economy.upkeep_reduction_multiplier)))
 
 func setup(_building, _index):
@@ -45,9 +43,7 @@ func update_ui(current_gold):
 		icon_rect.texture = null
 		info_label.text = "Кол-во: 0\nДоход: ???\nЦена: %s" % _format_number(building.cost)
 		buy1_button.disabled = true
-		buy10_button.disabled = true
 		buymax_button.disabled = true
-		buy10_button.visible = false
 		buymax_button.visible = false
 		return
 		
@@ -120,7 +116,6 @@ func update_ui(current_gold):
 			can_afford_upkeep_10 = false
 
 	buy1_button.disabled = current_gold.is_less_than(building.cost) or not can_afford_upkeep_1
-	buy10_button.disabled = current_gold.is_less_than(building.get_cost_for(10)) or not can_afford_upkeep_10
 	
 	var actual_max = building.get_max_affordable(current_gold, net_income, upkeep_mult)
 	if actual_max > 0:
@@ -132,7 +127,6 @@ func update_ui(current_gold):
 
 	var has_buy_max = GameLogic.ascension.has_skill("buy_max")
 	
-	buy10_button.visible = has_buy_max
 	buymax_button.visible = has_buy_max
 
 func _format_number(value) -> String:

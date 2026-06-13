@@ -93,6 +93,7 @@ func start_training(troop: TroopData, amount: int):
 	
 	if game.economy.spend_gold(total_cost):
 		troop.start_training(amount)
+		game.economy.lifetime_unlocked_troops[troop.id] = true
 		troops_changed.emit()
 		return true
 	return false

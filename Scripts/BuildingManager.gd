@@ -58,6 +58,7 @@ func buy_building(index, economy, net_income: BigNum, amount = 1):
 	
 	if economy.spend_gold(total_cost):
 		b.buy_multiple(amount)
+		economy.lifetime_unlocked_buildings[b.id] = true
 		return true
 	
 	return false

@@ -879,12 +879,11 @@ func _setup_archeology_ui():
 	var diff_opt = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox/DiffOption")
 	
 	var arch_slider = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox/ArchSlider")
-	arch_slider.value_changed.connect(func(v):
+	arch_slider.value_changed.connect(func(_v):
 		arch_slider.set_meta("user_interacted", true)
 	)
 	
 	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/TrainButton").pressed.connect(func(): game.archeology.start_training(1))
-	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/Train10Button").pressed.connect(func(): game.archeology.start_training(10))
 	archeology_screen.get_node("LeftPanel/TrainingPanel/VBox/TrainMaxButton").pressed.connect(func(): game.archeology.start_training(game.archeology.get_max_archeologists()))
 	
 	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
@@ -906,25 +905,17 @@ func update_archeology_ui():
 	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
 	var max_arch = am.get_max_archeologists()
 	var current_total = am.archeologists_count + am.archeologists_training
-	var b_name = game.buildings.get_building_by_name("Гильдия археологов")
-	var b_id = game.buildings.get_building_by_id("archeology_guild")
-	var cn = b_name.count if b_name else -1
-	var ci = b_id.count if b_id else -1
-	var cap = 50 + (game.ascension.get_skill_level("arch_guild_capacity") * 25)
 	
 	left_panel.get_node("TrainInfo").text = "🏺 Археологи: %d / %d (Обучается: %d)" % [am.archeologists_count, max_arch, am.archeologists_training]
 	
 	var can_train = current_total < max_arch and max_arch > 0
 	var train_btn = left_panel.get_node("TrainButton")
-	var train10_btn = left_panel.get_node("Train10Button")
 	var trainmax_btn = left_panel.get_node("TrainMaxButton")
 	
 	train_btn.visible = true
-	train10_btn.visible = true
 	trainmax_btn.visible = true
 	
 	train_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost))
-	train10_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost * 10))
 	trainmax_btn.disabled = not can_train or game.economy.gold.is_less_than(BigNum.from(am.base_archeologist_cost))
 	
 	var mid_panel = archeology_screen.get_node("MiddlePanel/StartExpeditionPanel/VBox")
@@ -957,11 +948,11 @@ func update_archeology_ui():
 	var exp_list = archeology_screen.get_node("MiddlePanel/ExpeditionsList")
 	for c in exp_list.get_children(): c.queue_free()
 	
-	for exp in am.active_expeditions:
+	for expedition in am.active_expeditions:
 		var lbl = Label.new()
-		var rem_min = int(exp.remaining_duration / 60)
-		var rem_sec = int(exp.remaining_duration) % 60
-		lbl.text = "[%s] 🏺 Археологов: %d | Ост: %02d:%02d" % [diff_names.get(exp.difficulty, exp.difficulty), exp.current_archeologists, rem_min, rem_sec]
+		var rem_min = int(expedition.remaining_duration / 60)
+		var rem_sec = int(expedition.remaining_duration) % 60
+		lbl.text = "[%s] 🏺 Археологов: %d | Ост: %02d:%02d" % [diff_names.get(expedition.difficulty, expedition.difficulty), expedition.current_archeologists, rem_min, rem_sec]
 		exp_list.add_child(lbl)
 	
 func update_artifacts_ui():
@@ -1017,7 +1008,7 @@ func _on_inventory_artifact_clicked(index):
 		selected_inventory_index = index
 	update_artifacts_ui()
 	
-func _on_arch_expedition_updated(exp_id):
+func _on_arch_expedition_updated(_exp_id):
 	update_archeology_ui()
 
 func _on_arch_expedition_completed(result):

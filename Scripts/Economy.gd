@@ -13,6 +13,10 @@ var lifetime_prayers: BigNum = BigNum.new(0.0)
 var prayer_multiplier: float = 1.0
 var upkeep_reduction_multiplier: float = 1.0
 
+var lifetime_unlocked_buildings: Dictionary = {}
+var lifetime_unlocked_troops: Dictionary = {}
+
+
 var troop_power_multiplier: float = 1.0
 var troop_cost_multiplier: float = 1.0
 var troop_speed_multiplier: float = 1.0

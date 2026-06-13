@@ -20,12 +20,12 @@ func setup(index: int, ui: Node, level: int):
 		artifact_button.hide()
 		empty_label.show()
 
-func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "artifact":
 		return not is_equipped
 	return false
 
-func _drop_data(at_position: Vector2, data: Variant):
+func _drop_data(_at_position: Vector2, data: Variant):
 	if not is_equipped:
 		main_ui.game.archeology.equip_kingdom_artifact(data["inventory_index"])
 

@@ -87,11 +87,6 @@ custom_minimum_size = Vector2(50, 0)
 layout_mode = 2
 text = "Купить"
 
-[node name="Buy10Button" type="Button" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox"]
-custom_minimum_size = Vector2(50, 0)
-layout_mode = 2
-text = "x10"
-
 [node name="BuyMaxButton" type="Button" parent="MarginContainer/HBoxContainer/TextPanel/TextVBox/ActionHBox"]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2

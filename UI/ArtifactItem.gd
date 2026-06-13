@@ -17,7 +17,7 @@ func setup(level: int, index: int, ui: Node, _equipped_by: String = ""):
 	else:
 		text = "Арт Ур.%d" % level
 	
-func _get_drag_data(at_position: Vector2):
+func _get_drag_data(_at_position: Vector2):
 	if equipped_by != "":
 		return {}
 
@@ -35,12 +35,12 @@ func _get_drag_data(at_position: Vector2):
 	
 	return data
 
-func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
+func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 	if typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "artifact":
 		if data["inventory_index"] != inventory_index:
 			if data["level"] == artifact_level and data["level"] < 10:
 				return true
 	return false
 
-func _drop_data(at_position: Vector2, data: Variant):
+func _drop_data(_at_position: Vector2, data: Variant):
 	main_ui.game.archeology.merge_artifacts(data["inventory_index"], inventory_index)

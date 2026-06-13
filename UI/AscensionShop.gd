@@ -31,20 +31,24 @@ func update_ui():
 		title.text = "=== " + cat_labels[cat_id] + " ==="
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		title.modulate = Color(1.0, 0.9, 0.5)
+		
+		var start_child_count = skills_container.get_child_count()
 		skills_container.add_child(title)
 		
 		_add_ascension_skills_for_category(cat_id)
 		
 		if cat_id == "commanders":
-			var has_visible_commanders = false
 			for troop in game.war.troops:
 				if troop.commander != null and game.war.is_troop_unlocked(troop):
 					_create_commander_ui(troop)
-					has_visible_commanders = true
 					
-		var sep = HSeparator.new()
-		sep.add_theme_constant_override("separation", 20)
-		skills_container.add_child(sep)
+		if skills_container.get_child_count() == start_child_count + 1:
+			skills_container.remove_child(title)
+			title.queue_free()
+		else:
+			var sep = HSeparator.new()
+			sep.add_theme_constant_override("separation", 20)
+			skills_container.add_child(sep)
 
 func _on_buy_skill_pressed(skill_id):
 	game.ascension.buy_skill(skill_id, game.economy)
@@ -76,6 +80,15 @@ func _add_ascension_skills_for_category(cat: String):
 			
 	for skill_id in sorted_skills:
 		var data = game.ascension.skills[skill_id]
+		
+		var related_troop = data.get("related_troop", "")
+		if related_troop != "" and not game.economy.lifetime_unlocked_troops.has(related_troop):
+			continue
+			
+		var related_building = data.get("related_building", "")
+		if related_building != "" and not game.economy.lifetime_unlocked_buildings.has(related_building):
+			continue
+			
 		var req = data.get("requires", "")
 		
 		var hbox = HBoxContainer.new()

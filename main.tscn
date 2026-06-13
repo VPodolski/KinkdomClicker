@@ -250,10 +250,6 @@ text = "🏺 Археологи: 0 / 0"
 layout_mode = 2
 text = "Нанять 1 (10000 🪙)"
 
-[node name="Train10Button" type="Button" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
-layout_mode = 2
-text = "Нанять 10"
-
 [node name="TrainMaxButton" type="Button" parent="RootVBox/ArcheologyScreen/LeftPanel/TrainingPanel/VBox"]
 layout_mode = 2
 text = "Нанять макс."
