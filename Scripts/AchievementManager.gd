@@ -22,31 +22,81 @@ func _init():
 
 
 func check(game: Node) -> void:
-	_unlock_if("first_click", game.economy.gold.is_greater_than(0))
-	_unlock_if("100_gold", game.economy.gold.is_greater_equal(100))
-	_unlock_if("10k_gold", game.economy.gold.is_greater_equal(10_000))
-	_unlock_if("1M_gold", game.economy.gold.is_greater_equal(1_000_000))
-	_unlock_if("1B_gold", game.economy.gold.is_greater_equal(1_000_000_000))
-	_unlock_if("1T_gold", game.economy.gold.is_greater_equal(1_000_000_000_000))
-	_unlock_if("1Qa_gold", game.economy.gold.is_greater_equal(1_000_000_000_000_000))
-	
-	var farm = game.buildings.get_building_by_name("Ферма")
-	if farm: _unlock_if("first_farm", farm.count >= 1)
-	_unlock_if("first_upgrade", game.upgrades.active_upgrades.size() >= 1)
-	
-	for count in [10, 50, 100]:
-		if farm: _unlock_if("farms_" + str(count), farm.count >= count)
-		var sawmill = game.buildings.get_building_by_name("Лесопилка")
-		if sawmill: _unlock_if("sawmills_" + str(count), sawmill.count >= count)
-		var quarry = game.buildings.get_building_by_name("Каменоломня")
-		if quarry: _unlock_if("quarries_" + str(count), quarry.count >= count)
-
-	var all_10 = true
+	# 1. Gold
+	var thresholds_gold = {
+		"first_click": BigNum.from(1),
+		"100_gold": BigNum.from(100),
+		"10k_gold": BigNum.from(10000),
+		"1M_gold": BigNum.from(1000000),
+		"1B_gold": BigNum.from(1000000000),
+		"1T_gold": BigNum.from(1000000000000),
+		"1Qa_gold": BigNum.from(1000000000000000),
+		"1Qi_gold": BigNum.from("1000000000000000000"),
+		"1Sx_gold": BigNum.from("1000000000000000000000"),
+		"1Sp_gold": BigNum.from("1000000000000000000000000"),
+	}
+	for k in thresholds_gold.keys():
+		_unlock_if(k, game.economy.gold.is_greater_equal(thresholds_gold[k]))
+		
+	# 2. Buildings
+	var b_thresholds = [1, 10, 50, 100, 250, 500]
 	for b in game.buildings.buildings:
-		if b.count < 10:
-			all_10 = false
-			break
-	_unlock_if("all_buildings_10", all_10)
+		for t in b_thresholds:
+			if b.count >= t:
+				_unlock_if("build_%s_%d" % [b.id, t], true)
+				
+	# 3. Upgrades
+	var upg_count = game.upgrades.active_upgrades.size()
+	for t in [1, 10, 25, 50, 100, 150]:
+		_unlock_if("upgrades_%d" % t, upg_count >= t)
+		
+	# 4. Troops & Commanders
+	var troops_count = 0.0
+	var cmd_count = 0
+	for t in game.war.troops:
+		troops_count += t.count
+		if t.commander and t.commander.is_unlocked:
+			cmd_count += 1
+	
+	_unlock_if("troops_1000", troops_count >= 1000)
+	_unlock_if("troops_1000000", troops_count >= 1000000)
+	_unlock_if("troops_1000000000", troops_count >= 1000000000)
+	
+	for t in [1, 5, 10, 15]:
+		_unlock_if("cmd_%d" % t, cmd_count >= t)
+		
+	# 5. Expeditions
+	var tier = game.expeditions.map_tier
+	for t in [2, 5, 10, 25, 50]:
+		_unlock_if("map_tier_%d" % t, tier >= t)
+		
+	# 6. Archeology
+	if game.archeology:
+		var arts_inv = game.archeology.inventory_artifacts.size()
+		var arts_king = game.archeology.kingdom_artifacts.size()
+		var archs = game.archeology.archeologists_count
+		
+		for t in [1, 10, 50]:
+			_unlock_if("arts_inv_%d" % t, arts_inv >= t)
+		for t in [1, 5, 10]:
+			_unlock_if("arts_king_%d" % t, arts_king >= t)
+		for t in [10, 50, 100]:
+			_unlock_if("archs_%d" % t, archs >= t)
+			
+		var has_lvl_10 = false
+		for a in game.archeology.inventory_artifacts:
+			if a >= 10: has_lvl_10 = true
+		for a in game.archeology.kingdom_artifacts:
+			if a >= 10: has_lvl_10 = true
+		_unlock_if("art_lvl_10", has_lvl_10)
+
+	# 7. Ascension
+	var prayers = game.ascension.prayers
+	for t in [100, 1000, 10000, 100000]:
+		_unlock_if("prayers_%d" % t, prayers >= t)
+	
+	if game.ascension.ascension_count > 0:
+		_unlock_if("first_ascension", true)
 
 
 func _unlock_if(id: String, condition: bool) -> void:
