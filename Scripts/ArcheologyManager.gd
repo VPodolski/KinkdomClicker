@@ -7,6 +7,7 @@ signal expedition_updated(exp_id)
 signal expedition_completed(result)
 
 var game: Node
+var archeology_unlocked_by_combat: bool = false
 
 # Archeologists
 var archeologists_count: int = 0
@@ -31,6 +32,7 @@ func reset():
 	archeologists_count = 0
 	archeologists_training = 0
 	training_progress = 0.0
+	archeology_unlocked_by_combat = false
 	inventory_artifacts.clear()
 	kingdom_artifacts.clear()
 	active_expeditions.clear()

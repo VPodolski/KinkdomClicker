@@ -8,6 +8,7 @@ class_name BattleResultsWindow
 @onready var losses_list = $VBoxContainer/StatsContainer/ScrollContainer/LossesList
 @onready var gold_label = $VBoxContainer/RewardsContainer/GoldLabel
 @onready var captives_label = $VBoxContainer/RewardsContainer/CaptivesLabel
+@onready var artifacts_label = $VBoxContainer/RewardsContainer/ArtifactsLabel
 @onready var ok_button = $VBoxContainer/OkButton
 @onready var rewards_container = $VBoxContainer/RewardsContainer
 
@@ -92,6 +93,13 @@ func setup(data: Dictionary, game: Node):
 	
 	gold_label.text = "Золото: +" + game.format_number(data.gold_reward)
 	captives_label.text = "Пленники: +" + str(data.captives_reward)
+	
+	var awarded_arts = data.get("artifacts_awarded", 0)
+	if awarded_arts > 0:
+		artifacts_label.text = "Артефакты: +%d шт. (Уровень %d)" % [awarded_arts, data.get("artifact_level", 1)]
+		artifacts_label.show()
+	else:
+		artifacts_label.hide()
 	
 	show()
 

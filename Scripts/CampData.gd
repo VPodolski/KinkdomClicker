@@ -15,6 +15,7 @@ var distance_time: float = 60.0
 var timer: float = 0.0
 
 # Сила врага
+var initial_power: float
 var exact_power: BigNum
 var min_power_display: BigNum
 var max_power_display: BigNum
@@ -33,6 +34,8 @@ var casualties_pct_taken: float = 0.0
 var pending_gold_reward: BigNum
 var pending_captives_reward: int = 0
 var pending_commander_xp: float = 0.0
+var pending_artifacts_awarded: int = 0
+var pending_artifact_level: int = 1
 
 # Данные для окна результатов
 var last_combat_losses: Dictionary = {}
@@ -46,6 +49,7 @@ func _init(_id: String, _name: String, _pos: Vector2, _power: float, _time: floa
 	id = _id
 	camp_name = _name
 	position = _pos
+	initial_power = _power
 	exact_power = BigNum.from(_power)
 	is_boss = _is_boss
 	is_unlocked = _is_unlocked

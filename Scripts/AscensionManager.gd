@@ -28,6 +28,8 @@ var skills = {
 	"upkeep_paladin": { "name": "Содержание (Паладины) -10%", "cost": 300, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction", "related_troop": "paladin" },
 	"upkeep_griffon_rider": { "name": "Содержание (Грифоны) -10%", "cost": 500, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "troops", "requires": "upkeep_reduction", "related_troop": "griffon_rider" },
 
+	"war_artifact_chance": { "name": "Шанс артефакта за войну +5%", "cost": 150, "repeatable": true, "cost_mult": 1.5, "max_levels": 4, "category": "troops", "related_building": "archeology_guild" },
+
 	"arch_commander_artifact": { "name": "Полководцы носят артефакт", "cost": 50, "category": "archeology", "related_building": "archeology_guild" },
 	"arch_max_expeditions": { "name": "Макс. экспедиций +1", "cost": 100, "repeatable": true, "cost_mult": 1.5, "max_levels": 5, "category": "archeology", "related_building": "archeology_guild" },
 	"arch_max_artifacts": { "name": "Макс. артефактов королевства +1", "cost": 200, "repeatable": true, "cost_mult": 2.0, "max_levels": 3, "category": "archeology", "related_building": "archeology_guild" },
@@ -59,6 +61,7 @@ var skill_levels = {
 	"upkeep_knight": 0,
 	"upkeep_paladin": 0,
 	"upkeep_griffon_rider": 0,
+	"war_artifact_chance": 0,
 	"arch_commander_artifact": 0,
 	"arch_max_expeditions": 0,
 	"arch_max_artifacts": 0,

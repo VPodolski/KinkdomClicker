@@ -203,6 +203,7 @@ func check_modes_unlock():
 	
 	var has_arch = false
 	if arch_guild and arch_guild.count > 0: has_arch = true
+	if game.archeology and game.archeology.archeology_unlocked_by_combat: has_arch = true
 	
 	if war_btn: war_btn.visible = has_war
 	if archeology_btn: archeology_btn.visible = has_arch
@@ -901,7 +902,16 @@ func _setup_archeology_ui():
 	)
 	
 func update_archeology_ui():
+	check_modes_unlock()
 	var am = game.archeology
+	var arch_guild = game.buildings.get_building_by_name("Гильдия археологов")
+	var has_guild = arch_guild and arch_guild.count > 0
+	
+	if archeology_screen.has_node("LeftPanel"):
+		archeology_screen.get_node("LeftPanel").visible = has_guild
+	if archeology_screen.has_node("MiddlePanel"):
+		archeology_screen.get_node("MiddlePanel").visible = has_guild
+	
 	var left_panel = archeology_screen.get_node("LeftPanel/TrainingPanel/VBox")
 	var max_arch = am.get_max_archeologists()
 	var current_total = am.archeologists_count + am.archeologists_training

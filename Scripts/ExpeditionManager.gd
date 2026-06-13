@@ -180,6 +180,7 @@ func resolve_scouting(camp: CampData):
 	camp_updated.emit(camp)
 
 func resolve_combat(camp: CampData):
+	var power_before_combat = camp.exact_power.to_float()
 	var army = camp.player_army
 	
 	var player_dict = army.troops.duplicate()
@@ -320,6 +321,23 @@ func resolve_combat(camp: CampData):
 		var xp_mult = 1.0 + (game.ascension.get_skill_level("commander_xp") * 0.2)
 		camp.pending_commander_xp = camp.exact_power.to_float() * 0.1 * xp_mult
 		
+		var chance = power_before_combat / max(1.0, camp.initial_power)
+		chance += game.ascension.get_skill_level("war_artifact_chance") * 0.05
+		
+		var target_level = map_tier + (1 if camp.is_boss else 0)
+		var max_art_level = 10
+		if target_level > max_art_level:
+			chance += (target_level - max_art_level) * 0.1
+			target_level = max_art_level
+			
+		var artifacts_awarded = int(chance)
+		var remainder = chance - artifacts_awarded
+		if randf() < remainder:
+			artifacts_awarded += 1
+			
+		camp.pending_artifacts_awarded = artifacts_awarded
+		camp.pending_artifact_level = target_level
+		
 		var result = {
 			"camp_id": camp.id,
 			"won": true,
@@ -330,7 +348,9 @@ func resolve_combat(camp: CampData):
 			"player_losses": camp.last_combat_losses,
 			"commander_losses": camp.last_commander_losses,
 			"enemy_killed": camp.last_enemy_killed,
-			"gathered_intel": false
+			"gathered_intel": false,
+			"artifacts_awarded": artifacts_awarded,
+			"artifact_level": target_level
 		}
 		expedition_finished.emit(result)
 	else:
@@ -422,6 +442,13 @@ func finish_return(camp: CampData):
 		total_captives += camp.pending_captives_reward
 		commander_xp += camp.pending_commander_xp
 		check_commander_level()
+		
+		if camp.pending_artifacts_awarded > 0:
+			for i in range(camp.pending_artifacts_awarded):
+				game.archeology.inventory_artifacts.append(camp.pending_artifact_level)
+			game.archeology.inventory_artifacts.sort_custom(func(a, b): return a > b)
+			game.archeology.archeology_unlocked_by_combat = true
+			game.archeology.artifacts_changed.emit()
 		
 		if current_stage_index < BARBARIAN_CAMPAIGN.size() - 1:
 			current_stage_index += 1
