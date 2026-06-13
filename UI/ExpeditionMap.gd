@@ -1,7 +1,8 @@
 extends Control
 class_name ExpeditionMap
 
-@onready var camps_container = $ScrollContainer/CampsContainer
+@onready var camps_container = $VBoxContainer/ScrollContainer/CampsContainer
+@onready var title_label = $VBoxContainer/TitleLabel
 
 var deployment_window: DeploymentWindow
 
@@ -10,6 +11,10 @@ var selected_camp: CampData
 func _ready():
 	GameLogic.expeditions.camp_spawned.connect(_on_camp_spawned)
 	GameLogic.expeditions.camp_updated.connect(_on_camp_updated)
+	GameLogic.expeditions.map_regenerated.connect(func():
+		for child in camps_container.get_children():
+			child.queue_free()
+	)
 	
 	deployment_window = preload("res://UI/DeploymentWindow.tscn").instantiate()
 	add_child(deployment_window)
@@ -20,6 +25,12 @@ func _ready():
 	# Создаем уже существующие лагеря
 	for c in GameLogic.expeditions.camps:
 		_on_camp_spawned(c)
+		
+	update_title()
+
+func update_title():
+	if title_label and GameLogic.expeditions:
+		title_label.text = "Варварские земли (Уровень %d)" % GameLogic.expeditions.map_tier
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -28,6 +39,7 @@ func _gui_input(event: InputEvent) -> void:
 		selected_camp = null
 
 func _on_camp_spawned(camp: CampData):
+	update_title()
 	var node = CampNode.new()
 	node.name = camp.id
 	node.setup(camp)

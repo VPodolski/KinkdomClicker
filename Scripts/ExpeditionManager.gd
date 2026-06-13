@@ -6,6 +6,7 @@ signal camp_updated(camp)
 signal combat_resolved(camp, won, casualties_percent, log_message)
 signal expedition_returned(log_message)
 signal expedition_finished(result_data: Dictionary)
+signal map_regenerated()
 
 var game: Node
 var camps: Array[CampData] = []
@@ -35,6 +36,7 @@ const BARBARIAN_CAMPAIGN = [
 ]
 
 var current_stage_index: int = 0
+var map_tier: int = 1
 
 func spawn_initial_camps():
 	# Координаты для красивого пути на карте (зиг-заг снизу вверх)
@@ -50,7 +52,8 @@ func spawn_initial_camps():
 		var stage = BARBARIAN_CAMPAIGN[i]
 		var is_boss = stage.get("is_boss", false)
 		var is_unlocked = (i <= current_stage_index)
-		var camp = CampData.new("camp_" + str(i), stage["name"], positions[i], stage["power"], stage["time"], is_boss, is_unlocked)
+		var base_power = stage["power"] * pow(5.0, map_tier - 1)
+		var camp = CampData.new("camp_" + str(i), stage["name"], positions[i], base_power, stage["time"], is_boss, is_unlocked)
 		generate_enemy_army(camp)
 		camps.append(camp)
 		camp_spawned.emit(camp)
@@ -234,7 +237,7 @@ func resolve_combat(camp: CampData):
 		var e_damage = e_power * e_mult * randf_range(0.8, 1.2)
 		
 		_distribute_damage(enemy_dict, p_damage)
-		_distribute_damage(player_dict, e_damage)
+		_distribute_damage(player_dict, e_damage, true, army)
 		
 		p_count = 0
 		for c in player_dict.values(): p_count += c
@@ -361,7 +364,7 @@ func resolve_combat(camp: CampData):
 	combat_resolved.emit(camp, won, 0.0, msg)
 	camp_updated.emit(camp)
 
-func _distribute_damage(army_dict: Dictionary, total_damage: float):
+func _distribute_damage(army_dict: Dictionary, total_damage: float, is_player: bool = false, army = null):
 	var active_types = []
 	for t_id in army_dict.keys():
 		if army_dict[t_id] > 0:
@@ -373,7 +376,12 @@ func _distribute_damage(army_dict: Dictionary, total_damage: float):
 	for t_id in active_types:
 		var count = army_dict[t_id]
 		var t = game.war.get_troop_by_id(t_id)
-		var kills = int(damage_per_type / t.base_power.to_float())
+		var effective_hp = t.base_power.to_float()
+		if is_player:
+			effective_hp *= t.power_multiplier
+			if t.commander and t.commander.is_unlocked and army and (t_id in army.included_commanders):
+				effective_hp *= t.commander.get_power_multiplier()
+		var kills = int(damage_per_type / max(0.1, effective_hp))
 		army_dict[t_id] = max(0, count - kills)
 
 func start_return(camp_id: String):
@@ -422,6 +430,12 @@ func finish_return(camp: CampData):
 				if c.camp_name == next_name and not c.is_unlocked:
 					c.is_unlocked = true
 					camp_updated.emit(c)
+		else:
+			map_tier += 1
+			current_stage_index = 0
+			camps.clear()
+			map_regenerated.emit()
+			spawn_initial_camps()
 	else:
 		camp.status = CampData.Status.IDLE
 		camp.timer = 0.0

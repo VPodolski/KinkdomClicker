@@ -50,6 +50,10 @@ func update_troops_multipliers():
 			art_upkeep = max(0.0, art_upkeep)
 			
 		t.power_multiplier = game.economy.troop_power_multiplier * art_power
+		
+		if game.developer_mode_active:
+			t.power_multiplier *= 1000.0
+			
 		t.cost_multiplier = game.economy.troop_cost_multiplier
 		t.speed_multiplier = game.economy.troop_speed_multiplier
 		t.upkeep_multiplier = game.economy.get_troop_upkeep_multiplier(t.id) * art_upkeep

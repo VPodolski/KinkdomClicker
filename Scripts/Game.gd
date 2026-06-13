@@ -16,6 +16,7 @@ var war: WarManager
 var expeditions: ExpeditionManager
 var archeology: ArcheologyManager
 	
+var developer_mode_active: bool = true
 
 var currentGoldPerSecond: BigNum = BigNum.new(0.0)
 var currentBaseNetIncome: BigNum = BigNum.new(0.0)
@@ -71,8 +72,9 @@ func _ready():
 	archeology = ArcheologyManager.new(self)
 	recalculate_income()
 	
-	Engine.time_scale = 1000.0
-	print("Developer Mode: ON by default (Speed x1000)")
+	if developer_mode_active:
+		Engine.time_scale = 1000.0
+		print("Developer Mode: ON by default (Speed x1000, Power x1000)")
 
 func get_click_value() -> BigNum:
 	var achievement_multiplier = achievements.get_income_multiplier()
@@ -215,9 +217,12 @@ func buy_all_affordable_upgrades() -> void:
 func _input(event):
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F12:
-			if Engine.time_scale == 1.0:
+			developer_mode_active = not developer_mode_active
+			if developer_mode_active:
 				Engine.time_scale = 1000.0
-				print("Developer Mode: ON (Speed x1000)")
+				print("Developer Mode: ON (Speed x1000, Power x1000)")
 			else:
 				Engine.time_scale = 1.0
 				print("Developer Mode: OFF (Speed x1)")
+			war.update_troops_multipliers()
+			war.recalculate_power()
