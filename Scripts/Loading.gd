@@ -54,6 +54,12 @@ func _ready():
 	progress_bar.value = 0.0
 	vbox.add_child(progress_bar)
 	
+	if SaveManager.load_game():
+		var current_time = Time.get_unix_time_from_system()
+		var offline_seconds = current_time - SaveManager.last_played_time
+		if offline_seconds > 5.0:
+			GameLogic.simulate_offline(offline_seconds)
+	
 	ResourceLoader.load_threaded_request(scene_path)
 
 func _process(delta):

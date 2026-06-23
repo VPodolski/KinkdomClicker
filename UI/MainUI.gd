@@ -18,6 +18,7 @@ var popup_forge: Control
 var popup_ach: Control
 var forge_btn: Button
 var ach_btn: Button
+var wipe_btn: Button
 
 @onready var ascension_tab = $RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel
 @onready var prestige_label = $RootVBox/TopPanel/TopVBox/TopHBox/AscensionPanel/PrestigeLabel
@@ -81,6 +82,8 @@ func _ready():
 	game.archeology.expedition_updated.connect(_on_arch_expedition_updated)
 	game.archeology.expedition_completed.connect(_on_arch_expedition_completed)
 	
+	game.developer_mode_toggled.connect(func(is_active): if wipe_btn: wipe_btn.visible = is_active)
+	
 	_setup_archeology_ui()
 		
 	if not ascend_button.pressed.is_connected(_on_ascend_pressed):
@@ -109,6 +112,7 @@ func _ready():
 	create_troops_ui()
 	create_commanders_ui()
 	check_modes_unlock()
+	update_war_info(game.war.total_military_power)
 	right_panel.current_tab = 0
 
 	notifications_container = VBoxContainer.new()
@@ -121,6 +125,132 @@ func _ready():
 	notifications_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	notifications_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(notifications_container)
+	
+	if game.offline_report and not game.offline_report.is_empty():
+		call_deferred("show_offline_popup")
+
+func show_offline_popup():
+	var report = game.offline_report
+	game.offline_report = {} # clear
+	
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	
+	var scroll = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 400)
+	margin.add_child(scroll)
+	
+	var vbox = VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 15)
+	scroll.add_child(vbox)
+	
+	var time_sec = int(report.get("time", 0))
+	var hours = time_sec / 3600
+	var minutes = (time_sec % 3600) / 60
+	var secs = time_sec % 60
+	var time_str = ""
+	if hours > 0: time_str += str(hours) + " ч. "
+	if minutes > 0: time_str += str(minutes) + " мин. "
+	time_str += str(secs) + " сек."
+	
+	var time_lbl = Label.new()
+	time_lbl.text = "⏳ Вас не было: " + time_str
+	time_lbl.add_theme_font_size_override("font_size", 18)
+	vbox.add_child(time_lbl)
+	vbox.add_child(HSeparator.new())
+	
+	var gold_lbl = Label.new()
+	gold_lbl.text = "🪙 Золота добыто: " + game.format_number(report.get("gold_earned", 0.0))
+	vbox.add_child(gold_lbl)
+	
+	var prayers = report.get("prayers_earned", BigNum.new(0.0))
+	if prayers.is_greater_than(0.0):
+		var pray_lbl = Label.new()
+		pray_lbl.text = "🙏 Молитв получено: " + game.format_number(prayers)
+		vbox.add_child(pray_lbl)
+		
+	var upgrades = report.get("upgrades", [])
+	if upgrades.size() > 0:
+		vbox.add_child(HSeparator.new())
+		var upg_lbl = Label.new()
+		upg_lbl.text = "🔨 Завершено улучшений: " + str(upgrades.size())
+		upg_lbl.add_theme_color_override("font_color", Color("#59C59A"))
+		vbox.add_child(upg_lbl)
+		for u in upgrades:
+			var l = Label.new()
+			l.text = " - " + str(u)
+			vbox.add_child(l)
+			
+	var expeditions = report.get("expeditions", [])
+	if expeditions.size() > 0:
+		vbox.add_child(HSeparator.new())
+		var exp_lbl = Label.new()
+		exp_lbl.text = "⚔️ Завершено походов: " + str(expeditions.size())
+		exp_lbl.add_theme_color_override("font_color", Color("#C55959"))
+		vbox.add_child(exp_lbl)
+		for res in expeditions:
+			var l = Label.new()
+			if res.get("won", false):
+				l.text = " - Победа! Добыто: " + game.format_number(res.get("gold_reward", 0.0)) + " 🪙"
+			elif res.get("is_scout_mission", false):
+				l.text = " - Разведка завершена."
+			else:
+				l.text = " - Поражение."
+			vbox.add_child(l)
+			
+	var archeology = report.get("archeology", [])
+	if archeology.size() > 0:
+		vbox.add_child(HSeparator.new())
+		var arch_lbl = Label.new()
+		arch_lbl.text = "🗺️ Археологических экспедиций: " + str(archeology.size())
+		arch_lbl.add_theme_color_override("font_color", Color("#C5A059"))
+		vbox.add_child(arch_lbl)
+		for res in archeology:
+			var l = Label.new()
+			if res.get("success", false):
+				l.text = " - Успех! Добыто: " + game.format_number(res.get("gold", 0.0)) + " 🪙. Артефактов: " + str(res.get("artifacts", []).size())
+			else:
+				l.text = " - Экспедиция провалена. Погибло археологов: " + str(res.get("dead", 0))
+			vbox.add_child(l)
+			
+	var troops = report.get("troops", {})
+	if troops.size() > 0:
+		vbox.add_child(HSeparator.new())
+		var troop_lbl = Label.new()
+		troop_lbl.text = "⚔️ Обучено войск: "
+		troop_lbl.add_theme_color_override("font_color", Color("#5981C5"))
+		vbox.add_child(troop_lbl)
+		for t_name in troops.keys():
+			var l = Label.new()
+			l.text = " - " + t_name + ": " + str(troops[t_name])
+			vbox.add_child(l)
+			
+	var arch_trained = report.get("archeologists_trained", 0)
+	if arch_trained > 0:
+		vbox.add_child(HSeparator.new())
+		var l = Label.new()
+		l.text = "⛺ Нанято археологов: " + str(arch_trained)
+		l.add_theme_color_override("font_color", Color("#C8A252"))
+		vbox.add_child(l)
+		
+	var commanders = report.get("commanders", [])
+	if commanders.size() > 0:
+		vbox.add_child(HSeparator.new())
+		var comm_lbl = Label.new()
+		comm_lbl.text = "🎖️ Полководцы: "
+		comm_lbl.add_theme_color_override("font_color", Color("#B052C8"))
+		vbox.add_child(comm_lbl)
+		for msg in commanders:
+			var l = Label.new()
+			l.text = " - " + msg
+			vbox.add_child(l)
+	
+	var popup = _create_popup(margin, "Офлайн Прогресс")
+	popup.show()
 
 func _process(delta):
 	ui_update_timer += delta
@@ -372,6 +502,13 @@ func create_buildings_ui():
 		ach_btn.text = "🏆 Достижения"
 		ach_btn.pressed.connect(func(): popup_ach.show())
 		nav_hbox.add_child(ach_btn)
+		
+		wipe_btn = Button.new()
+		wipe_btn.text = "⚠️ Вайп прогресса"
+		wipe_btn.modulate = Color(1.0, 0.2, 0.2)
+		wipe_btn.pressed.connect(func(): SaveManager.wipe_save())
+		wipe_btn.visible = game.developer_mode_active
+		nav_hbox.add_child(wipe_btn)
 		
 		right_panel.set_tab_title(0, "Общие")
 		right_panel.set_tab_title(1, "Военные")
@@ -651,7 +788,24 @@ func update_visibility() -> void:
 			visible_upgrades += 1
 			continue
 
-		if upgrade.cost.is_greater_than(max_visible_cost):
+		if upgrade.has_been_seen:
+			child.visible = true
+			upgrade.is_masked = false
+			visible_upgrades += 1
+			if upgrade.cost.is_greater_than(current_gold):
+				child.modulate.a = 0.5
+			else:
+				child.modulate.a = 1.0
+		elif upgrade.cost.is_less_equal(max_visible_cost):
+			upgrade.has_been_seen = true
+			upgrade.is_masked = false
+			child.visible = true
+			visible_upgrades += 1
+			if upgrade.cost.is_greater_than(current_gold):
+				child.modulate.a = 0.5
+			else:
+				child.modulate.a = 1.0
+		else:
 			if not first_unseen_upgrade_found:
 				child.visible = true
 				if not upgrade.has_been_seen:
@@ -660,20 +814,9 @@ func update_visibility() -> void:
 					upgrade.is_masked = false
 				first_unseen_upgrade_found = true
 				visible_upgrades += 1
+				child.modulate.a = 0.5
 			else:
 				child.visible = false
-		else:
-			upgrade.has_been_seen = true
-			upgrade.is_masked = false
-			child.visible = true
-			visible_upgrades += 1
-
-		# Если пока нельзя купить — делаем полупрозрачным.
-		if upgrade.cost.is_greater_than(current_gold):
-			child.modulate.a = 0.5
-		else:
-			child.modulate.a = 1.0
-			
 
 	var first_unseen_found = false
 	
@@ -691,26 +834,36 @@ func update_visibility() -> void:
 		for child in building_containers[cat].get_children():
 			var b = child.building
 			
-			if b.cost.is_greater_than(max_visible_cost):
-				if not first_unseen_found:
-					child.visible = true
-					b.is_masked = not b.has_been_seen
-					first_unseen_found = true
-					cat_info[cat].visible_count += 1
+			if b.has_been_seen:
+				child.visible = true
+				b.is_masked = false
+				cat_info[cat].visible_count += 1
+				if b.count == 0:
+					cat_info[cat].new_count += 1
+				if b.cost.is_greater_than(current_gold) and b.count == 0:
+					child.modulate.a = 0.5
 				else:
-					child.visible = false
-			else:
+					child.modulate.a = 1.0
+			elif b.cost.is_less_equal(max_visible_cost):
 				b.has_been_seen = true
 				b.is_masked = false
 				child.visible = true
 				cat_info[cat].visible_count += 1
 				if b.count == 0:
 					cat_info[cat].new_count += 1
-				
-			if b.cost.is_greater_than(current_gold) and b.count == 0:
-				child.modulate.a = 0.5
+				if b.cost.is_greater_than(current_gold) and b.count == 0:
+					child.modulate.a = 0.5
+				else:
+					child.modulate.a = 1.0
 			else:
-				child.modulate.a = 1.0
+				if not first_unseen_found:
+					child.visible = true
+					b.is_masked = not game.economy.lifetime_unlocked_buildings.has(b.id)
+					first_unseen_found = true
+					cat_info[cat].visible_count += 1
+					child.modulate.a = 0.5
+				else:
+					child.visible = false
 
 	var active_tab = right_panel.current_tab
 	for cat in cat_info:

@@ -482,3 +482,76 @@ func check_commander_level():
 	if commander_xp >= needed:
 		commander_xp -= needed
 		commander_level += 1
+
+func to_dict() -> Dictionary:
+	var camps_arr = []
+	for c in camps:
+		var army_dict = null
+		if c.player_army:
+			army_dict = {
+				"troops": c.player_army.troops,
+				"included_commanders": c.player_army.included_commanders,
+				"is_scouting_mission": c.player_army.is_scouting_mission,
+				"morale_multiplier": c.player_army.morale_multiplier
+			}
+			
+		camps_arr.append({
+			"id": c.id,
+			"is_unlocked": c.is_unlocked,
+			"is_defeated": c.is_defeated,
+			"status": c.status,
+			"timer": c.timer,
+			"exact_power": c.exact_power._to_string(),
+			"enemy_scouts_count": c.enemy_scouts_count,
+			"enemy_troops": c.enemy_troops,
+			"player_army": army_dict
+		})
+		
+	return {
+		"commander_xp": commander_xp,
+		"commander_level": commander_level,
+		"total_captives": total_captives,
+		"current_stage_index": current_stage_index,
+		"map_tier": map_tier,
+		"camps": camps_arr
+	}
+
+func from_dict(dict: Dictionary) -> void:
+	commander_xp = dict.get("commander_xp", 0.0)
+	commander_level = dict.get("commander_level", 1)
+	total_captives = dict.get("total_captives", 0)
+	
+	var saved_stage = dict.get("current_stage_index", 0)
+	var saved_tier = dict.get("map_tier", 1)
+	
+	if saved_stage != current_stage_index or saved_tier != map_tier:
+		current_stage_index = saved_stage
+		map_tier = saved_tier
+		camps.clear()
+		spawn_initial_camps()
+		
+	if dict.has("camps"):
+		var camps_arr = dict["camps"]
+		for cd in camps_arr:
+			for c in camps:
+				if c.id == cd["id"]:
+					c.is_unlocked = cd.get("is_unlocked", false)
+					c.is_defeated = cd.get("is_defeated", false)
+					c.status = cd.get("status", 0)
+					c.timer = cd.get("timer", 0.0)
+					c.exact_power = BigNum.from(cd.get("exact_power", c.exact_power._to_string()))
+					c.enemy_scouts_count = cd.get("enemy_scouts_count", 0)
+					
+					if cd.has("enemy_troops"):
+						c.enemy_troops = cd["enemy_troops"]
+						
+					if cd.has("player_army") and cd["player_army"] != null:
+						var ad = cd["player_army"]
+						var army = ArmyGroup.new()
+						army.troops = ad.get("troops", {})
+						var inc_cmd = ad.get("included_commanders", [])
+						for ic in inc_cmd: army.included_commanders.append(ic)
+						army.is_scouting_mission = ad.get("is_scouting_mission", false)
+						army.morale_multiplier = ad.get("morale_multiplier", 1.0)
+						c.player_army = army
+					break

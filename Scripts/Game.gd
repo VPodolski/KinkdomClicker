@@ -6,6 +6,7 @@ signal upgrades_changed
 signal buildings_changed
 signal achievement_unlocked
 signal upgrade_completed
+signal developer_mode_toggled(is_active)
 
 var economy: Economy
 var buildings: BuildingManager
@@ -16,7 +17,7 @@ var war: WarManager
 var expeditions: ExpeditionManager
 var archeology: ArcheologyManager
 	
-var developer_mode_active: bool = true
+var developer_mode_active: bool = false
 
 var currentGoldPerSecond: BigNum = BigNum.new(0.0)
 var currentBaseNetIncome: BigNum = BigNum.new(0.0)
@@ -226,3 +227,91 @@ func _input(event):
 				print("Developer Mode: OFF (Speed x1)")
 			war.update_troops_multipliers()
 			war.recalculate_power()
+			developer_mode_toggled.emit(developer_mode_active)
+
+var offline_report = {}
+
+func simulate_offline(seconds: float):
+	if seconds <= 0: return
+	
+	offline_report = {
+		"time": seconds,
+		"gold_earned": BigNum.new(0.0),
+		"prayers_earned": BigNum.new(0.0),
+		"upgrades": [],
+		"expeditions": [],
+		"archeology": [],
+		"troops": {},
+		"archeologists_trained": 0
+	}
+	
+	var initial_gold = BigNum.from(economy.gold)
+	var initial_prayers = BigNum.from(economy.prayers)
+	
+	# Temporary disconnect or intercept signals if needed.
+	# But since UI is not loaded yet, signals will just fire into the void or we can connect our own temporary ones.
+	var on_upg = func(upg): offline_report["upgrades"].append(upg.name)
+	var on_exp = func(res): offline_report["expeditions"].append(res)
+	var on_arch = func(res): offline_report["archeology"].append(res)
+	var on_arch_trained = func(amt): offline_report["archeologists_trained"] += amt
+	var on_troop = func(troop, amount):
+		if not offline_report["troops"].has(troop.name):
+			offline_report["troops"][troop.name] = 0
+		offline_report["troops"][troop.name] += amount
+	
+	upgrade_completed.connect(on_upg)
+	expeditions.expedition_finished.connect(on_exp)
+	archeology.expedition_completed.connect(on_arch)
+	archeology.archeologists_trained.connect(on_arch_trained)
+	war.troop_training_completed.connect(on_troop)
+	
+	var pre_commanders = {}
+	for t in war.troops:
+		if t.commander:
+			pre_commanders[t.id] = {
+				"unlocked": t.commander.is_unlocked,
+				"hp": t.commander.current_hp
+			}
+	
+	var time_left = seconds
+	var tick = 1.0 # Simulate in 1-second ticks for accuracy
+	while time_left > 0:
+		var delta = min(tick, time_left)
+		time_left -= delta
+		
+		economy.add_gold(currentGoldPerSecond.mul(delta))
+		if economy.gold.is_less_than(0.0):
+			economy.gold = BigNum.new(0.0)
+		economy.add_prayers(currentPrayerIncome.mul(delta))
+		
+		var speed = get_forge_speed_multiplier()
+		upgrades.update_crafting(delta, speed)
+		war.update_training(delta)
+		expeditions.update(delta)
+		archeology.update(delta)
+		achievements.check(self)
+		
+	var commanders_report = []
+	for t in war.troops:
+		if t.commander:
+			var pre = pre_commanders[t.id]
+			if not pre.unlocked and t.commander.is_unlocked:
+				commanders_report.append("Полководец (" + t.name + ") нанят!")
+			elif pre.unlocked and t.commander.current_hp > pre.hp:
+				var healed = t.commander.current_hp - pre.hp
+				if healed > 1.0:
+					commanders_report.append("Полководец (" + t.name + ") восстановил " + format_number(healed) + " HP")
+	
+	offline_report["commanders"] = commanders_report
+		
+	upgrade_completed.disconnect(on_upg)
+	expeditions.expedition_finished.disconnect(on_exp)
+	archeology.expedition_completed.disconnect(on_arch)
+	archeology.archeologists_trained.disconnect(on_arch_trained)
+	war.troop_training_completed.disconnect(on_troop)
+	
+	achievements.check(self)
+	
+	offline_report["gold_earned"] = economy.gold.sub(initial_gold)
+	if offline_report["gold_earned"].is_less_than(0.0): offline_report["gold_earned"] = BigNum.new(0.0)
+	offline_report["prayers_earned"] = economy.prayers.sub(initial_prayers)

@@ -82,3 +82,32 @@ func reset():
 		b.income_multiplier = 1.0
 		b.synergy_bonus = 0.0
 		b.cost_multiplier = 1.0
+		b.has_been_seen = false
+
+func to_dict() -> Dictionary:
+	var b_dict = {}
+	for b in buildings:
+		b_dict[b.id] = {
+			"count": b.count,
+			"cost": b.cost._to_string(),
+			"income_multiplier": b.income_multiplier,
+			"synergy_bonus": b.synergy_bonus,
+			"cost_multiplier": b.cost_multiplier,
+			"has_been_seen": b.has_been_seen,
+			"is_masked": b.is_masked
+		}
+	return {"buildings": b_dict}
+
+func from_dict(dict: Dictionary) -> void:
+	if dict.has("buildings"):
+		var b_dict = dict["buildings"]
+		for b in buildings:
+			if b_dict.has(b.id):
+				var data = b_dict[b.id]
+				b.count = data.get("count", 0)
+				b.cost = BigNum.from(data.get("cost", b.base_cost._to_string()))
+				b.income_multiplier = data.get("income_multiplier", 1.0)
+				b.synergy_bonus = data.get("synergy_bonus", 0.0)
+				b.cost_multiplier = data.get("cost_multiplier", 1.0)
+				b.has_been_seen = data.get("has_been_seen", false)
+				b.is_masked = data.get("is_masked", false)

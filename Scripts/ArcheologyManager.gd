@@ -5,6 +5,7 @@ signal archeologists_changed
 signal artifacts_changed
 signal expedition_updated(exp_id)
 signal expedition_completed(result)
+signal archeologists_trained(amount)
 
 var game: Node
 var archeology_unlocked_by_combat: bool = false
@@ -138,6 +139,7 @@ func update(delta: float):
 			training_progress -= training_time_per_unit
 			archeologists_training -= 1
 			archeologists_count += 1
+			archeologists_trained.emit(1)
 			archeologists_changed.emit()
 
 	var i = active_expeditions.size() - 1
@@ -336,3 +338,39 @@ func get_kingdom_army_upkeep_multiplier() -> float:
 		var red = 0.02 * pow(3, lvl - 1)
 		mult -= red
 	return max(0.0, mult)
+
+func to_dict() -> Dictionary:
+	return {
+		"archeology_unlocked_by_combat": archeology_unlocked_by_combat,
+		"archeologists_count": archeologists_count,
+		"archeologists_training": archeologists_training,
+		"training_progress": training_progress,
+		"inventory_artifacts": inventory_artifacts,
+		"kingdom_artifacts": kingdom_artifacts,
+		"active_expeditions": active_expeditions,
+		"next_exp_id": next_exp_id
+	}
+
+func from_dict(dict: Dictionary) -> void:
+	archeology_unlocked_by_combat = dict.get("archeology_unlocked_by_combat", false)
+	archeologists_count = dict.get("archeologists_count", 0)
+	archeologists_training = dict.get("archeologists_training", 0)
+	training_progress = dict.get("training_progress", 0.0)
+	next_exp_id = dict.get("next_exp_id", 1)
+	
+	if dict.has("inventory_artifacts"):
+		inventory_artifacts.clear()
+		for lvl in dict["inventory_artifacts"]:
+			inventory_artifacts.append(lvl)
+			
+	if dict.has("kingdom_artifacts"):
+		kingdom_artifacts.clear()
+		for lvl in dict["kingdom_artifacts"]:
+			kingdom_artifacts.append(lvl)
+			
+	if dict.has("active_expeditions"):
+		active_expeditions.clear()
+		for e in dict["active_expeditions"]:
+			if typeof(e.get("loot_gold")) == TYPE_STRING or typeof(e.get("loot_gold")) == TYPE_DICTIONARY:
+				e["loot_gold"] = BigNum.from(e["loot_gold"])
+			active_expeditions.append(e)

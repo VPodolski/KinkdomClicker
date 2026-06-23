@@ -141,3 +141,17 @@ func get_unlocked_achievements() -> Array[AchievementData]:
 			result.append(achievement)
 
 	return result
+
+func to_dict() -> Dictionary:
+	var list = []
+	for a in achievements:
+		if a.unlocked:
+			list.append(a.id)
+	return {"unlocked": list}
+
+func from_dict(dict: Dictionary) -> void:
+	if dict.has("unlocked"):
+		var list = dict["unlocked"]
+		for a in achievements:
+			if a.id in list:
+				a.unlocked = true

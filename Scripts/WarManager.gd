@@ -3,7 +3,7 @@ extends Node
 
 signal military_power_changed(new_power)
 signal troops_changed
-signal troop_training_completed(troop)
+signal troop_training_completed(troop, amount)
 
 var troops: Array[TroopData] = []
 var game: Node
@@ -117,8 +117,9 @@ func update_training(delta: float):
 			troop.training_progress += delta * speed
 			
 			if troop.training_progress >= troop.base_time:
+				var amount = troop.training_amount
 				troop.finish_training()
-				troop_training_completed.emit(troop)
+				troop_training_completed.emit(troop, amount)
 				changed = true
 				
 		if troop.commander != null:
@@ -142,3 +143,50 @@ func is_troop_unlocked(troop: TroopData) -> bool:
 		return true
 	var b = game.buildings.get_building_by_id(troop.required_building)
 	return b != null and b.count > 0
+
+func to_dict() -> Dictionary:
+	var tr_dict = {}
+	for t in troops:
+		var c_dict = {}
+		if t.commander:
+			c_dict = {
+				"is_unlocked": t.commander.is_unlocked,
+				"is_training": t.commander.is_training,
+				"training_progress": t.commander.training_progress,
+				"current_hp": t.commander.current_hp,
+				"equipped_artifact_level": t.commander.equipped_artifact_level,
+				"is_on_expedition": t.commander.is_on_expedition
+			}
+			
+		tr_dict[t.id] = {
+			"count": t.count,
+			"is_training": t.is_training,
+			"training_progress": t.training_progress,
+			"training_amount": t.training_amount,
+			"commander": c_dict
+		}
+	return {"troops": tr_dict}
+
+func from_dict(dict: Dictionary) -> void:
+	if dict.has("troops"):
+		var tr_dict = dict["troops"]
+		for t in troops:
+			if tr_dict.has(t.id):
+				var d = tr_dict[t.id]
+				t.count = d.get("count", 0)
+				t.is_training = d.get("is_training", false)
+				t.training_progress = d.get("training_progress", 0.0)
+				t.training_amount = d.get("training_amount", 0)
+				
+				if d.has("commander") and t.commander:
+					var cd = d["commander"]
+					t.commander.is_unlocked = cd.get("is_unlocked", false)
+					t.commander.is_training = cd.get("is_training", false)
+					t.commander.training_progress = cd.get("training_progress", 0.0)
+					t.commander.current_hp = cd.get("current_hp", t.commander.get_max_hp())
+					t.commander.equipped_artifact_level = cd.get("equipped_artifact_level", 0)
+					t.commander.is_on_expedition = cd.get("is_on_expedition", false)
+		
+		update_troops_multipliers()
+		recalculate_power()
+

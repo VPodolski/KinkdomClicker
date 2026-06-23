@@ -63,6 +63,8 @@ func update_crafting(delta, forge_speed):
 func complete_upgrade(upgrade):
 	apply_upgrade(upgrade)
 	active_upgrades.append(upgrade)
+	if game.get("buildings"):
+		game.buildings.update_synergies(active_upgrades)
 	if game.has_method("recalculate_income"):
 		game.recalculate_income()
 	if game.has_signal("upgrades_changed"):
@@ -70,3 +72,46 @@ func complete_upgrade(upgrade):
 	if game.has_method("emit_upgrade_completed"):
 		game.emit_upgrade_completed(upgrade)
 	upgrades.erase(upgrade)
+
+func to_dict() -> Dictionary:
+	var pending_list = []
+	for u in upgrades:
+		pending_list.append({
+			"name": u.name,
+			"is_crafting": u.is_crafting,
+			"progress": u.progress,
+			"has_been_seen": u.has_been_seen,
+			"is_masked": u.is_masked
+		})
+		
+	var active_list = []
+	for u in active_upgrades:
+		active_list.append(u.name)
+		
+	return {
+		"pending_upgrades": pending_list,
+		"active_upgrades": active_list
+	}
+
+func from_dict(dict: Dictionary) -> void:
+	if dict.has("active_upgrades"):
+		var act_list = dict["active_upgrades"]
+		var to_remove = []
+		for u in upgrades:
+			if u.name in act_list:
+				active_upgrades.append(u)
+				apply_upgrade(u)
+				to_remove.append(u)
+		for u in to_remove:
+			upgrades.erase(u)
+			
+	if dict.has("pending_upgrades"):
+		var pend_list = dict["pending_upgrades"]
+		for u in upgrades:
+			for data in pend_list:
+				if u.name == data["name"]:
+					u.is_crafting = data.get("is_crafting", false)
+					u.progress = data.get("progress", 0.0)
+					u.has_been_seen = data.get("has_been_seen", false)
+					u.is_masked = data.get("is_masked", false)
+					break

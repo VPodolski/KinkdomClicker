@@ -158,3 +158,19 @@ func reapply_all_skills(economy):
 		var level = skill_levels[skill]
 		if level > 0:
 			economy.troop_upkeep_multipliers[troop_id] = max(0.0, 1.0 - 0.1 * level)
+
+func to_dict() -> Dictionary:
+	return {
+		"unlocked_skills": unlocked_skills,
+		"skill_levels": skill_levels
+	}
+
+func from_dict(dict: Dictionary) -> void:
+	if dict.has("unlocked_skills"):
+		unlocked_skills = dict["unlocked_skills"]
+	if dict.has("skill_levels"):
+		var sl = dict["skill_levels"]
+		for k in sl.keys():
+			if skill_levels.has(k):
+				skill_levels[k] = sl[k]
+
