@@ -1,6 +1,8 @@
 class_name BuildingManager
 
 var buildings: Array[BuildingData] = []
+var buildings_by_id: Dictionary = {}
+var buildings_by_name: Dictionary = {}
 
 func _init():
 	var file = FileAccess.open("res://data/buildings.json", FileAccess.READ)
@@ -11,23 +13,20 @@ func _init():
 		if error == OK:
 			var data = json.data
 			for b in data:
-				buildings.append(BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b.get("income", 0.0)), float(b.get("prayer_income", 0.0)), float(b.get("gold_upkeep", 0.0))))
+				var new_b = BuildingData.new(b["id"], b["name"], float(b["base_cost"]), float(b.get("income", 0.0)), float(b.get("prayer_income", 0.0)), float(b.get("gold_upkeep", 0.0)))
+				buildings.append(new_b)
+				buildings_by_id[new_b.id] = new_b
+				buildings_by_name[new_b.name] = new_b
 		else:
 			print("Error parsing buildings.json: ", json.get_error_message())
 	else:
 		print("Failed to open buildings.json")
 
 func get_building_by_name(name):
-	for b in buildings:
-		if b.name == name:
-			return b
-	return null
+	return buildings_by_name.get(name, null)
 
 func get_building_by_id(id: String):
-	for b in buildings:
-		if b.id == id:
-			return b
-	return null
+	return buildings_by_id.get(id, null)
 
 func get_total_income(global_multiplier: float) -> BigNum:
 	var total = BigNum.new(0.0)

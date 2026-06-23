@@ -100,6 +100,40 @@ func mul(other) -> BigNum:
 	var res = BigNum.new(m * o.m, e + o.e)
 	return res
 
+func add_mut_mul(other: BigNum, factor: float) -> void:
+	if other.m == 0.0 or factor == 0.0:
+		return
+	var new_m = other.m * factor
+	var new_e = other.e
+	
+	var diff_norm = floor(log(abs(new_m)) / log(10.0))
+	if diff_norm != 0.0:
+		new_m /= pow(10.0, diff_norm)
+		new_e += int(diff_norm)
+		
+	if abs(new_m) >= 10.0:
+		new_m /= 10.0
+		new_e += 1
+	elif abs(new_m) < 1.0 and new_m != 0.0:
+		new_m *= 10.0
+		new_e -= 1
+		
+	if m == 0.0:
+		m = new_m
+		e = new_e
+		return
+		
+	var diff = e - new_e
+	if diff > 15:
+		return
+	elif diff < -15:
+		m = new_m
+		e = new_e
+	else:
+		e = new_e
+		m = m * pow(10.0, diff) + new_m
+		_normalize()
+
 func div(other) -> BigNum:
 	var o = BigNum.from(other)
 	if o.m == 0.0:

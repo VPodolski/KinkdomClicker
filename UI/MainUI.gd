@@ -255,7 +255,7 @@ func show_offline_popup():
 func _process(delta):
 	ui_update_timer += delta
 	
-	if ui_update_timer >= 0.05: # 20 раз в секунду
+	if ui_update_timer >= 0.1: # 10 раз в секунду
 		ui_update_timer = 0.0
 		check_modes_unlock()
 		update_gold(game.economy.gold)

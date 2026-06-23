@@ -30,6 +30,9 @@ var ui_update_timer := 0.0
 func add_gold(amount) -> void:
 	gold = gold.add(amount)
 
+func add_gold_mul(amount_bignum: BigNum, factor: float) -> void:
+	gold.add_mut_mul(amount_bignum, factor)
+
 func spend_gold(amount) -> bool:
 	var a = BigNum.from(amount)
 	if gold.is_greater_equal(a):
@@ -42,6 +45,11 @@ func add_prayers(amount) -> void:
 	if a.is_greater_than(0.0):
 		prayers = prayers.add(a)
 		lifetime_prayers = lifetime_prayers.add(a)
+
+func add_prayers_mul(amount_bignum: BigNum, factor: float) -> void:
+	if amount_bignum.m > 0.0 and factor > 0.0:
+		prayers.add_mut_mul(amount_bignum, factor)
+		lifetime_prayers.add_mut_mul(amount_bignum, factor)
 
 func spend_prayers(amount) -> bool:
 	var a = BigNum.from(amount)

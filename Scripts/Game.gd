@@ -129,12 +129,14 @@ func _process(delta):
 		economy.gold = BigNum.new(0.0)
 		
 	economy.add_prayers(currentPrayerIncome.mul(delta))
-
 	var speed = get_forge_speed_multiplier()
 	upgrades.update_crafting(delta, speed)
 	war.update_training(delta)
 	expeditions.update(delta)
 	archeology.update(delta)
+	
+	economy.add_gold_mul(currentGoldPerSecond, delta)
+	economy.add_prayers_mul(currentPrayerIncome, delta)
 
 	achievements.check(self)
 
@@ -279,10 +281,10 @@ func simulate_offline(seconds: float):
 		var delta = min(tick, time_left)
 		time_left -= delta
 		
-		economy.add_gold(currentGoldPerSecond.mul(delta))
+		economy.add_gold_mul(currentGoldPerSecond, delta)
 		if economy.gold.is_less_than(0.0):
 			economy.gold = BigNum.new(0.0)
-		economy.add_prayers(currentPrayerIncome.mul(delta))
+		economy.add_prayers_mul(currentPrayerIncome, delta)
 		
 		var speed = get_forge_speed_multiplier()
 		upgrades.update_crafting(delta, speed)
