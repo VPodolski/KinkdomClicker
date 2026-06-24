@@ -1,10 +1,18 @@
 [gd_scene format=3 uid="uid://cm3y61l8qj7d3"]
 
-[ext_resource type="Script" path="res://UI/KingdomVisualizer.gd" id="1_kvis"]
-[ext_resource type="Texture2D" path="res://assets/buildings/castle.jpg" id="2_cstl"]
+[ext_resource type="Script" uid="uid://baxc1chruqy3f" path="res://UI/KingdomVisualizer.gd" id="1_kvis"]
+[ext_resource type="Texture2D" uid="uid://dd7lv32rsr2hn" path="res://assets/map/NW_North1.png" id="2_6grpg"]
+[ext_resource type="Texture2D" uid="uid://dgvneth25157e" path="res://assets/buildings/castle.jpg" id="2_cstl"]
+[ext_resource type="Texture2D" uid="uid://c02y5nihm4mss" path="res://assets/map/N_North2.png" id="3_dby8c"]
+[ext_resource type="Texture2D" uid="uid://jle6rirvegam" path="res://assets/map/NE_North3.png" id="4_bpo07"]
+[ext_resource type="Texture2D" uid="uid://dhhnbw7wighue" path="res://assets/map/W_West.png" id="5_trnb3"]
+[ext_resource type="Texture2D" uid="uid://clgwroo6ws40h" path="res://assets/map/Center.png" id="6_hxmrb"]
+[ext_resource type="Texture2D" uid="uid://c375r5gr3fl4a" path="res://assets/map/E_East.png" id="7_t0ogo"]
+[ext_resource type="Texture2D" uid="uid://dnlxvbsxw2akn" path="res://assets/map/SW_South1.png" id="8_nse1w"]
+[ext_resource type="Texture2D" uid="uid://b36ilupyc6e7q" path="res://assets/map/S_South2.png" id="9_yk7or"]
+[ext_resource type="Texture2D" uid="uid://8eoel2vo0e0o" path="res://assets/map/SE_South3.png" id="10_6kc7k"]
 
-[node name="KingdomVisualizer" type="Control"]
-clip_contents = true
+[node name="KingdomVisualizer" type="Control" unique_id=1505297851]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,7 +22,7 @@ grow_vertical = 2
 size_flags_vertical = 3
 script = ExtResource("1_kvis")
 
-[node name="Canvas" type="Control" parent="."]
+[node name="Canvas" type="Control" parent="." unique_id=1120274711]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -24,7 +32,577 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CitadelButton" type="TextureButton" parent="Canvas"]
+[node name="MapBackgrounds" type="Node2D" parent="Canvas" unique_id=872850201]
+
+[node name="NW_North1" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=1024474505]
+position = Vector2(-1536, -1536)
+texture = ExtResource("2_6grpg")
+centered = false
+
+[node name="N_North2" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=1249807893]
+position = Vector2(-512, -1536)
+texture = ExtResource("3_dby8c")
+centered = false
+
+[node name="NE_North3" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=587054804]
+position = Vector2(512, -1536)
+texture = ExtResource("4_bpo07")
+centered = false
+
+[node name="W_West" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=112343140]
+position = Vector2(-1536, -512)
+texture = ExtResource("5_trnb3")
+centered = false
+
+[node name="Center" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=1943732332]
+position = Vector2(-512, -512)
+texture = ExtResource("6_hxmrb")
+centered = false
+
+[node name="E_East" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=519644413]
+position = Vector2(512, -512)
+texture = ExtResource("7_t0ogo")
+centered = false
+
+[node name="SW_South1" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=995660139]
+position = Vector2(-1536, 512)
+texture = ExtResource("8_nse1w")
+centered = false
+
+[node name="S_South2" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=4145812]
+position = Vector2(-512, 512)
+texture = ExtResource("9_yk7or")
+centered = false
+
+[node name="SE_South3" type="Sprite2D" parent="Canvas/MapBackgrounds" unique_id=1046947711]
+position = Vector2(512, 512)
+texture = ExtResource("10_6kc7k")
+centered = false
+
+[node name="SpawnPoints" type="Node2D" parent="Canvas" unique_id=1897618109]
+
+[node name="farm_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=221026611]
+
+[node name="farm_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=879654152]
+position = Vector2(150, 0)
+
+[node name="farm_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=665585425]
+position = Vector2(300, 0)
+
+[node name="farm_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=316314535]
+position = Vector2(450, 0)
+
+[node name="farm_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1480424218]
+position = Vector2(600, 0)
+
+[node name="farm_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1879384124]
+position = Vector2(750, 0)
+
+[node name="sawmill_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1822703741]
+position = Vector2(0, 150)
+
+[node name="sawmill_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=263759884]
+position = Vector2(150, 150)
+
+[node name="sawmill_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=147373050]
+position = Vector2(300, 150)
+
+[node name="sawmill_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=673426521]
+position = Vector2(450, 150)
+
+[node name="sawmill_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1040909359]
+position = Vector2(600, 150)
+
+[node name="sawmill_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=229879533]
+position = Vector2(750, 150)
+
+[node name="quarry_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1736807948]
+position = Vector2(0, 300)
+
+[node name="quarry_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=992102798]
+position = Vector2(150, 300)
+
+[node name="quarry_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2078992134]
+position = Vector2(300, 300)
+
+[node name="quarry_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1096289884]
+position = Vector2(450, 300)
+
+[node name="quarry_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1233556156]
+position = Vector2(600, 300)
+
+[node name="quarry_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1654768052]
+position = Vector2(750, 300)
+
+[node name="forge_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1597295293]
+position = Vector2(0, 450)
+
+[node name="forge_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1585882545]
+position = Vector2(150, 450)
+
+[node name="forge_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1162353422]
+position = Vector2(300, 450)
+
+[node name="forge_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=841698000]
+position = Vector2(450, 450)
+
+[node name="forge_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=760426929]
+position = Vector2(600, 450)
+
+[node name="forge_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2085460608]
+position = Vector2(750, 450)
+
+[node name="market_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1260314018]
+position = Vector2(0, 600)
+
+[node name="market_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=358046283]
+position = Vector2(150, 600)
+
+[node name="market_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1313949969]
+position = Vector2(300, 600)
+
+[node name="market_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1211972568]
+position = Vector2(450, 600)
+
+[node name="market_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1249309574]
+position = Vector2(600, 600)
+
+[node name="market_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1332947815]
+position = Vector2(750, 600)
+
+[node name="scout_guild_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=671029705]
+position = Vector2(0, 750)
+
+[node name="scout_guild_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2146012376]
+position = Vector2(150, 750)
+
+[node name="scout_guild_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=112532687]
+position = Vector2(300, 750)
+
+[node name="scout_guild_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2006655634]
+position = Vector2(450, 750)
+
+[node name="scout_guild_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=569720767]
+position = Vector2(600, 750)
+
+[node name="scout_guild_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1689526262]
+position = Vector2(750, 750)
+
+[node name="barracks_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2002562159]
+position = Vector2(0, 900)
+
+[node name="barracks_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1598206772]
+position = Vector2(150, 900)
+
+[node name="barracks_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1815303893]
+position = Vector2(300, 900)
+
+[node name="barracks_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1503820749]
+position = Vector2(450, 900)
+
+[node name="barracks_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1669209652]
+position = Vector2(600, 900)
+
+[node name="barracks_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1382155621]
+position = Vector2(750, 900)
+
+[node name="tavern_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1282769442]
+position = Vector2(0, 1050)
+
+[node name="tavern_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=683105388]
+position = Vector2(150, 1050)
+
+[node name="tavern_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=242491441]
+position = Vector2(300, 1050)
+
+[node name="tavern_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1933401064]
+position = Vector2(450, 1050)
+
+[node name="tavern_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1676430174]
+position = Vector2(600, 1050)
+
+[node name="tavern_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2031876141]
+position = Vector2(750, 1050)
+
+[node name="chapel_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=188213066]
+position = Vector2(0, 1200)
+
+[node name="chapel_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1775292512]
+position = Vector2(150, 1200)
+
+[node name="chapel_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=307607953]
+position = Vector2(300, 1200)
+
+[node name="chapel_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1661671466]
+position = Vector2(450, 1200)
+
+[node name="chapel_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1026362564]
+position = Vector2(600, 1200)
+
+[node name="chapel_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1588124973]
+position = Vector2(750, 1200)
+
+[node name="training_camp_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1762523739]
+position = Vector2(0, 1350)
+
+[node name="training_camp_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=79829955]
+position = Vector2(150, 1350)
+
+[node name="training_camp_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1169954722]
+position = Vector2(300, 1350)
+
+[node name="training_camp_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=155867568]
+position = Vector2(450, 1350)
+
+[node name="training_camp_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=307302102]
+position = Vector2(600, 1350)
+
+[node name="training_camp_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1667336603]
+position = Vector2(750, 1350)
+
+[node name="church_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=39258858]
+position = Vector2(0, 1500)
+
+[node name="church_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1870528832]
+position = Vector2(150, 1500)
+
+[node name="church_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1270451596]
+position = Vector2(300, 1500)
+
+[node name="church_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=248500747]
+position = Vector2(450, 1500)
+
+[node name="church_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2137670085]
+position = Vector2(600, 1500)
+
+[node name="church_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=326415382]
+position = Vector2(750, 1500)
+
+[node name="guild_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=254247139]
+position = Vector2(0, 1650)
+
+[node name="guild_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=713451362]
+position = Vector2(150, 1650)
+
+[node name="guild_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1189749036]
+position = Vector2(300, 1650)
+
+[node name="guild_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=471873699]
+position = Vector2(450, 1650)
+
+[node name="guild_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1374577700]
+position = Vector2(600, 1650)
+
+[node name="guild_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1552762752]
+position = Vector2(750, 1650)
+
+[node name="armory_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=9842763]
+position = Vector2(0, 1800)
+
+[node name="armory_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=436495320]
+position = Vector2(150, 1800)
+
+[node name="armory_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1488687379]
+position = Vector2(300, 1800)
+
+[node name="armory_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2134806072]
+position = Vector2(450, 1800)
+
+[node name="armory_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1934013839]
+position = Vector2(600, 1800)
+
+[node name="armory_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=136693109]
+position = Vector2(750, 1800)
+
+[node name="bank_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=135221027]
+position = Vector2(0, 1950)
+
+[node name="bank_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=833225148]
+position = Vector2(150, 1950)
+
+[node name="bank_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=34782619]
+position = Vector2(300, 1950)
+
+[node name="bank_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1721891097]
+position = Vector2(450, 1950)
+
+[node name="bank_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=794733152]
+position = Vector2(600, 1950)
+
+[node name="bank_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=101843194]
+position = Vector2(750, 1950)
+
+[node name="temple_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=608040943]
+position = Vector2(0, 2100)
+
+[node name="temple_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=611584352]
+position = Vector2(150, 2100)
+
+[node name="temple_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2068476388]
+position = Vector2(300, 2100)
+
+[node name="temple_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=349497651]
+position = Vector2(450, 2100)
+
+[node name="temple_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1286838078]
+position = Vector2(600, 2100)
+
+[node name="temple_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=126244468]
+position = Vector2(750, 2100)
+
+[node name="archery_range_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1516684301]
+position = Vector2(0, 2250)
+
+[node name="archery_range_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1963756892]
+position = Vector2(150, 2250)
+
+[node name="archery_range_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1094707986]
+position = Vector2(300, 2250)
+
+[node name="archery_range_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1970139923]
+position = Vector2(450, 2250)
+
+[node name="archery_range_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1350498841]
+position = Vector2(600, 2250)
+
+[node name="archery_range_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=443962438]
+position = Vector2(750, 2250)
+
+[node name="port_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=331339405]
+position = Vector2(0, 2400)
+
+[node name="port_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=464873346]
+position = Vector2(150, 2400)
+
+[node name="port_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1439563911]
+position = Vector2(300, 2400)
+
+[node name="port_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=957130863]
+position = Vector2(450, 2400)
+
+[node name="port_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1760897787]
+position = Vector2(600, 2400)
+
+[node name="port_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1285428742]
+position = Vector2(750, 2400)
+
+[node name="cathedral_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1123920829]
+position = Vector2(0, 2550)
+
+[node name="cathedral_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1552588368]
+position = Vector2(150, 2550)
+
+[node name="cathedral_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1492615223]
+position = Vector2(300, 2550)
+
+[node name="cathedral_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1266789879]
+position = Vector2(450, 2550)
+
+[node name="cathedral_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=547465537]
+position = Vector2(600, 2550)
+
+[node name="cathedral_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1015266122]
+position = Vector2(750, 2550)
+
+[node name="stables_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1088870635]
+position = Vector2(0, 2700)
+
+[node name="stables_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1489026262]
+position = Vector2(150, 2700)
+
+[node name="stables_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1008893888]
+position = Vector2(300, 2700)
+
+[node name="stables_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1678605632]
+position = Vector2(450, 2700)
+
+[node name="stables_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=537209246]
+position = Vector2(600, 2700)
+
+[node name="stables_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=65801660]
+position = Vector2(750, 2700)
+
+[node name="shipyard_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=199343573]
+position = Vector2(0, 2850)
+
+[node name="shipyard_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=99007852]
+position = Vector2(150, 2850)
+
+[node name="shipyard_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=174064225]
+position = Vector2(300, 2850)
+
+[node name="shipyard_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2103857823]
+position = Vector2(450, 2850)
+
+[node name="shipyard_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=999822608]
+position = Vector2(600, 2850)
+
+[node name="shipyard_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=278706721]
+position = Vector2(750, 2850)
+
+[node name="grand_cathedral_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2139653790]
+position = Vector2(0, 3000)
+
+[node name="grand_cathedral_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=878979518]
+position = Vector2(150, 3000)
+
+[node name="grand_cathedral_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1657266854]
+position = Vector2(300, 3000)
+
+[node name="grand_cathedral_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1002644100]
+position = Vector2(450, 3000)
+
+[node name="grand_cathedral_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1732805828]
+position = Vector2(600, 3000)
+
+[node name="grand_cathedral_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1201104905]
+position = Vector2(750, 3000)
+
+[node name="alchemy_lab_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1680591396]
+position = Vector2(0, 3150)
+
+[node name="alchemy_lab_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=453553905]
+position = Vector2(150, 3150)
+
+[node name="alchemy_lab_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=166656467]
+position = Vector2(300, 3150)
+
+[node name="alchemy_lab_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2122425704]
+position = Vector2(450, 3150)
+
+[node name="alchemy_lab_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=421715923]
+position = Vector2(600, 3150)
+
+[node name="alchemy_lab_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=287847128]
+position = Vector2(750, 3150)
+
+[node name="knight_order_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=823695439]
+position = Vector2(0, 3300)
+
+[node name="knight_order_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=392682242]
+position = Vector2(150, 3300)
+
+[node name="knight_order_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=409827294]
+position = Vector2(300, 3300)
+
+[node name="knight_order_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1257172477]
+position = Vector2(450, 3300)
+
+[node name="knight_order_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1791590947]
+position = Vector2(600, 3300)
+
+[node name="knight_order_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1513650262]
+position = Vector2(750, 3300)
+
+[node name="mage_tower_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=110358832]
+position = Vector2(0, 3450)
+
+[node name="mage_tower_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=769412317]
+position = Vector2(150, 3450)
+
+[node name="mage_tower_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2065899365]
+position = Vector2(300, 3450)
+
+[node name="mage_tower_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1167804844]
+position = Vector2(450, 3450)
+
+[node name="mage_tower_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=710334488]
+position = Vector2(600, 3450)
+
+[node name="mage_tower_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1670179118]
+position = Vector2(750, 3450)
+
+[node name="patriarchal_cathedral_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2013870032]
+position = Vector2(0, 3600)
+
+[node name="patriarchal_cathedral_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=165910276]
+position = Vector2(150, 3600)
+
+[node name="patriarchal_cathedral_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1333023965]
+position = Vector2(300, 3600)
+
+[node name="patriarchal_cathedral_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1972987112]
+position = Vector2(450, 3600)
+
+[node name="patriarchal_cathedral_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1242401610]
+position = Vector2(600, 3600)
+
+[node name="patriarchal_cathedral_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=564967711]
+position = Vector2(750, 3600)
+
+[node name="griffon_nest_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=382366023]
+position = Vector2(0, 3750)
+
+[node name="griffon_nest_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1718679062]
+position = Vector2(150, 3750)
+
+[node name="griffon_nest_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=7052853]
+position = Vector2(300, 3750)
+
+[node name="griffon_nest_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1866065186]
+position = Vector2(450, 3750)
+
+[node name="griffon_nest_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1845091769]
+position = Vector2(600, 3750)
+
+[node name="griffon_nest_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1942689916]
+position = Vector2(750, 3750)
+
+[node name="castle_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1574949086]
+position = Vector2(0, 3900)
+
+[node name="castle_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1463455152]
+position = Vector2(150, 3900)
+
+[node name="castle_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1067755243]
+position = Vector2(300, 3900)
+
+[node name="castle_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1439553348]
+position = Vector2(450, 3900)
+
+[node name="castle_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1873204998]
+position = Vector2(600, 3900)
+
+[node name="castle_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=307753221]
+position = Vector2(750, 3900)
+
+[node name="wonders_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=16907409]
+position = Vector2(0, 4050)
+
+[node name="wonders_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1182910503]
+position = Vector2(150, 4050)
+
+[node name="wonders_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=851409926]
+position = Vector2(300, 4050)
+
+[node name="wonders_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1536801927]
+position = Vector2(450, 4050)
+
+[node name="wonders_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=372698641]
+position = Vector2(600, 4050)
+
+[node name="wonders_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=2101418486]
+position = Vector2(750, 4050)
+
+[node name="archeology_guild_0" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=1989082326]
+position = Vector2(0, 4200)
+
+[node name="archeology_guild_1" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=628012225]
+position = Vector2(150, 4200)
+
+[node name="archeology_guild_2" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=548553230]
+position = Vector2(300, 4200)
+
+[node name="archeology_guild_3" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=612829510]
+position = Vector2(450, 4200)
+
+[node name="archeology_guild_4" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=131952242]
+position = Vector2(600, 4200)
+
+[node name="archeology_guild_5" type="Marker2D" parent="Canvas/SpawnPoints" unique_id=148525515]
+position = Vector2(750, 4200)
+
+[node name="CitadelButton" type="TextureButton" parent="Canvas" unique_id=294774031]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

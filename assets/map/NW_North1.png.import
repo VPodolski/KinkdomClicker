@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bum3w5nunlmav"
-path="res://.godot/imported/media__1781357546330.png-694563062a38176f95dfc57c5f3bc70e.ctex"
+uid="uid://dd7lv32rsr2hn"
+path="res://.godot/imported/NW_North1.png-caaa946c0ce8636839eaa47e2da12cee.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/media__1781357546330.png"
-dest_files=["res://.godot/imported/media__1781357546330.png-694563062a38176f95dfc57c5f3bc70e.ctex"]
+source_file="res://assets/map/NW_North1.png"
+dest_files=["res://.godot/imported/NW_North1.png-caaa946c0ce8636839eaa47e2da12cee.ctex"]
 
 [params]
 

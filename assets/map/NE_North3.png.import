@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c2bvtyaj4jrjn"
-path="res://.godot/imported/media__1781359831132.png-d7071306f497c5635d7940c0b4b2c81e.ctex"
+uid="uid://jle6rirvegam"
+path="res://.godot/imported/NE_North3.png-82ce678ea17721149fd9735bc28537be.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/media__1781359831132.png"
-dest_files=["res://.godot/imported/media__1781359831132.png-d7071306f497c5635d7940c0b4b2c81e.ctex"]
+source_file="res://assets/map/NE_North3.png"
+dest_files=["res://.godot/imported/NE_North3.png-82ce678ea17721149fd9735bc28537be.ctex"]
 
 [params]
 

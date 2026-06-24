@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c636yh127tlpk"
-path="res://.godot/imported/media__1781352719860.png-53f02146f6ea763040b4a00128d8fe7f.ctex"
+uid="uid://dhhnbw7wighue"
+path="res://.godot/imported/W_West.png-11463daa50fb5095ef1a81a86b35914b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/media__1781352719860.png"
-dest_files=["res://.godot/imported/media__1781352719860.png-53f02146f6ea763040b4a00128d8fe7f.ctex"]
+source_file="res://assets/map/W_West.png"
+dest_files=["res://.godot/imported/W_West.png-11463daa50fb5095ef1a81a86b35914b.ctex"]
 
 [params]
 

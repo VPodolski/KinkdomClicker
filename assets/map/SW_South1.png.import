@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hm7nciuul15w"
-path="res://.godot/imported/media__1781354809052.png-9b989cae0f87f6573e31056a7220956d.ctex"
+uid="uid://dnlxvbsxw2akn"
+path="res://.godot/imported/SW_South1.png-c1116dadfea2dca83776bef2c844e1d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/media__1781354809052.png"
-dest_files=["res://.godot/imported/media__1781354809052.png-9b989cae0f87f6573e31056a7220956d.ctex"]
+source_file="res://assets/map/SW_South1.png"
+dest_files=["res://.godot/imported/SW_South1.png-c1116dadfea2dca83776bef2c844e1d8.ctex"]
 
 [params]
 

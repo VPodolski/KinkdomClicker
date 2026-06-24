@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbhgjgss2pw4b"
-valid=false
+uid="uid://b36ilupyc6e7q"
+path="res://.godot/imported/S_South2.png-dee5d3e28bb553e180411b1d20d84c59.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://assets/startup_banner_1781360338264.png"
+source_file="res://assets/map/S_South2.png"
+dest_files=["res://.godot/imported/S_South2.png-dee5d3e28bb553e180411b1d20d84c59.ctex"]
 
 [params]
 

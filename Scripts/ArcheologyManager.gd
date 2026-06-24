@@ -135,12 +135,14 @@ func update(delta: float):
 			speed += (b.count * 0.05)
 			
 		training_progress += delta * speed
-		if training_progress >= training_time_per_unit:
+		while training_progress >= training_time_per_unit and archeologists_training > 0:
 			training_progress -= training_time_per_unit
 			archeologists_training -= 1
 			archeologists_count += 1
 			archeologists_trained.emit(1)
 			archeologists_changed.emit()
+		if archeologists_training == 0:
+			training_progress = 0.0
 
 	var i = active_expeditions.size() - 1
 	while i >= 0:
@@ -149,7 +151,7 @@ func update(delta: float):
 		exp_dict.minute_timer += delta
 		
 		# Process each minute
-		if exp_dict.minute_timer >= 60.0:
+		while exp_dict.minute_timer >= 60.0 and exp_dict.current_archeologists > 0:
 			exp_dict.minute_timer -= 60.0
 			process_expedition_minute(exp_dict)
 		

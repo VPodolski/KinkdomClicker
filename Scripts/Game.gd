@@ -276,7 +276,7 @@ func simulate_offline(seconds: float):
 			}
 	
 	var time_left = seconds
-	var tick = 1.0 # Simulate in 1-second ticks for accuracy
+	var tick = max(1.0, seconds / 1000.0) # Simulate in max 1000 ticks to avoid freezes
 	while time_left > 0:
 		var delta = min(tick, time_left)
 		time_left -= delta
