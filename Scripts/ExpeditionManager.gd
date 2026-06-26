@@ -555,3 +555,7 @@ func from_dict(dict: Dictionary) -> void:
 						army.morale_multiplier = ad.get("morale_multiplier", 1.0)
 						c.player_army = army
 					break
+					
+		for i in range(camps.size()):
+			if i <= current_stage_index:
+				camps[i].is_unlocked = true

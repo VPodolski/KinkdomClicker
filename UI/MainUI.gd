@@ -257,16 +257,27 @@ func show_offline_popup():
 
 func _process(delta):
 	ui_update_timer += delta
+	var do_slow_update = false
 	
-	if ui_update_timer >= 0.1: # 10 раз в секунду
+	if ui_update_timer >= 0.2: # 5 раз в секунду (Тяжелые проверки)
+		do_slow_update = true
 		ui_update_timer = 0.0
 		check_modes_unlock()
-		update_gold(game.economy.gold)
-		update_upgrades_ui()
-		update_buildings_ui()
-		update_commanders_ui()
 		update_visibility()
 		update_prestige_ui()
+
+	# fast_update_timer runs at 20 fps
+	if not has_meta("ui_fast_timer"):
+		set_meta("ui_fast_timer", 0.0)
+	var fast_timer = get_meta("ui_fast_timer") + delta
+	if fast_timer >= 0.05: # 20 раз в секунду (Плавный UI)
+		set_meta("ui_fast_timer", 0.0)
+		update_gold(game.economy.gold)
+		update_upgrades_ui(do_slow_update)
+		update_buildings_ui()
+		update_commanders_ui()
+	else:
+		set_meta("ui_fast_timer", fast_timer)
 
 # =========================
 # 🖱️ INPUT
@@ -568,7 +579,7 @@ func create_upgrades_ui():
 		item.craft_pressed.connect(_on_upgrade_pressed)
 
 
-func update_upgrades_ui():
+func update_upgrades_ui(do_slow_update: bool = true):
 	for child in upgrades_container.get_children():
 		var upgrade = child.upgrade
 
@@ -578,9 +589,9 @@ func update_upgrades_ui():
 		# Доступен ли апгрейд для покупки
 		var is_unlocked = current_gold.is_greater_equal(upgrade.cost) and not upgrade.is_crafting
 
-		# Текст предпросмотра эффекта
-		var preview_text = ""
-		if upgrade.has_method("get_preview_text"):
+		# Текст предпросмотра эффекта (Тяжелая операция)
+		var preview_text = child.preview_label.text
+		if do_slow_update and upgrade.has_method("get_preview_text"):
 			preview_text = upgrade.get_preview_text(game)
 
 		# Оставшееся время крафта
@@ -598,29 +609,30 @@ func update_upgrades_ui():
 			remaining_text
 		)
 
-	var available_upgrades_count = 0
-	for u in game.upgrades.upgrades:
-		if not u.is_crafting and not game.upgrades.active_upgrades.has(u):
-			available_upgrades_count += 1
+	if do_slow_update:
+		var available_upgrades_count = 0
+		for u in game.upgrades.upgrades:
+			if not u.is_crafting and not game.upgrades.active_upgrades.has(u):
+				available_upgrades_count += 1
+				
+		var affordable_upgrades = game.get_affordable_upgrades()
+		
+		if forge_btn:
+			if available_upgrades_count > 0:
+				forge_btn.text = "🔨 Кузница (%d)" % available_upgrades_count
+			else:
+				forge_btn.text = "🔨 Кузница"
 			
-	var affordable_upgrades = game.get_affordable_upgrades()
-	
-	if forge_btn:
-		if available_upgrades_count > 0:
-			forge_btn.text = "🔨 Кузница (%d)" % available_upgrades_count
+		if affordable_upgrades.size() > 0:
+			buy_all_upgrades_button.text = "Купить всё (%d)" % affordable_upgrades.size()
+			buy_all_upgrades_button.disabled = false
 		else:
-			forge_btn.text = "🔨 Кузница"
-		
-	if affordable_upgrades.size() > 0:
-		buy_all_upgrades_button.text = "Купить всё (%d)" % affordable_upgrades.size()
-		buy_all_upgrades_button.disabled = false
-	else:
-		buy_all_upgrades_button.text = "Купить всё"
-		buy_all_upgrades_button.disabled = true
-		
-	buy_all_upgrades_button.visible = game.ascension.has_skill("buy_all")
+			buy_all_upgrades_button.text = "Купить всё"
+			buy_all_upgrades_button.disabled = true
+			
+		buy_all_upgrades_button.visible = game.ascension.has_skill("buy_all")
 
-	update_visibility()
+		update_visibility()
 	
 func update_achievements_ui() -> void:
 	var unlocked = game.achievements.get_unlocked_achievements()

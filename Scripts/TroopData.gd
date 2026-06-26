@@ -61,7 +61,11 @@ func get_max_affordable(current_gold: BigNum, net_income: BigNum, upkeep_mult: f
 	if current_upkeep_cost.is_greater_than(0.0) and net_income != null and net_income.is_greater_than(0.0):
 		var max_add_upkeep = net_income.mul(0.8)
 		var factor = max_add_upkeep.div(current_upkeep_cost)
-		max_upkeep = int(floor(factor.to_float()))
+		var f_val = factor.to_float()
+		if f_val > 1e15:
+			max_upkeep = max_gold
+		else:
+			max_upkeep = int(floor(f_val))
 		
 	if max_upkeep < 0: max_upkeep = 0
 	var affordable = min(max_gold, max_upkeep)
