@@ -9,6 +9,8 @@ var effect_type: String
 var effect_value: float
 var target: String = ""
 var source_building: String = ""
+var req_building: String = ""
+var req_count: int = 0
 
 var is_crafting: bool = false
 var progress: float = 0.0
@@ -24,7 +26,9 @@ func _init(
 	_effect_type: String,
 	_effect_value: float,
 	_target: String = "",
-	_source_building: String = ""
+	_source_building: String = "",
+	_req_building: String = "",
+	_req_count: int = 0
 ):
 	name = _name
 	description = _description
@@ -34,6 +38,8 @@ func _init(
 	effect_value = _effect_value
 	target = _target
 	source_building = _source_building
+	req_building = _req_building
+	req_count = _req_count
 
 func get_preview_text(game) -> String:
 	return EffectSystem.get_text(game, self)

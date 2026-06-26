@@ -289,7 +289,8 @@ func _on_achievement_unlocked(achievement) -> void:
 	show_achievement_notification(achievement)
 
 func _on_upgrade_completed(upgrade) -> void:
-	show_upgrade_notification(upgrade)
+	if notifications_container.get_child_count() < 5:
+		show_upgrade_notification(upgrade)
 
 # =========================
 # ⚔️ ВОЙНА UI
@@ -786,6 +787,16 @@ func update_visibility() -> void:
 			child.visible = true
 			child.modulate.a = 1.0
 			visible_upgrades += 1
+			continue
+			
+		var req_met = true
+		if upgrade.req_building != "":
+			var req_b = game.buildings.get_building_by_id(upgrade.req_building)
+			if not req_b or req_b.count < upgrade.req_count:
+				req_met = false
+				
+		if not req_met:
+			child.visible = false
 			continue
 
 		if upgrade.has_been_seen:

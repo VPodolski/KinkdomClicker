@@ -191,7 +191,13 @@ func get_affordable_upgrades() -> Array:
 	var available = []
 	for u in upgrades.upgrades:
 		if not u.is_crafting and not upgrades.active_upgrades.has(u):
-			available.append(u)
+			var req_met = true
+			if u.req_building != "":
+				var req_b = buildings.get_building_by_id(u.req_building)
+				if not req_b or req_b.count < u.req_count:
+					req_met = false
+			if req_met:
+				available.append(u)
 			
 	available.sort_custom(func(a, b): return a.cost.is_less_than(b.cost))
 	
