@@ -25,6 +25,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TopPanel" type="PanelContainer" parent="RootVBox"]
+z_index = 1
 layout_mode = 2
 
 [node name="TopVBox" type="VBoxContainer" parent="RootVBox/TopPanel"]
@@ -91,6 +92,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="RightPanel" type="TabContainer" parent="RootVBox/HBoxContainer"]
+z_index = 1
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0

@@ -91,9 +91,11 @@ func _ready():
 	buy_all_upgrades_button.pressed.connect(_on_buy_all_upgrades_pressed)
 
 	battle_results_window = battle_results_scene.instantiate()
+	battle_results_window.z_index = 100
 	add_child(battle_results_window)
 	
 	exp_result_window = exp_result_scene.instantiate()
+	exp_result_window.z_index = 100
 	add_child(exp_result_window)
 
 	var war_tabs = war_screen.get_node("RightPanel")
@@ -124,6 +126,7 @@ func _ready():
 	notifications_container.grow_horizontal = Control.GROW_DIRECTION_END
 	notifications_container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	notifications_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	notifications_container.z_index = 100
 	add_child(notifications_container)
 	
 	if game.offline_report and not game.offline_report.is_empty():
@@ -419,6 +422,7 @@ func _create_popup(content: Control, title: String, header_actions: Array = []) 
 	overlay.color = Color(0, 0, 0, 0.7)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
+	overlay.z_index = 100
 	overlay.hide()
 	
 	var center = CenterContainer.new()
@@ -998,6 +1002,7 @@ func _on_ascension_confirmed():
 	if ascension_shop == null:
 		var scene = preload("res://UI/AscensionShop.tscn")
 		ascension_shop = scene.instantiate()
+		ascension_shop.z_index = 100
 		add_child(ascension_shop)
 	ascension_shop.open()
 
